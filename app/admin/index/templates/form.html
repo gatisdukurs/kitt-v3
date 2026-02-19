@@ -1,0 +1,11 @@
+{{ define "form.errors" }}
+<ul class="errors">
+    {{ range . }} 
+    <li>{{ . }}</li>
+    {{ end }}
+</ul>
+{{ end }}
+
+{{ define "form.success" }}
+<div class="success">{{ . }}</div>
+{{ end }}

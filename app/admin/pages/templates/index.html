@@ -1,0 +1,20 @@
+{{ define "admin.pages.index" }}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin: Pages</title>
+    {{ template "admin.css" }}
+    {{ template "admin.js" }}
+</head>
+<body>
+    <div id="navigation">
+        {{ template "admin.navigation" . }}
+    </div>
+    <div id="content" class="content">
+        {{ template "admin.pages.content" . }}
+    </div>
+</body>
+</html>
+{{ end }}

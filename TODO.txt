@@ -1,0 +1,6 @@
+NOW: Storage, store pages
+
+NEXT: Figure out template naming for htmx ones vs full.
+NEXT: Maybe create template helpers for form builders and stuff, for css, js, assets, func registration.
+NEXT: Create frontend for displaying added pages.
+NEXT: Form builder?

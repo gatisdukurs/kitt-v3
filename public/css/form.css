@@ -1,0 +1,78 @@
+form {
+    padding: 12px;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 600px;
+}
+
+.field label {
+    font-weight: bold;
+}
+
+.field label,
+.field input, textarea {
+    box-sizing: border-box;
+    display: block;
+    width: 100%;
+}
+
+.field label {
+    padding: 12px 6px;
+}
+
+.field input, textarea {
+    padding: 12px;
+}
+
+.field input, textarea, button {
+    border-radius: 4px;
+    outline: none;
+}
+
+.field input, textarea {
+    border: 1px solid #E5E7EB;
+    resize: none;
+}
+
+form .errors {
+    padding: 12px;
+    color: #ff746c;
+}
+
+form .errors li::before {
+    content: "* ";
+}
+
+form .errors li + li {
+    padding-top: 8px;
+}
+
+form .success {
+    padding: 24px;
+    color: #38914a;
+    border: 1px solid #50cd69;
+    background-color: #dff6e3;
+    border-radius: 4px;
+    font-weight: 400;
+}
+
+.field + .field {
+    padding-top: 12px;
+}
+
+.field + .buttons {
+    padding-top: 24px;
+}
+
+form .buttons {
+    text-align: right;
+}
+
+form .buttons button {
+    background: #25a0b9;
+    color: #fff;
+    border: none;
+    font-weight: bold;
+    padding: 12px 24px;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.5);
+}

@@ -1,0 +1,15 @@
+{{ define "admin.navigation" }}
+    {{ with index .Vars "admin.navigation" }}
+    <ul class="navigation">
+        {{ range .Items }}<li {{ if .Active }}class="active"{{ end }}>
+            <a 
+                href="{{ .Path }}"
+                hx-get="{{ .Path }}"
+                hx-target="#content"
+                hx-swap="innerHTML"
+                hx-push-url="true"
+                >{{ .Label }}</a>
+        </li>{{ end }}
+    </ul>
+    {{ end }}
+{{ end }}
