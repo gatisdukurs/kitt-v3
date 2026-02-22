@@ -1,5 +1,5 @@
 {{ define "admin.navigation" }}
-    {{ with index .Vars "admin.navigation" }}
+    {{ with .Ctx "admin.navigation" }}
     <ul class="navigation">
         {{ range .Items }}<li {{ if .Active }}class="active"{{ end }}>
             <a 

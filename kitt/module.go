@@ -6,4 +6,5 @@ type Module interface {
 	Templates() TemplateSet
 	Routes(r *Router)
 	Services(s *Services)
+	Migrate()
 }

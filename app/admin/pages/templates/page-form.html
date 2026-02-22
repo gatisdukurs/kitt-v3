@@ -10,6 +10,10 @@
     {{ with .Success }}
         {{ template "form.success" . }}
     {{ end }}
+
+    {{ with .Error }}
+        {{ template "form.error" . }}
+    {{ end }}
     
     <div class="field">
         <label>Title</label>

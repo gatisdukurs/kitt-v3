@@ -1,6 +1,7 @@
 package admin
 
 import (
+	"context"
 	"kitt/app/admin/index"
 	"kitt/app/admin/pages"
 	"kitt/kitt"
@@ -21,7 +22,6 @@ func (m *Module) Boot() {
 }
 
 func (m Module) Events() {
-	// Setup navigation data for template
 	kitt.Subscribe("router.onRequest", func(e kitt.Event) {
 		ctx := kitt.GetEventContext[*kitt.RouteCtx](e)
 		if ctx.Route().Module == "admin" {
@@ -55,8 +55,29 @@ func (Module) Routes(r *kitt.Router) {
 		Pattern: "/admin/pages",
 		Handler: pages.PostPages,
 	})
+	// r.To(kitt.Route{
+	// 	Module:  "admin",
+	// 	Method:  http.MethodGet,
+	// 	Pattern: "/admin/view",
+	// 	Handler: pages.GetView,
+	// })
 }
 
 func (Module) Services(s *kitt.Services) {
 	kitt.Log("admin: Services")
+}
+
+func (Module) Migrate() {
+	_, err := kitt.SQL().Exec(context.Background(), `
+		CREATE TABLE IF NOT EXISTS pages (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			title TEXT NOT NULL,
+			content TEXT NOT NULL
+		);
+	`)
+
+	kitt.Log("admin: Migrate")
+	if err != nil {
+		kitt.Log(err.Error())
+	}
 }

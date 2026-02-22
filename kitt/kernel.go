@@ -10,6 +10,12 @@ func (k Kernel) Boot() {
 	}
 }
 
+func (k Kernel) Migrate() {
+	for _, m := range k.Modules {
+		m.Migrate()
+	}
+}
+
 func (k Kernel) RegisterTemplates() {
 	for _, m := range k.Modules {
 		registerTemplates(m.Templates(), "app/")

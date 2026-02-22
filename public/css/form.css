@@ -48,10 +48,21 @@ form .errors li + li {
 }
 
 form .success {
+    margin-bottom: 24px;
     padding: 24px;
     color: #38914a;
     border: 1px solid #50cd69;
     background-color: #dff6e3;
+    border-radius: 4px;
+    font-weight: 400;
+}
+
+form .error {
+    margin-bottom: 24px;
+    padding: 24px;
+    color: #ff746c;
+    border: 1px solid #ff746c;
+    background-color: #ffe8e7;
     border-radius: 4px;
     font-weight: 400;
 }
@@ -75,4 +86,24 @@ form .buttons button {
     font-weight: bold;
     padding: 12px 24px;
     text-shadow: 0 1px 0 rgba(0, 0, 0, 0.5);
+}
+
+form .flash {
+    overflow: hidden;
+    animation: fadeOut 0.4s ease forwards, collapse 0.4s ease forwards;
+    animation-delay: 3s, 3.4s;
+}
+
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes collapse {
+  to {
+    max-height: 0;
+    margin: 0;
+    padding: 0;
+  }
 }

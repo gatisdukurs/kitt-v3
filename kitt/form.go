@@ -4,6 +4,7 @@ type FormCtxValidators map[string]Validators
 
 type formCtx struct {
 	successMsg string
+	errorMsg   string
 	values     map[string][]string
 	errors     map[string][]string
 	validators FormCtxValidators
@@ -15,6 +16,11 @@ func (f formCtx) Success() string {
 
 func (f *formCtx) SetSuccess(msg string) {
 	f.successMsg = msg
+	f.Clear()
+}
+
+func (f *formCtx) SetError(msg string) {
+	f.errorMsg = msg
 }
 
 func (f *formCtx) WithRequest(request *RouteRequest) *formCtx {
@@ -61,6 +67,16 @@ func (f formCtx) Value(field string) string {
 
 func (f formCtx) Errors(field string) []string {
 	return f.errors[field]
+}
+
+func (f formCtx) Error() string {
+	return f.errorMsg
+}
+
+func (f *formCtx) Clear() {
+	f.errorMsg = ""
+	f.errors = make(map[string][]string)
+	f.values = make(map[string][]string)
 }
 
 func NewFormCtx() *formCtx {
