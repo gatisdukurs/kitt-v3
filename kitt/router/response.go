@@ -11,7 +11,7 @@ type Renderable interface {
 
 type Response interface {
 	WithStatus(status int) Response
-	WithResponse(response http.ResponseWriter) Response
+	WithHttpResponse(response http.ResponseWriter) Response
 	Send(interface{})
 }
 
@@ -26,7 +26,7 @@ func (r *response) WithStatus(status int) Response {
 	return r
 }
 
-func (r *response) WithResponse(response http.ResponseWriter) Response {
+func (r *response) WithHttpResponse(response http.ResponseWriter) Response {
 	r.response = response
 	return r
 }
@@ -37,6 +37,10 @@ func (r *response) Send(raw interface{}) {
 	case string:
 		r.response.WriteHeader(r.status)
 		r.response.Write([]byte(sendable))
+	case Renderable:
+		renderable, _ := raw.(Renderable)
+		r.response.WriteHeader(r.status)
+		r.response.Write([]byte(renderable.Render()))
 	default:
 		// do nothing
 	}

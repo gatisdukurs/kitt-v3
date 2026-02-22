@@ -49,6 +49,10 @@ func getSnap(t *testing.T, snap string) string {
 	return strings.TrimSpace(string(b))
 }
 
+// Transition to these later
+// req := httptest.NewRequest("GET", "/", nil)
+// w := httptest.NewRecorder()
+// mux.ServeHTTP(w, req)
 func newFakeResponseWriter() *responseWriterForTesting {
 	return &responseWriterForTesting{
 		Buf:    newBuf(),
@@ -75,4 +79,32 @@ func (r *responseWriterForTesting) WriteHeader(status int) {
 
 func (r responseWriterForTesting) Sent() string {
 	return getBufStr(r.Buf)
+}
+
+type fakeHttpHandler struct {
+	Served bool
+}
+
+func (fh *fakeHttpHandler) ServeHTTP(http.ResponseWriter, *http.Request) {
+	fh.Served = true
+}
+
+func newFakeHttpHandler() *fakeHttpHandler {
+	return &fakeHttpHandler{
+		Served: false,
+	}
+}
+
+type fakeRenderable struct {
+	String string
+}
+
+func (fr fakeRenderable) Render() string {
+	return fr.String
+}
+
+func newFakeRenderable(str string) *fakeRenderable {
+	return &fakeRenderable{
+		String: str,
+	}
 }

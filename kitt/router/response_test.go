@@ -9,7 +9,7 @@ func Test_Response(t *testing.T) {
 	t.Run("it writes response with string", func(t *testing.T) {
 		w := newFakeResponseWriter()
 		r := NewResponse()
-		r.WithResponse(w)
+		r.WithHttpResponse(w)
 
 		str := "Hello World!"
 
@@ -18,11 +18,23 @@ func Test_Response(t *testing.T) {
 		assertEqual(t, w.Sent(), str)
 	})
 
+	t.Run("it writes response with renderable", func(t *testing.T) {
+		str := "Hello World!"
+		renderable := newFakeRenderable(str)
+		w := newFakeResponseWriter()
+		r := NewResponse()
+		r.WithHttpResponse(w)
+
+		r.Send(renderable)
+
+		assertEqual(t, w.Sent(), str)
+	})
+
 	t.Run("it sets and sends status", func(t *testing.T) {
 		str := "Hello World!"
 		rw := newFakeResponseWriter()
 		r := NewResponse()
-		r.WithResponse(rw)
+		r.WithHttpResponse(rw)
 		r.WithStatus(http.StatusAccepted)
 		r.Send(str)
 

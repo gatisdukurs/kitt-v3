@@ -1,6 +1,10 @@
-NOW: Continue with router refactoring, first add tests for all things in router package.
-NOW: Think about how to propagte errors from handlers - with return Send()
+NOW: Write tests for Controller.go and fix HTMX, add POST, DELETE methods to route.
 
+NEXT: Reorganize HTML to work with Layouts trully so I can reuse master layout in admin
+NEXT: Refactor module concept
+MEXT: Try Model concept
+
+NEXT: Think about how to propagte errors from handlers - with return Send()
 NEXT: Queue Workers, like pulling data from external apis and stuff?
 NEXT: Nicer API for controllers, working with db, handling errors, etc.
 NEXT: Maybe create template helpers for form builders and stuff, for css, js, assets, func registration.

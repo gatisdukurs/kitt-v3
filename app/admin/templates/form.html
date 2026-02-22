@@ -1,0 +1,15 @@
+{{ define "form.errors" }}
+<ul class="errors">
+    {{ range . }} 
+    <li>{{ . }}</li>
+    {{ end }}
+</ul>
+{{ end }}
+
+{{ define "form.success" }}
+<div class="success flash">{{ . }}</div>
+{{ end }}
+
+{{ define "form.error" }}
+<div class="error">{{ . }}</div>
+{{ end }}

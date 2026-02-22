@@ -16,21 +16,9 @@ func (k Kernel) Migrate() {
 	}
 }
 
-func (k Kernel) RegisterTemplates() {
-	for _, m := range k.Modules {
-		registerTemplates(m.Templates(), "app/")
-	}
-}
-
 func (k Kernel) RegisterEvents() {
 	for _, m := range k.Modules {
 		m.Events()
-	}
-}
-
-func (k Kernel) RegisterRoutes(r *Router) {
-	for _, m := range k.Modules {
-		m.Routes(r)
 	}
 }
 

@@ -1,44 +1,52 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"kitt/app/admin"
 	"kitt/kitt"
-	"text/template"
+	"kitt/kitt/render"
+	"kitt/kitt/router"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 )
 
 func main() {
-	kitt.K().WithTemplateFuncs(kitt.KittTemplateFuncs{
+	kitt.K().WithTemplateFuncs(render.Funcs{
 		"asset": func(path string) string {
 			return fmt.Sprintf("%s?v=%d", path, time.Now().Unix())
 		},
 	})
-	kitt.K().WithTemplates(kitt.KittTemplatePatterns{
-		"app/admin/*/templates/*.html",
+	kitt.K().WithTemplates(kitt.TemplatePatterns{
+		"app/admin/templates/*/**.html",
+	})
+	kitt.K().Router().With404(func(ctx router.RouteCtx) {
+		ctx.Response().Send("Custom 404 here")
 	})
 
 	kitt.InitSQL().WithSQLite("db.sqlite")
 	defer kitt.SQL().Close()
-	kitt.RegisterTemplateFuncs(template.FuncMap{
-		"asset": func(path string) string {
-			return fmt.Sprintf("%s?v=%d", path, time.Now().Unix())
-		},
-	})
 
-	r := &kitt.Router{}
 	s := &kitt.Services{}
 	k := &kitt.Kernel{
 		Modules: []kitt.Module{
-			&admin.Module{},
+			&admin.AdminModule{},
 		},
 	}
 
 	k.Boot()
 	k.Migrate()
 	k.RegisterEvents()
-	k.RegisterTemplates()
-	k.RegisterRoutes(r)
 	k.RegisterServices(s)
-	kitt.Run(r)
+
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
+	err := kitt.K().ServeHttp(ctx, ":3000")
+
+	if err != nil {
+		fmt.Println(err)
+	}
 }

@@ -5,7 +5,7 @@ import "net/http"
 type RouteHandler func(ctx RouteCtx)
 
 type Route interface {
-	GET(handler RouteHandler)
+	GET(handler RouteHandler) Route
 	Pattern() string
 	Execute(ctx RouteCtx)
 }
@@ -16,9 +16,10 @@ type route struct {
 	handler RouteHandler
 }
 
-func (r *route) GET(handler RouteHandler) {
+func (r *route) GET(handler RouteHandler) Route {
 	r.method = http.MethodGet
 	r.handler = handler
+	return r
 }
 
 func (r route) Pattern() string {

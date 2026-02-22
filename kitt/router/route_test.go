@@ -9,7 +9,7 @@ func Test_Route(t *testing.T) {
 		str := "Hello World!"
 		w := newFakeResponseWriter()
 		r := NewResponse()
-		r.WithResponse(w)
+		r.WithHttpResponse(w)
 
 		ctx := NewRouteCtx()
 		ctx.WithResponse(r)

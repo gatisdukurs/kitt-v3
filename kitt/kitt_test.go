@@ -1,7 +1,9 @@
 package kitt
 
 import (
+	"context"
 	"kitt/kitt/render"
+	"kitt/kitt/router"
 	"testing"
 )
 
@@ -22,9 +24,25 @@ func Test_Kitt(t *testing.T) {
 		}
 	})
 
+	t.Run("it provides router", func(t *testing.T) {
+		K().InTesting()
+		r := K().Router()
+		if _, ok := r.(router.Router); !ok {
+			t.Fatalf("not providing router")
+		}
+	})
+
+	t.Run("it provides route", func(t *testing.T) {
+		K().InTesting()
+		r := K().Route("/home")
+		if _, ok := r.(router.Route); !ok {
+			t.Fatalf("not providing router")
+		}
+	})
+
 	t.Run("it allows to add templates", func(t *testing.T) {
 		K().InTesting()
-		K().WithTemplates(KittTemplatePatterns{
+		K().WithTemplates(TemplatePatterns{
 			"testdata/template.html",
 		})
 		l := K().Layout("template")
@@ -40,7 +58,7 @@ func Test_Kitt(t *testing.T) {
 
 	t.Run("it allows to add funcs", func(t *testing.T) {
 		K().InTesting()
-		K().WithTemplateFuncs(KittTemplateFuncs{
+		K().WithTemplateFuncs(render.Funcs{
 			"hw": func() string {
 				return "World!"
 			},
@@ -56,4 +74,28 @@ func Test_Kitt(t *testing.T) {
 		ctx["foo"] = "bar"
 		assertEqual(t, ctx["foo"], "bar")
 	})
+
+	t.Run("it serves", func(t *testing.T) {
+		K().InTesting()
+		addr := ":3000"
+		fakeServer := newFakeHttpServer()
+		K().WithHttpServer(fakeServer)
+		err := K().ServeHttp(context.Background(), addr)
+
+		assertNoError(t, err)
+		assertEqual(t, fakeServer.Addr, addr)
+		assertEqual(t, fakeServer.Handler, K().Router())
+	})
+
+	t.Run("it serves and returns error", func(t *testing.T) {
+		K().InTesting()
+		addr := ":3000"
+		fakeServer := newFakeHttpServer()
+		fakeServer.Error = true
+		K().WithHttpServer(fakeServer)
+		err := K().ServeHttp(context.Background(), addr)
+
+		assertError(t, err)
+	})
+
 }

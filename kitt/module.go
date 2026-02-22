@@ -3,8 +3,7 @@ package kitt
 type Module interface {
 	Boot()
 	Events()
-	Templates() TemplateSet
-	Routes(r *Router)
+	Templates()
 	Services(s *Services)
 	Migrate()
 }

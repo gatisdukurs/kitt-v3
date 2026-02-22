@@ -2,6 +2,9 @@ package kitt
 
 import (
 	"bytes"
+	"context"
+	"fmt"
+	"kitt/kitt/router"
 	"os"
 	"strings"
 	"testing"
@@ -35,6 +38,13 @@ func assertNoError(t *testing.T, err error) {
 	}
 }
 
+func assertError(t *testing.T, err error) {
+	t.Helper()
+	if err == nil {
+		t.Fatal("should throw error")
+	}
+}
+
 func getSnap(t *testing.T, snap string) string {
 	t.Helper()
 
@@ -46,4 +56,33 @@ func getSnap(t *testing.T, snap string) string {
 	}
 
 	return strings.TrimSpace(string(b))
+}
+
+type fakeHttpServer struct {
+	Error          bool
+	Addr           string
+	Handler        router.HttpHandler
+	ShutdownCalled bool
+}
+
+func (f *fakeHttpServer) ListenAndServe(ctx context.Context, addr string, handler router.HttpHandler) error {
+	f.Addr = addr
+	f.Handler = handler
+
+	if f.Error {
+		return fmt.Errorf("fake error")
+	}
+	return nil
+}
+
+func (f *fakeHttpServer) Shutdown() error {
+	f.ShutdownCalled = true
+	if f.Error {
+		return fmt.Errorf("fake error")
+	}
+	return nil
+}
+
+func newFakeHttpServer() *fakeHttpServer {
+	return &fakeHttpServer{}
 }
