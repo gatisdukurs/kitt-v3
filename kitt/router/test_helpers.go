@@ -2,6 +2,7 @@ package router
 
 import (
 	"bytes"
+	"net/http"
 	"os"
 	"strings"
 	"testing"
@@ -46,4 +47,32 @@ func getSnap(t *testing.T, snap string) string {
 	}
 
 	return strings.TrimSpace(string(b))
+}
+
+func newFakeResponseWriter() *responseWriterForTesting {
+	return &responseWriterForTesting{
+		Buf:    newBuf(),
+		Status: 0,
+	}
+}
+
+type responseWriterForTesting struct {
+	Buf    *bytes.Buffer
+	Status int
+}
+
+func (r responseWriterForTesting) Write(bytes []byte) (int, error) {
+	return r.Buf.Write(bytes)
+}
+
+func (r responseWriterForTesting) Header() http.Header {
+	return make(http.Header)
+}
+
+func (r *responseWriterForTesting) WriteHeader(status int) {
+	r.Status = status
+}
+
+func (r responseWriterForTesting) Sent() string {
+	return getBufStr(r.Buf)
 }

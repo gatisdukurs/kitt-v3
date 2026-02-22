@@ -1,24 +1,27 @@
 package router
 
 import (
-	"io"
 	"testing"
 )
 
 func Test_Route(t *testing.T) {
 	t.Run("it handles", func(t *testing.T) {
 		str := "Hello World!"
-		buf := newBuf()
-		ctx := makeRouteCtx(buf)
+		w := newFakeResponseWriter()
+		r := NewResponse()
+		r.WithResponse(w)
 
-		r := NewRoute("/home")
-		r.GET(func(ctx RouteCtx) {
+		ctx := NewRouteCtx()
+		ctx.WithResponse(r)
+
+		route := NewRoute("/home")
+		route.GET(func(ctx RouteCtx) {
 			ctx.Response().Send(str)
 		})
 
-		r.Execute(ctx)
+		route.Execute(ctx)
 
-		assertEqual(t, getBufStr(buf), str)
+		assertEqual(t, w.Sent(), str)
 	})
 
 	t.Run("it returns correct pattern", func(t *testing.T) {
@@ -28,14 +31,4 @@ func Test_Route(t *testing.T) {
 		})
 		assertEqual(t, r.Pattern(), "GET /home")
 	})
-}
-
-func makeRouteCtx(buf io.Writer) RouteCtx {
-	response := NewResponse()
-	response.WithWriter(buf)
-
-	ctx := NewRouteCtx()
-	ctx.WithResponse(response)
-
-	return ctx
 }
