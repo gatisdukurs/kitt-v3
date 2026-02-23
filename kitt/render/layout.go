@@ -12,7 +12,7 @@ type LayoutCtx interface {
 
 type Layout interface {
 	Renderable
-	Slots() map[string][]Partial
+	Slot(slot string) []Partial
 	Ctx() AnyCtx
 	WithPartial(slot string, p Partial) Layout
 	WithCtx(AnyCtx) Layout
@@ -22,13 +22,11 @@ type layoutCtx struct {
 	l Layout
 }
 
-func (lc layoutCtx) Slot(name string) AsHtml {
+func (lc layoutCtx) Slot(slot string) AsHtml {
 	var buf bytes.Buffer
 
-	for _, slot := range lc.l.Slots() {
-		for _, p := range slot {
-			buf.WriteString(p.Render())
-		}
+	for _, p := range lc.l.Slot(slot) {
+		buf.WriteString(p.Render())
 	}
 
 	return AsHtml(buf.String())
@@ -71,8 +69,8 @@ func (l *layout) WithCtx(ctx AnyCtx) Layout {
 	return l
 }
 
-func (l layout) Slots() map[string][]Partial {
-	return l.slots
+func (l layout) Slot(slot string) []Partial {
+	return l.slots[slot]
 }
 
 func NewLayout(name string, e Engine) Layout {

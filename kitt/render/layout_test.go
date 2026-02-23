@@ -16,9 +16,12 @@ func Test_Layout(t *testing.T) {
 	})
 
 	t.Run("it renders partials", func(t *testing.T) {
-		p := NewPartial("partial", e)
+		p1 := NewPartial("partial", e)
+		p2 := NewPartial("partial", e)
 		l := NewLayout("layout.partials", e)
-		l.WithPartial("content", p)
+		l.WithPartial("content", p1)
+		// Skips this one cause there is no slot for this
+		l.WithPartial("navigation", p2)
 
 		assertEqual(t, l.Render(), getSnap(t, "layout_partials"))
 	})

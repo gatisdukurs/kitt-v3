@@ -14,8 +14,12 @@ func (c IndexController) Boot() {
 
 func (c IndexController) GetIndex(rctx router.RouteCtx) {
 	// View
-	view := c.View("admin.index")
-	view.WithCtx(c.CtxWithNavigation(rctx).Basic())
+	view := c.Layout("admin.layout")
+	content := c.Partial("admin.content")
+	navigation := c.Navigation(rctx)
+
+	view.WithPartial("content", content)
+	view.WithPartial("navigation", navigation)
 	// Send
 	rctx.Response().Send(view)
 }

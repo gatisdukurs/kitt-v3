@@ -13,8 +13,14 @@ func (c PagesController) Boot() {
 }
 
 func (c PagesController) GetPages(ctx router.RouteCtx) {
-	view := c.View("admin.pages.index")
-	view.WithCtx(c.CtxWithNavigation(ctx).Basic())
+	// View
+	view := c.Layout("admin.layout")
+	content := c.Partial("admin.pages.content")
+	navigation := c.Navigation(ctx)
+
+	view.WithPartial("content", content)
+	view.WithPartial("navigation", navigation)
+	// Send
 	ctx.Response().Send(view)
 }
 

@@ -21,10 +21,12 @@ func main() {
 	})
 	kitt.K().WithTemplates(kitt.TemplatePatterns{
 		"app/admin/templates/*/**.html",
+		"app/admin/templates/**.html",
 	})
 	kitt.K().Router().With404(func(ctx router.RouteCtx) {
 		ctx.Response().Send("Custom 404 here")
 	})
+	kitt.K().Router().To(router.NewStaticRoute("/css", "./public/css"))
 
 	kitt.InitSQL().WithSQLite("db.sqlite")
 	defer kitt.SQL().Close()

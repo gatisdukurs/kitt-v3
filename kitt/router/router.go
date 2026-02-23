@@ -1,8 +1,11 @@
 package router
 
-import "net/http"
+import (
+	"net/http"
+	"strings"
+)
 
-type Routes = map[string]Route
+type Routes = []Route
 
 type Router interface {
 	HttpHandler
@@ -17,7 +20,7 @@ type router struct {
 }
 
 func (r *router) To(route Route) Router {
-	r.routes[route.Pattern()] = route
+	r.routes = append(r.routes, route)
 	return r
 }
 
@@ -33,15 +36,16 @@ func (r router) Routes() Routes {
 func (r router) ServeHTTP(response http.ResponseWriter, request *http.Request) {
 	method := request.Method
 	path := request.URL.Path
-	pattern := method + " " + path
 
 	ctx := NewRouteCtx()
 	ctx.WithRequest(NewRequest().WithHttpRequest(request))
 	ctx.WithResponse(NewResponse().WithHttpResponse(response))
 
-	if route, ok := r.routes[pattern]; ok {
-		route.Execute(ctx)
-		return
+	for _, route := range r.routes {
+		if route.Match(method, path) {
+			route.Execute(ctx)
+			return
+		}
 	}
 
 	if r.handler404 != nil {
@@ -53,7 +57,20 @@ func (r router) ServeHTTP(response http.ResponseWriter, request *http.Request) {
 }
 
 func NewRouter() Router {
-	return &router{
-		routes: make(Routes),
+	return &router{}
+}
+
+func NewStaticRoute(prefix, dir string) Route {
+	if !strings.HasSuffix(prefix, "/") {
+		prefix += "/"
 	}
+
+	fs := http.StripPrefix(prefix, http.FileServer(http.Dir(dir)))
+
+	return NewRoute(prefix + "*").GET(func(ctx RouteCtx) {
+		fs.ServeHTTP(
+			ctx.Response().HttpResponse(),
+			ctx.Request().HttpRequest(),
+		)
+	})
 }

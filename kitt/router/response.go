@@ -12,6 +12,7 @@ type Renderable interface {
 type Response interface {
 	WithStatus(status int) Response
 	WithHttpResponse(response http.ResponseWriter) Response
+	HttpResponse() http.ResponseWriter
 	Send(interface{})
 }
 
@@ -19,6 +20,10 @@ type response struct {
 	status   int
 	writer   io.Writer
 	response http.ResponseWriter
+}
+
+func (r response) HttpResponse() http.ResponseWriter {
+	return r.response
 }
 
 func (r *response) WithStatus(status int) Response {

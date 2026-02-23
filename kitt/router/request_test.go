@@ -15,4 +15,13 @@ func Test_Request(t *testing.T) {
 
 		assertEqual(t, path, request.Path())
 	})
+
+	t.Run("it returns http request", func(t *testing.T) {
+		path := "/home"
+		httpRequest := httptest.NewRequest(http.MethodGet, path, nil)
+		request := NewRequest()
+		request.WithHttpRequest(httpRequest)
+
+		assertEqual(t, request.HttpRequest(), httpRequest)
+	})
 }

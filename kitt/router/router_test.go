@@ -14,10 +14,9 @@ func Test_Router(t *testing.T) {
 		router.To(route)
 		found := false
 
-		for pattern, r := range router.Routes() {
+		for _, r := range router.Routes() {
 			if r == route {
 				found = true
-				assertEqual(t, r.Pattern(), pattern)
 			}
 		}
 
@@ -79,6 +78,21 @@ func Test_Router(t *testing.T) {
 		}
 
 		if w.Body.String() != "404 page not found\n" {
+			t.Fatalf("unexpected body: %q", w.Body.String())
+		}
+	})
+
+	t.Run("it can serve static files", func(t *testing.T) {
+		router := NewRouter()
+		static := NewStaticRoute("/assets", "./testdata")
+		router.To(static)
+
+		r := httptest.NewRequest("GET", "/assets/static.txt", nil)
+		w := httptest.NewRecorder()
+
+		router.ServeHTTP(w, r)
+
+		if w.Body.String() != "static" {
 			t.Fatalf("unexpected body: %q", w.Body.String())
 		}
 	})

@@ -2,6 +2,7 @@ package router
 
 import (
 	"net/http"
+	"net/http/httptest"
 	"testing"
 )
 
@@ -40,5 +41,12 @@ func Test_Response(t *testing.T) {
 
 		assertEqual(t, rw.Status, http.StatusAccepted)
 		assertEqual(t, rw.Sent(), str)
+	})
+
+	t.Run("it returns http response", func(t *testing.T) {
+		httpResponse := httptest.NewRecorder()
+		r := NewResponse()
+		r.WithHttpResponse(httpResponse)
+		assertEqual(t, r.HttpResponse(), httpResponse)
 	})
 }

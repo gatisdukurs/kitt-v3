@@ -1,8 +1,9 @@
-NOW: Write tests for Controller.go and fix HTMX, add POST, DELETE methods to route.
+NOW: fix HTMX.
 
-NEXT: Reorganize HTML to work with Layouts trully so I can reuse master layout in admin
 NEXT: Refactor module concept
 MEXT: Try Model concept
+
+Get Rid of KittContext and use just render context, like Controller.ViewCtx()
 
 NEXT: Think about how to propagte errors from handlers - with return Send()
 NEXT: Queue Workers, like pulling data from external apis and stuff?
