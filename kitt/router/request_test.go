@@ -24,4 +24,20 @@ func Test_Request(t *testing.T) {
 
 		assertEqual(t, request.HttpRequest(), httpRequest)
 	})
+
+	t.Run("it detects HTMX", func(t *testing.T) {
+		path := "/home"
+		httpRequest := httptest.NewRequest(http.MethodGet, path, nil)
+		httpRequest.Header.Set("HX-Request", "true")
+		request := NewRequest()
+		request.WithHttpRequest(httpRequest)
+
+		assertEqual(t, request.HTMX(), true)
+
+		httpRequest = httptest.NewRequest(http.MethodGet, path, nil)
+		request = NewRequest()
+		request.WithHttpRequest(httpRequest)
+
+		assertEqual(t, request.HTMX(), false)
+	})
 }

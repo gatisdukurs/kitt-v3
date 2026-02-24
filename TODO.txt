@@ -1,4 +1,6 @@
-NOW: fix HTMX.
+NOW: fix HTMX via Layout htmx support, 
+also maybe the sending should happen by returning response instead of writing to it from handlers?
+this would give option to switch between regular or htmx, right?
 
 NEXT: Refactor module concept
 MEXT: Try Model concept
@@ -13,3 +15,15 @@ NEXT: Figure out template naming for htmx ones vs full.
 NEXT: Create frontend for displaying added pages.
 NEXT: Form builder?
 NEXT: Think about reusable layouts?
+
+func (c IndexController) GetIndex(rctx router.RouteCtx) router.RouteResponse {
+	// View
+	view := c.Layout("admin.layout")
+	content := c.Partial("admin.content")
+	navigation := c.Navigation(rctx)
+
+	view.WithPartial("content", content)
+	view.WithPartial("navigation", navigation)
+	// Send
+	return c.Response(view).WithStatus(200)
+}

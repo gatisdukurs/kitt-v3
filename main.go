@@ -23,8 +23,9 @@ func main() {
 		"app/admin/templates/*/**.html",
 		"app/admin/templates/**.html",
 	})
-	kitt.K().Router().With404(func(ctx router.RouteCtx) {
+	kitt.K().Router().With404(func(ctx router.RouteCtx) router.RouteResponse {
 		ctx.Response().Send("Custom 404 here")
+		return nil
 	})
 	kitt.K().Router().To(router.NewStaticRoute("/css", "./public/css"))
 

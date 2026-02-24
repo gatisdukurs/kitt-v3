@@ -12,7 +12,7 @@ func (c PagesController) Boot() {
 	c.GET("/admin/pages", c.GetPages)
 }
 
-func (c PagesController) GetPages(ctx router.RouteCtx) {
+func (c PagesController) GetPages(ctx router.RouteCtx) router.RouteResponse {
 	// View
 	view := c.Layout("admin.layout")
 	content := c.Partial("admin.pages.content")
@@ -22,6 +22,7 @@ func (c PagesController) GetPages(ctx router.RouteCtx) {
 	view.WithPartial("navigation", navigation)
 	// Send
 	ctx.Response().Send(view)
+	return nil
 }
 
 // func PostPages(ctx *kitt.RouteCtx) {

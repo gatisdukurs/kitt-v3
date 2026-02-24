@@ -9,7 +9,9 @@ import (
 func Test_Contoller(t *testing.T) {
 	t.Run("it provides GET route shortcut", func(t *testing.T) {
 		c := &Controller{}
-		route := c.GET("/home", func(ctx router.RouteCtx) {})
+		route := c.GET("/home", func(ctx router.RouteCtx) router.RouteResponse {
+			return nil
+		})
 
 		if _, ok := route.(router.Route); !ok {
 			t.Fatalf("not providing route")
@@ -20,7 +22,9 @@ func Test_Contoller(t *testing.T) {
 
 	t.Run("it provides POST route shortcut", func(t *testing.T) {
 		c := &Controller{}
-		route := c.POST("/home", func(ctx router.RouteCtx) {})
+		route := c.POST("/home", func(ctx router.RouteCtx) router.RouteResponse {
+			return nil
+		})
 
 		if _, ok := route.(router.Route); !ok {
 			t.Fatalf("not providing route")
@@ -30,7 +34,9 @@ func Test_Contoller(t *testing.T) {
 
 	t.Run("it provides DELETE route shortcut", func(t *testing.T) {
 		c := &Controller{}
-		route := c.DELETE("/home", func(ctx router.RouteCtx) {})
+		route := c.DELETE("/home", func(ctx router.RouteCtx) router.RouteResponse {
+			return nil
+		})
 
 		if _, ok := route.(router.Route); !ok {
 			t.Fatalf("not providing route")

@@ -5,6 +5,10 @@ import (
 	"strings"
 )
 
+type SupportsHTMX interface {
+	HTMX() string
+}
+
 type LayoutCtx interface {
 	Slot(name string) AsHtml
 	Ctx(name string) interface{}
@@ -12,6 +16,7 @@ type LayoutCtx interface {
 
 type Layout interface {
 	Renderable
+	SupportsHTMX
 	Slot(slot string) []Partial
 	Ctx() AnyCtx
 	WithPartial(slot string, p Partial) Layout
@@ -53,6 +58,10 @@ func (l *layout) Render() string {
 	}
 
 	return strings.TrimSpace(buf.String())
+}
+
+func (l *layout) HTMX() string {
+	return l.Render()
 }
 
 func (l layout) Ctx() AnyCtx {

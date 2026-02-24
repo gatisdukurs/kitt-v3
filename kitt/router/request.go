@@ -6,6 +6,7 @@ type Request interface {
 	Path() string
 	WithHttpRequest(request *http.Request) Request
 	HttpRequest() *http.Request
+	HTMX() bool
 }
 
 type request struct {
@@ -19,6 +20,10 @@ func (r request) HttpRequest() *http.Request {
 func (r *request) WithHttpRequest(request *http.Request) Request {
 	r.request = request
 	return r
+}
+
+func (r *request) HTMX() bool {
+	return r.request.Header.Get("HX-Request") == "true"
 }
 
 func (r *request) Path() string {

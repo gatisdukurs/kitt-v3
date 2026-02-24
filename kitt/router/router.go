@@ -43,7 +43,15 @@ func (r router) ServeHTTP(response http.ResponseWriter, request *http.Request) {
 
 	for _, route := range r.routes {
 		if route.Match(method, path) {
-			route.Execute(ctx)
+			routeResponse := route.Execute(ctx)
+			if routeResponse != nil {
+				ctx.Response().WithStatus(routeResponse.Status())
+				if ctx.Request().HTMX() {
+					ctx.Response().Send(routeResponse.HTMX())
+				} else {
+					ctx.Response().Send(routeResponse.Body())
+				}
+			}
 			return
 		}
 	}
@@ -67,10 +75,11 @@ func NewStaticRoute(prefix, dir string) Route {
 
 	fs := http.StripPrefix(prefix, http.FileServer(http.Dir(dir)))
 
-	return NewRoute(prefix + "*").GET(func(ctx RouteCtx) {
+	return NewRoute(prefix + "*").GET(func(ctx RouteCtx) RouteResponse {
 		fs.ServeHTTP(
 			ctx.Response().HttpResponse(),
 			ctx.Request().HttpRequest(),
 		)
+		return nil
 	})
 }

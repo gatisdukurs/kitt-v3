@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-type RouteHandler func(ctx RouteCtx)
+type RouteHandler func(ctx RouteCtx) RouteResponse
 
 type Route interface {
 	GET(handler RouteHandler) Route
@@ -14,7 +14,7 @@ type Route interface {
 	Handler(method string, handler RouteHandler) Route
 	Pattern() string
 	Match(method string, path string) bool
-	Execute(ctx RouteCtx)
+	Execute(ctx RouteCtx) RouteResponse
 }
 
 type route struct {
@@ -45,8 +45,8 @@ func (r route) Pattern() string {
 	return r.method + " " + r.pattern
 }
 
-func (r route) Execute(ctx RouteCtx) {
-	r.handler(ctx)
+func (r route) Execute(ctx RouteCtx) RouteResponse {
+	return r.handler(ctx)
 }
 
 func (r route) Match(method, path string) bool {

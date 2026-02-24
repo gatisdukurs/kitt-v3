@@ -103,6 +103,10 @@ func (fr fakeRenderable) Render() string {
 	return fr.String
 }
 
+func (fr fakeRenderable) HTMX() string {
+	return fr.String
+}
+
 func newFakeRenderable(str string) *fakeRenderable {
 	return &fakeRenderable{
 		String: str,
