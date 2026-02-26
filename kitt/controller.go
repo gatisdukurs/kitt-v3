@@ -31,6 +31,11 @@ func (Controller) DELETE(pattern string, handler router.RouteHandler) router.Rou
 	return route
 }
 
+func (Controller) Response(sendable router.RouteResponseSendable) router.RouteResponse {
+	response := K().Response(sendable)
+	return response
+}
+
 // Ctx
 func (Controller) Ctx() KittContext {
 	return K().Ctx()
@@ -45,9 +50,4 @@ func (Controller) Layout(name string) render.Layout {
 func (Controller) Partial(name string) render.Partial {
 	partial := K().Partial(name)
 	return partial
-}
-
-func (Controller) Response(sendable router.RouteResponseSendable) router.RouteResponse {
-	response := K().Response(sendable)
-	return response
 }

@@ -1,15 +1,14 @@
-NOW: Reimplement pages controller actions
+NOW: Reimplement pages controller actions, fix nav active when path is /admin/pages/create, then continue with POST page endpoint
+and figure out how to create forms easily.
 
+NEXT: Forms
 NEXT: Refactor module concept
 MEXT: Try Model concept
 
 Get Rid of KittContext and use just render context, like Controller.ViewCtx()
 
-NEXT: Think about how to propagte errors from handlers - with return Send()
 NEXT: Queue Workers, like pulling data from external apis and stuff?
-NEXT: Nicer API for controllers, working with db, handling errors, etc.
-NEXT: Maybe create template helpers for form builders and stuff, for css, js, assets, func registration.
-NEXT: Figure out template naming for htmx ones vs full.
+NEXT: Nicer API for working with db, handling errors, etc.
 NEXT: Create frontend for displaying added pages.
-NEXT: Form builder?
-NEXT: Think about reusable layouts?
+
+Think about url herlper functions for templates - NAMED ROUTES that I can then use in templates

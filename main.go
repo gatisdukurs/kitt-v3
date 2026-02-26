@@ -20,8 +20,7 @@ func main() {
 		},
 	})
 	kitt.K().WithTemplates(kitt.TemplatePatterns{
-		"app/admin/templates/*/**.html",
-		"app/admin/templates/**.html",
+		"app/admin/internal/*/*.html",
 	})
 	kitt.K().Router().With404(func(ctx router.RouteCtx) router.RouteResponse {
 		ctx.Response().Send("Custom 404 here")
@@ -29,13 +28,15 @@ func main() {
 	})
 	kitt.K().Router().To(router.NewStaticRoute("/css", "./public/css"))
 
+	// ----- OLD START
+
 	kitt.InitSQL().WithSQLite("db.sqlite")
 	defer kitt.SQL().Close()
 
 	s := &kitt.Services{}
 	k := &kitt.Kernel{
 		Modules: []kitt.Module{
-			&admin.AdminModule{},
+			&admin.Module{},
 		},
 	}
 
@@ -43,6 +44,8 @@ func main() {
 	k.Migrate()
 	k.RegisterEvents()
 	k.RegisterServices(s)
+
+	// ---- OLD END
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()

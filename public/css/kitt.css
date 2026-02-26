@@ -1,0 +1,246 @@
+/* micro.css — tiny UI baseline for Go + HTMX (with grid)
+   Drop-in, extendable, no build tools.
+*/
+
+/* ---------- Theme tokens ---------- */
+:root {
+  --bg: #F9FAFB;
+  --text: #555;
+  --muted: #999;
+  --text-strong: #444;
+
+  --border: #E5E7EB;
+
+  --primary: #25a0b9;
+  --primary-text: #fff;
+
+  --success: #38914a;
+  --success-border: #50cd69;
+  --success-bg: #dff6e3;
+
+  --danger: #ff746c;
+  --danger-bg: #ffe8e7;
+
+  --radius: 6px;
+  --pad: 24px;
+  --space: 12px;
+}
+
+/* ---------- Base ---------- */
+html {
+  font-size: 16px;
+  background: var(--bg);
+  color: var(--text);
+}
+
+body,
+input,
+textarea,
+button,
+select {
+  font: 1rem/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+a { color: inherit; }
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: var(--pad) 0;
+}
+
+/* ---------- Layout helpers ---------- */
+.container {
+  padding: var(--pad);
+}
+
+.stack > * + * {
+  margin-top: var(--space);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space);
+}
+
+/* ---------- Navigation ---------- */
+.nav {
+  padding: var(--pad);
+  padding-bottom: 0;
+  margin: 0;
+  list-style: none;
+
+  display: flex;
+  gap: var(--space);
+  flex-wrap: wrap;
+}
+
+.nav a {
+  text-decoration: none;
+  color: var(--muted);
+}
+
+.nav .active a {
+  color: var(--text-strong);
+  text-decoration: underline;
+}
+
+/* ---------- Grid ---------- */
+.grid {
+  display: grid;
+  gap: var(--space);
+}
+
+.grid--2 { grid-template-columns: repeat(2, 1fr); }
+.grid--3 { grid-template-columns: repeat(3, 1fr); }
+.grid--4 { grid-template-columns: repeat(4, 1fr); }
+
+/* 12-column grid */
+.grid--12 {
+  grid-template-columns: repeat(12, 1fr);
+}
+
+.col-1  { grid-column: span 1; }
+.col-2  { grid-column: span 2; }
+.col-3  { grid-column: span 3; }
+.col-4  { grid-column: span 4; }
+.col-5  { grid-column: span 5; }
+.col-6  { grid-column: span 6; }
+.col-7  { grid-column: span 7; }
+.col-8  { grid-column: span 8; }
+.col-9  { grid-column: span 9; }
+.col-10 { grid-column: span 10; }
+.col-11 { grid-column: span 11; }
+.col-12 { grid-column: span 12; }
+
+/* ---------- Forms ---------- */
+.form {
+  padding: var(--space);
+  margin: 0 auto;
+  width: 100%;
+  max-width: 600px;
+}
+
+.field label {
+  display: block;
+  padding: var(--space) 6px;
+  font-weight: 700;
+}
+
+.control {
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  padding: var(--space);
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  outline: none;
+  background: #fff;
+}
+
+textarea.control { resize: none; }
+
+.control:focus {
+  border-color: color-mix(in srgb, var(--primary) 55%, var(--border));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 18%, transparent);
+}
+
+/* spacing between fields */
+.field + .field { margin-top: var(--space); }
+
+.actions {
+  margin-top: calc(var(--space) * 2);
+  text-align: right;
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-block;
+  padding: var(--space) calc(var(--space) * 2);
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  cursor: pointer;
+
+  font-weight: 700;
+  background: var(--primary);
+  color: var(--primary-text);
+
+  text-shadow: 0 1px 0 rgba(0,0,0,0.35);
+}
+
+.btn:active { transform: translateY(1px); }
+
+.btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 18%, transparent);
+}
+
+/* ---------- Cards ---------- */
+.card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--pad);
+}
+
+/* ---------- Messages ---------- */
+.alert {
+  margin-bottom: var(--pad);
+  padding: var(--pad);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  font-weight: 400;
+}
+
+.alert--success {
+  color: var(--success);
+  border-color: var(--success-border);
+  background: var(--success-bg);
+}
+
+.alert--danger {
+  color: var(--danger);
+  border-color: var(--danger);
+  background: var(--danger-bg);
+}
+
+/* ---------- Errors list ---------- */
+.errors {
+  margin: var(--space) 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--danger);
+}
+
+.errors li::before { content: "* "; }
+.errors li + li { margin-top: 8px; }
+
+/* ---------- HTMX flash animation ---------- */
+.flash {
+  overflow: hidden;
+  animation: fadeOut 0.4s ease forwards, collapse 0.4s ease forwards;
+  animation-delay: 3s, 3.4s;
+  max-height: 200px; /* allows collapse animation */
+}
+
+@keyframes fadeOut { to { opacity: 0; } }
+@keyframes collapse { to { max-height: 0; margin: 0; padding: 0; } }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 768px) {
+  .grid--2,
+  .grid--3,
+  .grid--4,
+  .grid--12 {
+    grid-template-columns: 1fr;
+  }
+
+  [class*="col-"] {
+    grid-column: span 1;
+  }
+
+  .container { padding: calc(var(--pad) * 0.75); }
+  .nav { padding: calc(var(--pad) * 0.75); }
+}

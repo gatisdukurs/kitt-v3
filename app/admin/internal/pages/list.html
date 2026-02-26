@@ -1,0 +1,14 @@
+{{ define "admin.pages.list" }}
+<div class="grid grid--2">
+    <h1>Pages</h1>
+    <div>
+        <a 
+        class="btn"
+        hx-get="/admin/pages/create"
+        hx-target="#content"
+        hx-swap="innerHTML"
+        >Create New Page</a>
+    </div>
+</div>
+<p>List of pages go here.</p>
+{{ end }}
