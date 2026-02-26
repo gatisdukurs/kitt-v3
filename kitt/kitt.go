@@ -14,6 +14,7 @@ type Kitt interface {
 	Partial(name string) render.Partial
 	Router() router.Router
 	Route(pattern string) router.Route
+	Response(sendable router.RouteResponseSendable) router.RouteResponse
 	Ctx() KittContext
 	WithTemplate(name string, str string) Kitt
 	WithTemplates(patterns TemplatePatterns) Kitt
@@ -54,6 +55,11 @@ func (k kitt) Router() router.Router {
 
 func (k kitt) Route(pattern string) router.Route {
 	return router.NewRoute(pattern)
+}
+
+func (k kitt) Response(sendable router.RouteResponseSendable) router.RouteResponse {
+	response := router.NewRouteResponse(sendable)
+	return response
 }
 
 func (k kitt) Ctx() KittContext {

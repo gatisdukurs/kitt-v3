@@ -32,6 +32,18 @@ func Test_Kitt(t *testing.T) {
 		}
 	})
 
+	t.Run("it provides route response", func(t *testing.T) {
+		K().InTesting()
+		str := "Hello World!"
+		r := K().Response(newFakeRenderable(str))
+		if _, ok := r.(router.RouteResponse); !ok {
+			t.Fatalf("not providing route response")
+		}
+
+		assertEqual(t, r.Body(), str)
+		assertEqual(t, r.HTMX(), str)
+	})
+
 	t.Run("it provides route", func(t *testing.T) {
 		K().InTesting()
 		r := K().Route("/home")

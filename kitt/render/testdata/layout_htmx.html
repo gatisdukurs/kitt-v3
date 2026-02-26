@@ -1,0 +1,11 @@
+{{ define "layout.htmx" }}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Layout With HTMX</title>
+</head>
+<body><div id="navigation">{{ .Slot "navigation" }}</div><div id="content">{{ .Slot "content" }}</div></body>
+</html>
+{{ end }}

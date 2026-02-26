@@ -20,7 +20,7 @@ func (c IndexController) GetIndex(rctx router.RouteCtx) router.RouteResponse {
 
 	view.WithPartial("content", content)
 	view.WithPartial("navigation", navigation)
+	view.WithHTMX("content", "navigation")
 	// Send
-	rctx.Response().Send(view)
-	return nil
+	return c.Response(view)
 }

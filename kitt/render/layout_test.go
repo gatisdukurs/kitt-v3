@@ -8,6 +8,9 @@ func Test_Layout(t *testing.T) {
 	e.WithTemplates("testdata/layout_partials.html")
 	e.WithTemplates("testdata/partial.html")
 	e.WithTemplates("testdata/layout_ctx.html")
+	e.WithTemplates("testdata/layout_htmx.html")
+	e.WithTemplates("testdata/htmx_content.html")
+	e.WithTemplates("testdata/htmx_navigation.html")
 
 	t.Run("it renders", func(t *testing.T) {
 		l := NewLayout("layout", e)
@@ -47,11 +50,15 @@ func Test_Layout(t *testing.T) {
 	})
 
 	t.Run("it supports HTMX", func(t *testing.T) {
-		// Add HTMX support
-		p := NewPartial("partial", e)
-		l := NewLayout("layout.partials", e)
-		l.WithPartial("content", p)
+		// Add HTMX support in LAYOUT
+		content := NewPartial("htmx.content", e)
+		navigation := NewPartial("htmx.navigation", e)
+		l := NewLayout("layout.htmx", e)
+		l.WithPartial("content", content)
+		l.WithPartial("navigation", navigation)
 
-		assertEqual(t, l.HTMX(), getSnap(t, "layout_partials"))
+		l.WithHTMX("content", "navigation")
+
+		assertEqual(t, l.HTMX(), getSnap(t, "layout_htmx"))
 	})
 }

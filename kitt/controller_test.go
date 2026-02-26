@@ -70,4 +70,13 @@ func Test_Contoller(t *testing.T) {
 			t.Fatalf("not providing partial")
 		}
 	})
+
+	t.Run("it provides route response", func(t *testing.T) {
+		c := &Controller{}
+		response := c.Response(newFakeRenderable("Hello World!"))
+
+		if _, ok := response.(router.RouteResponse); !ok {
+			t.Fatalf("not providing route response")
+		}
+	})
 }

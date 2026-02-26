@@ -86,3 +86,21 @@ func (f *fakeHttpServer) Shutdown() error {
 func newFakeHttpServer() *fakeHttpServer {
 	return &fakeHttpServer{}
 }
+
+type fakeRenderable struct {
+	String string
+}
+
+func (fr fakeRenderable) Render() string {
+	return fr.String
+}
+
+func (fr fakeRenderable) HTMX() string {
+	return fr.String
+}
+
+func newFakeRenderable(str string) *fakeRenderable {
+	return &fakeRenderable{
+		String: str,
+	}
+}

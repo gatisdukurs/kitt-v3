@@ -1,6 +1,9 @@
 package router
 
-import "net/http"
+import (
+	"net/http"
+	"strings"
+)
 
 type Request interface {
 	Path() string
@@ -27,7 +30,7 @@ func (r *request) HTMX() bool {
 }
 
 func (r *request) Path() string {
-	return r.request.URL.Path
+	return strings.TrimSuffix(r.request.URL.Path, "/")
 }
 
 func NewRequest() Request {

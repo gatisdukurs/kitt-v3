@@ -46,3 +46,8 @@ func (Controller) Partial(name string) render.Partial {
 	partial := K().Partial(name)
 	return partial
 }
+
+func (Controller) Response(sendable router.RouteResponseSendable) router.RouteResponse {
+	response := K().Response(sendable)
+	return response
+}

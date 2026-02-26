@@ -20,9 +20,9 @@ func (c PagesController) GetPages(ctx router.RouteCtx) router.RouteResponse {
 
 	view.WithPartial("content", content)
 	view.WithPartial("navigation", navigation)
+	view.WithHTMX("content", "navigation")
 	// Send
-	ctx.Response().Send(view)
-	return nil
+	return c.Response(view)
 }
 
 // func PostPages(ctx *kitt.RouteCtx) {

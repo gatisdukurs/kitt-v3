@@ -2,11 +2,13 @@ package render
 
 import (
 	"bytes"
+	"fmt"
 	"strings"
 )
 
 type SupportsHTMX interface {
 	HTMX() string
+	WithHTMX(content string, oob ...string)
 }
 
 type LayoutCtx interface {
@@ -43,10 +45,12 @@ func (lc layoutCtx) Ctx(name string) interface{} {
 }
 
 type layout struct {
-	e     Engine
-	name  string
-	slots map[string][]Partial
-	ctx   AnyCtx
+	e               Engine
+	name            string
+	slots           map[string][]Partial
+	ctx             AnyCtx
+	HTMXcontentSlot string
+	HTMXoobSlots    []string
 }
 
 func (l *layout) Render() string {
@@ -61,7 +65,32 @@ func (l *layout) Render() string {
 }
 
 func (l *layout) HTMX() string {
-	return l.Render()
+	if l.HTMXcontentSlot == "" {
+		return l.Render()
+	}
+
+	slotsToRender := append([]string{l.HTMXcontentSlot}, l.HTMXoobSlots...)
+
+	var buf bytes.Buffer
+
+	for _, slot := range slotsToRender {
+		for _, p := range l.Slot(slot) {
+			out := p.Render()
+
+			if slot != l.HTMXcontentSlot {
+				out = fmt.Sprintf(`<div id="%s" hx-swap-oob="true">%s</div>`, slot, out)
+			}
+
+			buf.WriteString(out)
+		}
+	}
+
+	return strings.TrimSpace(buf.String())
+}
+
+func (l *layout) WithHTMX(contentSlot string, oobSlots ...string) {
+	l.HTMXcontentSlot = contentSlot
+	l.HTMXoobSlots = oobSlots
 }
 
 func (l layout) Ctx() AnyCtx {
