@@ -8,7 +8,7 @@ import (
 
 type SupportsHTMX interface {
 	HTMX() string
-	WithHTMX(content string, oob ...string)
+	WithHTMX(content string, oob ...string) Layout
 }
 
 type LayoutCtx interface {
@@ -69,28 +69,35 @@ func (l *layout) HTMX() string {
 		return l.Render()
 	}
 
-	slotsToRender := append([]string{l.HTMXcontentSlot}, l.HTMXoobSlots...)
-
 	var buf bytes.Buffer
 
-	for _, slot := range slotsToRender {
-		for _, p := range l.Slot(slot) {
-			out := p.Render()
+	buf.WriteString(l.renderSlot(l.HTMXcontentSlot))
 
-			if slot != l.HTMXcontentSlot {
-				out = fmt.Sprintf(`<div id="%s" hx-swap-oob="true">%s</div>`, slot, out)
-			}
-
-			buf.WriteString(out)
-		}
+	for _, slot := range l.HTMXoobSlots {
+		buf.WriteString(
+			fmt.
+				Sprintf(`<div id="%s" hx-swap-oob="true">%s</div>`,
+					slot,
+					l.renderSlot(slot),
+				),
+		)
 	}
 
 	return strings.TrimSpace(buf.String())
 }
 
-func (l *layout) WithHTMX(contentSlot string, oobSlots ...string) {
+func (l *layout) renderSlot(slot string) string {
+	var buf bytes.Buffer
+	for _, p := range l.Slot(slot) {
+		buf.WriteString(p.Render())
+	}
+	return strings.TrimSpace(buf.String())
+}
+
+func (l *layout) WithHTMX(contentSlot string, oobSlots ...string) Layout {
 	l.HTMXcontentSlot = contentSlot
 	l.HTMXoobSlots = oobSlots
+	return l
 }
 
 func (l layout) Ctx() AnyCtx {

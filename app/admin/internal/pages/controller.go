@@ -12,6 +12,7 @@ type Controller struct {
 func (c Controller) Boot() {
 	c.GET("/admin/pages", c.GetList)
 	c.GET("/admin/pages/create", c.GetCreate)
+	c.POST("/admin/pages", c.PostPage)
 }
 
 func (c Controller) GetList(ctx router.RouteCtx) router.RouteResponse {
@@ -37,6 +38,11 @@ func (c Controller) GetCreate(ctx router.RouteCtx) router.RouteResponse {
 	view.WithPartial("navigation", navigation)
 	view.WithHTMX("content", "navigation")
 	// Send
+	return c.Response(view)
+}
+
+func (c Controller) PostPage(ctx router.RouteCtx) router.RouteResponse {
+	view := c.Layout("admin.pages.form")
 	return c.Response(view)
 }
 
