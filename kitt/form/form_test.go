@@ -12,8 +12,14 @@ func Test_Form(t *testing.T) {
 		f := NewForm("pages", engine)
 		f.WithMethod(http.MethodGet)
 		f.WithAction("/pages")
+		control := NewFormControl("title", engine)
+		field := NewFormField("title", engine)
+		label := NewFormLabel("Title", engine)
+		control.WithLabel(label)
+		control.WithField(field)
+		f.WithControl(control)
 
-		assertEqual(t, f.Render(), `<form action="/pages" method="GET" id="pages"></form>`)
+		assertEqual(t, f.Render(), `<form class="form" action="/pages" method="GET" id="pages"><div class="control" id="title"><label class="label">Title</label><input class="field" name="title" id="title" type="text" value="" /></div></form>`)
 	})
 
 	t.Run("it sets id", func(t *testing.T) {

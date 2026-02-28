@@ -1,10 +1,12 @@
 package form
 
+import "kitt/kitt/render"
+
 type FormContext interface {
 	Action() string
 	Method() string
 	Id() string
-	Controls() string
+	Controls() render.AsHtml
 }
 
 type formCtx struct {
@@ -23,8 +25,8 @@ func (ctx formCtx) Id() string {
 	return ctx.form.Id()
 }
 
-func (ctx formCtx) Controls() string {
-	return ctx.form.RenderControls()
+func (ctx formCtx) Controls() render.AsHtml {
+	return render.AsHtml(ctx.form.RenderControls())
 }
 
 func NewFormContext(form Form) FormContext {

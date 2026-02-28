@@ -78,7 +78,7 @@ func (ff *formField) WithId(id string) FormField {
 }
 
 func NewFormField(name string, engine render.Engine) FormField {
-	inputTpl := `<input name="{{ .Name }}" id="{{ .Id }}" type="{{ .Type }}" value="{{ .Value }}" />`
+	inputTpl := `<input class="field" name="{{ .Name }}" id="{{ .Id }}" type="{{ .Type }}" value="{{ .Value }}" />`
 
 	engine.WithTemplate("form.input", inputTpl)
 

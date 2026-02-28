@@ -18,7 +18,7 @@ type label struct {
 func (l label) Render() string {
 	var buf bytes.Buffer
 
-	l.e.Render(&buf, "form.label", NewLabelContext(l))
+	l.e.Render(&buf, "form.label", NewFormLabelContext(l))
 
 	return buf.String()
 }
@@ -27,8 +27,8 @@ func (l label) Name() string {
 	return l.name
 }
 
-func NewLabel(name string, engine render.Engine) FormLabel {
-	template := `<label>{{ .Name }}</label>`
+func NewFormLabel(name string, engine render.Engine) FormLabel {
+	template := `<label class="label">{{ .Name }}</label>`
 	engine.WithTemplate("form.label", template)
 
 	return &label{

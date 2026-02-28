@@ -12,7 +12,7 @@ func (lc formLabelContext) Name() string {
 	return lc.label.Name()
 }
 
-func NewLabelContext(label FormLabel) FormLabelContext {
+func NewFormLabelContext(label FormLabel) FormLabelContext {
 	return &formLabelContext{
 		label: label,
 	}

@@ -27,6 +27,7 @@ type form struct {
 }
 
 func (f *form) WithControl(control FormControl) Form {
+	f.controls = append(f.controls, control)
 	return f
 }
 
@@ -52,6 +53,10 @@ func (f *form) Render() string {
 }
 
 func (f form) RenderControls() string {
+	if len(f.controls) == 0 {
+		return ""
+	}
+
 	var buf bytes.Buffer
 
 	for _, c := range f.controls {
@@ -74,7 +79,7 @@ func (f form) Id() string {
 }
 
 func NewForm(id string, e render.Engine) Form {
-	template := `<form action="{{ .Action }}" method="{{ .Method }}" id="{{ .Id }}">{{ .Controls }}</form>`
+	template := `<form class="form" action="{{ .Action }}" method="{{ .Method }}" id="{{ .Id }}">{{ .Controls }}</form>`
 	e.WithTemplate("form", template)
 
 	return &form{

@@ -11,7 +11,7 @@ func Test_Form_Field(t *testing.T) {
 		field := NewFormField("email", e)
 		field.WithValue("gatis.dukurs@gmail.com")
 
-		assertEqual(t, field.Render(), `<input name="email" id="email" type="text" value="gatis.dukurs@gmail.com" />`)
+		assertEqual(t, field.Render(), `<input class="field" name="email" id="email" type="text" value="gatis.dukurs@gmail.com" />`)
 	})
 
 	t.Run("it renders unsupported type", func(t *testing.T) {
