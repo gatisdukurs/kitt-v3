@@ -1,0 +1,34 @@
+package form
+
+type FormContext interface {
+	Action() string
+	Method() string
+	Id() string
+	Controls() string
+}
+
+type formCtx struct {
+	form Form
+}
+
+func (ctx formCtx) Action() string {
+	return ctx.form.Action()
+}
+
+func (ctx formCtx) Method() string {
+	return ctx.form.Method()
+}
+
+func (ctx formCtx) Id() string {
+	return ctx.form.Id()
+}
+
+func (ctx formCtx) Controls() string {
+	return ctx.form.RenderControls()
+}
+
+func NewFormContext(form Form) FormContext {
+	return &formCtx{
+		form: form,
+	}
+}

@@ -1,7 +1,8 @@
-NOW: Reimplement pages controller actions, continue with POST page endpoint
+NOW: Forms
+
+NEXT: Reimplement pages controller actions, continue with POST page endpoint
 and figure out how to create forms easily.
 
-NEXT: Forms
 NEXT: Refactor module concept
 NEXT: Try Model concept
 NEXT: Add loading for HTMX?
@@ -13,3 +14,10 @@ NEXT: Nicer API for working with db, handling errors, etc.
 NEXT: Create frontend for displaying added pages.
 
 Think about url herlper functions for templates - NAMED ROUTES that I can then use in templates
+
+
+----
+Form API
+
+FormControl(Label("Email"), Field("email", TypeEmail).WithValidators(Required()))
+Form("login").WithControl()
