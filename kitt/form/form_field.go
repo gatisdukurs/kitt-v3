@@ -9,6 +9,7 @@ const (
 	FIELD_TEXT     = "text"
 	FIELD_EMAIL    = "email"
 	FIELD_PASSWORD = "password"
+	FIELD_TEXTAREA = "textarea"
 )
 
 type FormField interface {
@@ -34,6 +35,8 @@ func (ff formField) Render() string {
 	switch ff.fieldType {
 	case FIELD_TEXT:
 		return ff.renderText()
+	case FIELD_TEXTAREA:
+		return ff.renderTextarea()
 	default:
 		return "unknown field type: " + ff.fieldType
 	}
@@ -43,6 +46,14 @@ func (ff *formField) renderText() string {
 	var buf bytes.Buffer
 
 	ff.e.Render(&buf, "form.input", NewFormFieldContext(ff))
+
+	return buf.String()
+}
+
+func (ff *formField) renderTextarea() string {
+	var buf bytes.Buffer
+
+	ff.e.Render(&buf, "form.textarea", NewFormFieldContext(ff))
 
 	return buf.String()
 }
@@ -79,8 +90,10 @@ func (ff *formField) WithId(id string) FormField {
 
 func NewFormField(name string, engine render.Engine) FormField {
 	inputTpl := `<input class="field" name="{{ .Name }}" id="{{ .Id }}" type="{{ .Type }}" value="{{ .Value }}" />`
+	textareaTpl := `<textarea class="field" name="{{ .Name }}" id="{{ .Id }}">{{ .Value }}</textarea>`
 
 	engine.WithTemplate("form.input", inputTpl)
+	engine.WithTemplate("form.textarea", textareaTpl)
 
 	return &formField{
 		e:         engine,

@@ -14,6 +14,15 @@ func Test_Form_Field(t *testing.T) {
 		assertEqual(t, field.Render(), `<input class="field" name="email" id="email" type="text" value="gatis.dukurs@gmail.com" />`)
 	})
 
+	t.Run("it renders textarea", func(t *testing.T) {
+		e := render.NewEngine()
+		field := NewFormField("content", e)
+		field.WithType(FIELD_TEXTAREA)
+		field.WithValue("Content")
+
+		assertEqual(t, field.Render(), `<textarea class="field" name="content" id="content">Content</textarea>`)
+	})
+
 	t.Run("it renders unsupported type", func(t *testing.T) {
 		e := render.NewEngine()
 		field := NewFormField("email", e)
