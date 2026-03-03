@@ -9,10 +9,10 @@ import (
 
 type Form interface {
 	render.Renderable
+	Success() FormSuccess
 	Error() FormError
-	SuccessMsg() string
 	WithError(err FormError) Form
-	WithSuccess(message string) Form
+	WithSuccess(succ FormSuccess) Form
 	WithControl(control FormControl) Form
 	WithMethod(method string) Form
 	WithAction(action string) Form
@@ -20,6 +20,7 @@ type Form interface {
 	WithId(id string) Form
 	RenderControls() string
 	RenderError() string
+	RenderSuccess() string
 	Action() string
 	Method() string
 	Id() string
@@ -27,21 +28,21 @@ type Form interface {
 }
 
 type form struct {
-	e              render.Engine
-	controls       []FormControl
-	method         string
-	action         string
-	id             string
-	formError      FormError
-	successMessage string
+	e           render.Engine
+	controls    []FormControl
+	method      string
+	action      string
+	id          string
+	formError   FormError
+	formSuccess FormSuccess
 }
 
 func (f *form) Error() FormError {
 	return f.formError
 }
 
-func (f *form) SuccessMsg() string {
-	return f.successMessage
+func (f *form) Success() FormSuccess {
+	return f.formSuccess
 }
 
 func (f *form) WithError(err FormError) Form {
@@ -49,8 +50,8 @@ func (f *form) WithError(err FormError) Form {
 	return f
 }
 
-func (f *form) WithSuccess(message string) Form {
-	f.successMessage = message
+func (f *form) WithSuccess(succ FormSuccess) Form {
+	f.formSuccess = succ
 	return f
 }
 
@@ -112,6 +113,13 @@ func (f form) RenderError() string {
 	return f.formError.Render()
 }
 
+func (f form) RenderSuccess() string {
+	if f.formSuccess == nil {
+		return ""
+	}
+	return f.formSuccess.Render()
+}
+
 func (f form) Control(id string) FormControl {
 	for _, c := range f.controls {
 		if c.Id() == id {
@@ -135,7 +143,7 @@ func (f form) Id() string {
 }
 
 func NewForm(id string, e render.Engine) Form {
-	template := `<form class="form" action="{{ .Action }}" method="{{ .Method }}" id="{{ .Id }}">{{ .Error }}{{ .Controls }}</form>`
+	template := `<form class="form" action="{{ .Action }}" method="{{ .Method }}" id="{{ .Id }}">{{ .Success }}{{ .Error }}{{ .Controls }}</form>`
 	e.WithTemplate("form", template)
 
 	return &form{

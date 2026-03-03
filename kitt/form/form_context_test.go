@@ -23,6 +23,9 @@ func Test_Form_Context(t *testing.T) {
 		err := NewFormError("Error.", e)
 		form.WithError(err)
 
+		succ := NewFormSuccess("Success.", e)
+		form.WithSuccess(succ)
+
 		ctx := NewFormContext(form)
 
 		assertEqual(t, ctx.Action(), form.Action())
@@ -30,5 +33,6 @@ func Test_Form_Context(t *testing.T) {
 		assertEqual(t, ctx.Id(), form.Id())
 		assertEqual(t, ctx.Controls(), render.AsHtml(form.RenderControls()))
 		assertEqual(t, ctx.Error(), render.AsHtml(form.RenderError()))
+		assertEqual(t, ctx.Success(), render.AsHtml(form.RenderSuccess()))
 	})
 }
