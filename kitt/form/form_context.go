@@ -7,6 +7,7 @@ type FormContext interface {
 	Method() string
 	Id() string
 	Controls() render.AsHtml
+	Error() render.AsHtml
 }
 
 type formCtx struct {
@@ -27,6 +28,10 @@ func (ctx formCtx) Id() string {
 
 func (ctx formCtx) Controls() render.AsHtml {
 	return render.AsHtml(ctx.form.RenderControls())
+}
+
+func (ctx formCtx) Error() render.AsHtml {
+	return render.AsHtml(ctx.form.RenderError())
 }
 
 func NewFormContext(form Form) FormContext {

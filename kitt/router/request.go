@@ -2,12 +2,14 @@ package router
 
 import (
 	"net/http"
+	"net/url"
 	"strings"
 )
 
 type Request interface {
 	Path() string
 	WithHttpRequest(request *http.Request) Request
+	FormValues() url.Values
 	HttpRequest() *http.Request
 	HTMX() bool
 }
@@ -23,6 +25,11 @@ func (r request) HttpRequest() *http.Request {
 func (r *request) WithHttpRequest(request *http.Request) Request {
 	r.request = request
 	return r
+}
+
+func (r *request) FormValues() url.Values {
+	r.request.ParseForm()
+	return r.request.Form
 }
 
 func (r *request) HTMX() bool {

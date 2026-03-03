@@ -3,6 +3,8 @@ package router
 import (
 	"net/http"
 	"net/http/httptest"
+	"net/url"
+	"strings"
 	"testing"
 )
 
@@ -14,6 +16,25 @@ func Test_Request(t *testing.T) {
 		request.WithHttpRequest(httpRequest)
 
 		assertEqual(t, path, request.Path())
+	})
+
+	t.Run("it returens for values", func(t *testing.T) {
+		email := "test@example.com"
+		password := "secret"
+
+		form := url.Values{}
+		form.Set("email", email)
+		form.Set("password", password)
+
+		httpRequest := httptest.NewRequest(http.MethodPost, "/post", strings.NewReader(form.Encode()))
+		httpRequest.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+		request := NewRequest()
+		request.WithHttpRequest(httpRequest)
+
+		values := request.FormValues()
+
+		assertEqual(t, values.Get("email"), email)
 	})
 
 	t.Run("it returns http request", func(t *testing.T) {

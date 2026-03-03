@@ -1,4 +1,4 @@
-NOW: Forms - Add Validators, Add setting values, Add Text Area, Add Actions
+NOW: Forms - Add Validators + Errors, Add success for form as a whole
 
 NEXT: Reimplement pages controller actions, continue with POST page endpoint
 and figure out how to create forms easily.
