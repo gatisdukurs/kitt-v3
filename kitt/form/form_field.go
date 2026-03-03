@@ -20,15 +20,18 @@ type FormField interface {
 	WithType(fieldType string) FormField
 	WithId(id string) FormField
 	WithValue(value string) FormField
+	WithValidators(validators ...FormValidator) FormField
 	Value() string
+	Validate() (bool, []string)
 }
 
 type formField struct {
-	id        string
-	name      string
-	e         render.Engine
-	fieldType string
-	value     string
+	id         string
+	name       string
+	e          render.Engine
+	fieldType  string
+	value      string
+	validators []FormValidator
 }
 
 func (ff formField) Render() string {
@@ -86,6 +89,24 @@ func (ff *formField) WithValue(value string) FormField {
 func (ff *formField) WithId(id string) FormField {
 	ff.id = id
 	return ff
+}
+
+func (ff *formField) WithValidators(validators ...FormValidator) FormField {
+	ff.validators = validators
+	return ff
+}
+
+func (ff *formField) Validate() (bool, []string) {
+	errors := []string{}
+	value := ff.value
+
+	for _, v := range ff.validators {
+		if ok, err := v(value); !ok {
+			errors = append(errors, err)
+		}
+	}
+
+	return len(errors) == 0, errors
 }
 
 func NewFormField(name string, engine render.Engine) FormField {

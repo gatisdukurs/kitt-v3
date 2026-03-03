@@ -63,4 +63,24 @@ func Test_Form_Field(t *testing.T) {
 
 		assertEqual(t, field.Value(), "gatis.dukurs@gmail.com")
 	})
+
+	t.Run("it works with validators", func(t *testing.T) {
+		e := render.NewEngine()
+		field := NewFormField("email", e)
+		field.WithValue("")
+
+		field.WithValidators(Required(), MinLength(3))
+
+		valid, errors := field.Validate()
+
+		assertEqual(t, valid, false)
+		assertEqual(t, len(errors), 2)
+
+		field.WithValue("123")
+
+		valid, errors = field.Validate()
+
+		assertEqual(t, valid, true)
+		assertEqual(t, len(errors), 0)
+	})
 }
