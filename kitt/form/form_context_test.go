@@ -18,7 +18,7 @@ func Test_Form_Context(t *testing.T) {
 		label := NewFormLabel("E-mail", e)
 		field.WithLabel(label)
 		field.WithControl(control)
-		form.WithControl(field)
+		form.WithField(field)
 
 		err := NewFormError("Error.", e)
 		form.WithError(err)
@@ -31,7 +31,7 @@ func Test_Form_Context(t *testing.T) {
 		assertEqual(t, ctx.Action(), form.Action())
 		assertEqual(t, ctx.Method(), form.Method())
 		assertEqual(t, ctx.Id(), form.Id())
-		assertEqual(t, ctx.Controls(), render.AsHtml(form.RenderControls()))
+		assertEqual(t, ctx.Fields(), render.AsHtml(form.RenderFields()))
 		assertEqual(t, ctx.Error(), render.AsHtml(form.RenderError()))
 		assertEqual(t, ctx.Success(), render.AsHtml(form.RenderSuccess()))
 	})

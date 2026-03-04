@@ -57,16 +57,26 @@ func (c Controller) _PageForm() form.Form {
 	f.WithAction("/admin/pages/create")
 
 	// title
-	title := form.NewFormField("title-control", e)
+	title := form.NewFormField("title-field", e)
 
-	titleField := form.NewFormControl("title", e)
-	titleField.WithValidators(form.Required(), form.MinLength(3))
-	title.WithControl(titleField)
+	titleControl := form.NewFormControl("title", e)
+	titleControl.WithValidators(form.Required(), form.MinLength(3))
+	title.WithControl(titleControl)
 
 	titleLabel := form.NewFormLabel("Title", e)
 	title.WithLabel(titleLabel)
 
-	f.WithControl(title)
+	// content
+	content := form.NewFormField("content-field", e)
+	contentControl := form.NewFormControl("title", e)
+	contentControl.WithValidators(form.Required(), form.MinLength(3))
+	content.WithControl(contentControl)
+
+	contentLabel := form.NewFormLabel("Title", e)
+	content.WithLabel(contentLabel)
+
+	f.WithField(title)
+	f.WithField(title)
 
 	return f
 }

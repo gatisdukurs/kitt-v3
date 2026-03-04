@@ -6,7 +6,7 @@ type FormContext interface {
 	Action() string
 	Method() string
 	Id() string
-	Controls() render.AsHtml
+	Fields() render.AsHtml
 	Error() render.AsHtml
 	Success() render.AsHtml
 }
@@ -27,8 +27,8 @@ func (ctx formCtx) Id() string {
 	return ctx.form.Id()
 }
 
-func (ctx formCtx) Controls() render.AsHtml {
-	return render.AsHtml(ctx.form.RenderControls())
+func (ctx formCtx) Fields() render.AsHtml {
+	return render.AsHtml(ctx.form.RenderFields())
 }
 
 func (ctx formCtx) Error() render.AsHtml {

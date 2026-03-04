@@ -13,24 +13,24 @@ type Form interface {
 	Error() FormError
 	WithError(err FormError) Form
 	WithSuccess(succ FormSuccess) Form
-	WithControl(control FormField) Form
+	WithField(control FormField) Form
 	WithMethod(method string) Form
 	WithAction(action string) Form
 	WithValues(values url.Values) Form
 	WithId(id string) Form
-	RenderControls() string
+	RenderFields() string
 	RenderError() string
 	RenderSuccess() string
 	Action() string
 	Method() string
 	Id() string
-	Control(id string) FormField
+	Field(id string) FormField
 	Validate() bool
 }
 
 type form struct {
 	e           render.Engine
-	controls    []FormField
+	fields      []FormField
 	method      string
 	action      string
 	id          string
@@ -49,9 +49,9 @@ func (f form) Success() FormSuccess {
 func (f form) Validate() bool {
 	isValid := true
 
-	for _, c := range f.controls {
-		if ok, errs := c.Control().Validate(); !ok {
-			c.WithErrors(errs)
+	for _, field := range f.fields {
+		if ok, errs := field.Control().Validate(); !ok {
+			field.WithErrors(errs)
 			isValid = false
 		}
 	}
@@ -70,18 +70,18 @@ func (f *form) WithSuccess(succ FormSuccess) Form {
 }
 
 func (f *form) WithValues(values url.Values) Form {
-	for _, c := range f.controls {
-		if c.Control() != nil {
-			value := values.Get(c.Control().Name())
-			c.Control().WithValue(value)
+	for _, field := range f.fields {
+		if field.Control() != nil {
+			value := values.Get(field.Control().Name())
+			field.Control().WithValue(value)
 		}
 	}
 
 	return f
 }
 
-func (f *form) WithControl(control FormField) Form {
-	f.controls = append(f.controls, control)
+func (f *form) WithField(field FormField) Form {
+	f.fields = append(f.fields, field)
 	return f
 }
 
@@ -106,14 +106,14 @@ func (f *form) Render() string {
 	return buf.String()
 }
 
-func (f form) RenderControls() string {
-	if len(f.controls) == 0 {
+func (f form) RenderFields() string {
+	if len(f.fields) == 0 {
 		return ""
 	}
 
 	var buf bytes.Buffer
 
-	for _, c := range f.controls {
+	for _, c := range f.fields {
 		buf.WriteString(c.Render())
 	}
 
@@ -134,10 +134,10 @@ func (f form) RenderSuccess() string {
 	return f.formSuccess.Render()
 }
 
-func (f form) Control(id string) FormField {
-	for _, c := range f.controls {
-		if c.Id() == id {
-			return c
+func (f form) Field(id string) FormField {
+	for _, field := range f.fields {
+		if field.Id() == id {
+			return field
 		}
 	}
 
@@ -157,7 +157,7 @@ func (f form) Id() string {
 }
 
 func NewForm(id string, e render.Engine) Form {
-	template := `<form class="form" action="{{ .Action }}" method="{{ .Method }}" id="{{ .Id }}">{{ .Success }}{{ .Error }}{{ .Controls }}</form>`
+	template := `<form class="form" action="{{ .Action }}" method="{{ .Method }}" id="{{ .Id }}">{{ .Success }}{{ .Error }}{{ .Fields }}</form>`
 	e.WithTemplate("form", template)
 
 	return &form{

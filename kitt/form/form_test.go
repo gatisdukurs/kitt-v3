@@ -18,7 +18,7 @@ func Test_Form(t *testing.T) {
 		label := NewFormLabel("Title", engine)
 		field.WithLabel(label)
 		field.WithControl(control)
-		f.WithControl(field)
+		f.WithField(field)
 
 		assertEqual(t, f.Render(), `<form class="form" action="/pages" method="GET" id="pages"><div class="field" id="title"><label class="label">Title</label><input class="control" name="title" id="title" type="text" value="" /></div></form>`)
 	})
@@ -34,7 +34,7 @@ func Test_Form(t *testing.T) {
 		label := NewFormLabel("Title", engine)
 		field.WithLabel(label)
 		field.WithControl(control)
-		f.WithControl(field)
+		f.WithField(field)
 
 		assertEqual(t, f.Validate(), false)
 
@@ -53,7 +53,7 @@ func Test_Form(t *testing.T) {
 		label := NewFormLabel("Title", engine)
 		field.WithLabel(label)
 		field.WithControl(control)
-		f.WithControl(field)
+		f.WithField(field)
 		f.Validate()
 
 		assertEqual(t, f.Render(), `<form class="form" action="/" method="POST" id="pages"><div class="field" id="title"><label class="label">Title</label><input class="control" name="title" id="title" type="text" value="" /><ul class="errors"><li>This field is required</li><li>Must be at least 3 characters</li></ul></div></form>`)
@@ -68,9 +68,9 @@ func Test_Form(t *testing.T) {
 		label := NewFormLabel("Title", engine)
 		field.WithLabel(label)
 		field.WithControl(control)
-		f.WithControl(field)
+		f.WithField(field)
 
-		assertEqual(t, f.Control("title").Label().Name(), label.Name())
+		assertEqual(t, f.Field("title").Label().Name(), label.Name())
 	})
 
 	t.Run("it renders error", func(t *testing.T) {
@@ -114,14 +114,14 @@ func Test_Form(t *testing.T) {
 		label := NewFormLabel("E-mail", engine)
 		field.WithLabel(label)
 		field.WithControl(control)
-		f.WithControl(field)
+		f.WithField(field)
 
 		field1 := NewFormField("password", engine)
 		control1 := NewFormControl("password", engine)
 		label1 := NewFormLabel("Password", engine)
 		field1.WithLabel(label1)
 		field1.WithControl(control1)
-		f.WithControl(field1)
+		f.WithField(field1)
 
 		f.WithValues(values)
 
