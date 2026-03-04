@@ -25,6 +25,7 @@ type Form interface {
 	Method() string
 	Id() string
 	Control(id string) FormControl
+	Validate() bool
 }
 
 type form struct {
@@ -37,12 +38,25 @@ type form struct {
 	formSuccess FormSuccess
 }
 
-func (f *form) Error() FormError {
+func (f form) Error() FormError {
 	return f.formError
 }
 
-func (f *form) Success() FormSuccess {
+func (f form) Success() FormSuccess {
 	return f.formSuccess
+}
+
+func (f form) Validate() bool {
+	isValid := true
+
+	for _, c := range f.controls {
+		if ok, errs := c.Field().Validate(); !ok {
+			c.WithErrors(errs)
+			isValid = false
+		}
+	}
+
+	return isValid
 }
 
 func (f *form) WithError(err FormError) Form {

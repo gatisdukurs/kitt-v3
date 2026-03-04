@@ -10,10 +10,13 @@ type FormControl interface {
 	Id() string
 	Label() FormLabel
 	Field() FormField
+	Errors() []string
 	RenderField() string
 	RenderLabel() string
+	RenderErrors() string
 	WithLabel(label FormLabel) FormControl
 	WithField(field FormField) FormControl
+	WithErrors(errs []string) FormControl
 }
 
 type formControl struct {
@@ -21,6 +24,7 @@ type formControl struct {
 	id    string
 	label FormLabel
 	field FormField
+	errs  []string
 }
 
 func (f formControl) Id() string {
@@ -33,6 +37,15 @@ func (f formControl) Label() FormLabel {
 
 func (f formControl) Field() FormField {
 	return f.field
+}
+
+func (f formControl) Errors() []string {
+	return f.errs
+}
+
+func (f *formControl) WithErrors(errs []string) FormControl {
+	f.errs = errs
+	return f
 }
 
 func (f *formControl) WithLabel(label FormLabel) FormControl {
@@ -67,9 +80,24 @@ func (f formControl) RenderLabel() string {
 	return f.label.Render()
 }
 
+func (f formControl) RenderErrors() string {
+	if len(f.errs) == 0 {
+		return ""
+	}
+
+	var buf bytes.Buffer
+
+	f.e.Render(&buf, "form.errors", f.errs)
+
+	return buf.String()
+}
+
 func NewFormControl(id string, e render.Engine) FormControl {
-	template := `<div class="control" id="{{ .Id }}">{{ .Label }}{{ .Field }}</div>`
-	e.WithTemplate("form.control", template)
+	control := `<div class="control" id="{{ .Id }}">{{ .Label }}{{ .Field }}{{ .Errors }}</div>`
+	errs := `<ul class="errors">{{ range . }}<li>{{ . }}</li>{{ end }}</ul>`
+
+	e.WithTemplate("form.control", control)
+	e.WithTemplate("form.errors", errs)
 
 	return &formControl{
 		e:  e,

@@ -23,6 +23,42 @@ func Test_Form(t *testing.T) {
 		assertEqual(t, f.Render(), `<form class="form" action="/pages" method="GET" id="pages"><div class="control" id="title"><label class="label">Title</label><input class="field" name="title" id="title" type="text" value="" /></div></form>`)
 	})
 
+	t.Run("it validates fields", func(t *testing.T) {
+		engine := render.NewEngine()
+		f := NewForm("pages", engine)
+
+		control := NewFormControl("title", engine)
+		field := NewFormField("title", engine)
+		field.WithValue("")
+		field.WithValidators(Required(), MinLength(3))
+		label := NewFormLabel("Title", engine)
+		control.WithLabel(label)
+		control.WithField(field)
+		f.WithControl(control)
+
+		assertEqual(t, f.Validate(), false)
+
+		field.WithValue("pass")
+		assertEqual(t, f.Validate(), true)
+	})
+
+	t.Run("it renders with errors", func(t *testing.T) {
+		engine := render.NewEngine()
+		f := NewForm("pages", engine)
+
+		control := NewFormControl("title", engine)
+		field := NewFormField("title", engine)
+		field.WithValue("")
+		field.WithValidators(Required(), MinLength(3))
+		label := NewFormLabel("Title", engine)
+		control.WithLabel(label)
+		control.WithField(field)
+		f.WithControl(control)
+		f.Validate()
+
+		assertEqual(t, f.Render(), `<form class="form" action="/" method="POST" id="pages"><div class="control" id="title"><label class="label">Title</label><input class="field" name="title" id="title" type="text" value="" /><ul class="errors"><li>This field is required</li><li>Must be at least 3 characters</li></ul></div></form>`)
+	})
+
 	t.Run("it returns control", func(t *testing.T) {
 		engine := render.NewEngine()
 		f := NewForm("pages", engine)

@@ -24,6 +24,34 @@ func Test_Form_Control(t *testing.T) {
 		assertEqual(t, control.Render(), `<div class="control" id="email"><label class="label">E-mail</label><input class="field" name="email" id="email" type="text" value="" /></div>`)
 	})
 
+	t.Run("it renders errors", func(t *testing.T) {
+		e := render.NewEngine()
+		control := NewFormControl("email", e)
+		label := NewFormLabel("E-mail", e)
+		field := NewFormField("email", e)
+		field.WithValue("")
+		field.WithValidators(Required(), MinLength(3))
+		control.WithField(field)
+		control.WithLabel(label)
+
+		_, errs := field.Validate()
+		control.WithErrors(errs)
+
+		assertEqual(t, control.Render(), `<div class="control" id="email"><label class="label">E-mail</label><input class="field" name="email" id="email" type="text" value="" /><ul class="errors"><li>This field is required</li><li>Must be at least 3 characters</li></ul></div>`)
+	})
+
+	t.Run("it sets errors", func(t *testing.T) {
+		errs := []string{
+			"Required",
+			"Max length not right",
+		}
+		e := render.NewEngine()
+		control := NewFormControl("email", e)
+		control.WithErrors(errs)
+
+		assertEqual(t, control.Errors(), errs)
+	})
+
 	t.Run("it sets field", func(t *testing.T) {
 		e := render.NewEngine()
 		control := NewFormControl("email", e)

@@ -18,5 +18,6 @@ func Test_Form_Control_Context(t *testing.T) {
 		assertEqual(t, ctx.Id(), control.Id())
 		assertEqual(t, ctx.Field(), render.AsHtml(field.Render()))
 		assertEqual(t, ctx.Label(), render.AsHtml(label.Render()))
+		assertEqual(t, ctx.Errors(), render.AsHtml(control.RenderErrors()))
 	})
 }

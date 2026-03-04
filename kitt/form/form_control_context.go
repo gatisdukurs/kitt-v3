@@ -6,6 +6,7 @@ type FormControlContext interface {
 	Id() string
 	Label() render.AsHtml
 	Field() render.AsHtml
+	Errors() render.AsHtml
 }
 
 type formControlCtx struct {
@@ -20,6 +21,10 @@ func (c formControlCtx) Label() render.AsHtml {
 }
 func (c formControlCtx) Field() render.AsHtml {
 	return render.AsHtml(c.formControl.RenderField())
+}
+
+func (c formControlCtx) Errors() render.AsHtml {
+	return render.AsHtml(c.formControl.RenderErrors())
 }
 
 func NewFormControlContext(formControl FormControl) FormControlContext {

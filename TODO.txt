@@ -1,6 +1,4 @@
-NOW: Forms - Add form validation logic + render field errors in control
-
-NEXT: Reimplement pages controller actions, continue with POST page endpoint
+NOW: Reimplement pages controller actions, continue with POST page endpoint
 and figure out how to create forms easily.
 
 NEXT: Refactor module concept

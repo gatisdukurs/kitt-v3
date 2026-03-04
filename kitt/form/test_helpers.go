@@ -3,6 +3,7 @@ package form
 import (
 	"bytes"
 	"os"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -17,7 +18,7 @@ func getBufStr(buf *bytes.Buffer) string {
 }
 
 func assertEqual(t *testing.T, have interface{}, want interface{}) {
-	if have != want {
+	if !reflect.DeepEqual(have, want) {
 		t.Fatal("not equal", have, "\n\n", want)
 	}
 }
