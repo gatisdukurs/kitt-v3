@@ -61,7 +61,7 @@ func (f *formField) WithControl(control FormControl) FormField {
 func (f *formField) Render() string {
 	var buf bytes.Buffer
 
-	f.e.Render(&buf, "form.control", NewFormFieldContext(f))
+	f.e.Render(&buf, "form.field", NewFormFieldContext(f))
 
 	return buf.String()
 }
@@ -93,10 +93,10 @@ func (f formField) RenderErrors() string {
 }
 
 func NewFormField(id string, e render.Engine) FormField {
-	controlTpl := `<div class="control" id="{{ .Id }}">{{ .Label }}{{ .Control }}{{ .Errors }}</div>`
+	controlTpl := `<div class="field" id="{{ .Id }}">{{ .Label }}{{ .Control }}{{ .Errors }}</div>`
 	errsTpl := `<ul class="errors">{{ range . }}<li>{{ . }}</li>{{ end }}</ul>`
 
-	e.WithTemplate("form.control", controlTpl)
+	e.WithTemplate("form.field", controlTpl)
 	e.WithTemplate("form.errors", errsTpl)
 
 	return &formField{

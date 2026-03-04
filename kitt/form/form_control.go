@@ -111,8 +111,8 @@ func (fc *formControl) Validate() (bool, []string) {
 }
 
 func NewFormControl(name string, engine render.Engine) FormControl {
-	inputTpl := `<input class="field" name="{{ .Name }}" id="{{ .Id }}" type="{{ .Type }}" value="{{ .Value }}" />`
-	textareaTpl := `<textarea class="field" name="{{ .Name }}" id="{{ .Id }}">{{ .Value }}</textarea>`
+	inputTpl := `<input class="control" name="{{ .Name }}" id="{{ .Id }}" type="{{ .Type }}" value="{{ .Value }}" />`
+	textareaTpl := `<textarea class="control" name="{{ .Name }}" id="{{ .Id }}">{{ .Value }}</textarea>`
 
 	engine.WithTemplate("form.input", inputTpl)
 	engine.WithTemplate("form.textarea", textareaTpl)

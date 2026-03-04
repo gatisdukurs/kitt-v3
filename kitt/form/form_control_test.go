@@ -11,7 +11,7 @@ func Test_Form_Control(t *testing.T) {
 		control := NewFormControl("email", e)
 		control.WithValue("gatis.dukurs@gmail.com")
 
-		assertEqual(t, control.Render(), `<input class="field" name="email" id="email" type="text" value="gatis.dukurs@gmail.com" />`)
+		assertEqual(t, control.Render(), `<input class="control" name="email" id="email" type="text" value="gatis.dukurs@gmail.com" />`)
 	})
 
 	t.Run("it renders textarea", func(t *testing.T) {
@@ -20,7 +20,7 @@ func Test_Form_Control(t *testing.T) {
 		control.WithType(FIELD_TEXTAREA)
 		control.WithValue("Content")
 
-		assertEqual(t, control.Render(), `<textarea class="field" name="content" id="content">Content</textarea>`)
+		assertEqual(t, control.Render(), `<textarea class="control" name="content" id="content">Content</textarea>`)
 	})
 
 	t.Run("it renders unsupported type", func(t *testing.T) {
