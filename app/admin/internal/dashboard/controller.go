@@ -15,8 +15,8 @@ func (c Controller) Boot() {
 
 func (c Controller) GetDashboard(rctx router.RouteCtx) router.RouteResponse {
 	// View
-	view := c.Layout("admin.layout")
-	content := c.Partial("admin.dashboard")
+	view := c.View("admin.layout")
+	content := c.View("admin.dashboard")
 	navigation := c.Navigation(rctx)
 
 	view.WithPartial("content", content)

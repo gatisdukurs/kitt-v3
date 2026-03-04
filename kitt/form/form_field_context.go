@@ -1,35 +1,36 @@
 package form
 
+import "kitt/kitt/render"
+
 type FormFieldContext interface {
-	Name() string
 	Id() string
-	Type() string
-	Value() string
+	Label() render.AsHtml
+	Control() render.AsHtml
+	Errors() render.AsHtml
 }
 
-type fieldCtx struct {
-	field FormField
+type formFieldCtx struct {
+	formField FormField
 }
 
-func (fc fieldCtx) Name() string {
-	return fc.field.Name()
+func (c formFieldCtx) Id() string {
+	return c.formField.Id()
 }
 
-func (fc fieldCtx) Id() string {
-	return fc.field.Id()
+func (c formFieldCtx) Label() render.AsHtml {
+	return render.AsHtml(c.formField.RenderLabel())
 }
 
-func (fc fieldCtx) Type() string {
-	return fc.field.Type()
+func (c formFieldCtx) Control() render.AsHtml {
+	return render.AsHtml(c.formField.RenderControl())
 }
 
-func (fc fieldCtx) Value() string {
-	return fc.field.Value()
+func (c formFieldCtx) Errors() render.AsHtml {
+	return render.AsHtml(c.formField.RenderErrors())
 }
 
-// inputTpl := `<input name="{{ .Name }}" id="{{ .Id }}" type="{{ .Type }}" value={{ .Value }} />`
-func NewFormFieldContext(field FormField) FormFieldContext {
-	return &fieldCtx{
-		field: field,
+func NewFormFieldContext(formField FormField) FormFieldContext {
+	return &formFieldCtx{
+		formField: formField,
 	}
 }

@@ -6,92 +6,81 @@ import (
 )
 
 func Test_Form_Control(t *testing.T) {
-	t.Run("it renders without label and field", func(t *testing.T) {
+	t.Run("it renders default", func(t *testing.T) {
 		e := render.NewEngine()
 		control := NewFormControl("email", e)
+		control.WithValue("gatis.dukurs@gmail.com")
 
-		assertEqual(t, control.Render(), `<div class="control" id="email"></div>`)
+		assertEqual(t, control.Render(), `<input class="field" name="email" id="email" type="text" value="gatis.dukurs@gmail.com" />`)
 	})
 
-	t.Run("it renders with label and field", func(t *testing.T) {
+	t.Run("it renders textarea", func(t *testing.T) {
 		e := render.NewEngine()
-		control := NewFormControl("email", e)
-		field := NewFormField("email", e)
-		control.WithField(field)
-		label := NewFormLabel("E-mail", e)
-		control.WithLabel(label)
+		control := NewFormControl("content", e)
+		control.WithType(FIELD_TEXTAREA)
+		control.WithValue("Content")
 
-		assertEqual(t, control.Render(), `<div class="control" id="email"><label class="label">E-mail</label><input class="field" name="email" id="email" type="text" value="" /></div>`)
+		assertEqual(t, control.Render(), `<textarea class="field" name="content" id="content">Content</textarea>`)
 	})
 
-	t.Run("it renders errors", func(t *testing.T) {
+	t.Run("it renders unsupported type", func(t *testing.T) {
 		e := render.NewEngine()
 		control := NewFormControl("email", e)
-		label := NewFormLabel("E-mail", e)
-		field := NewFormField("email", e)
-		field.WithValue("")
-		field.WithValidators(Required(), MinLength(3))
-		control.WithField(field)
-		control.WithLabel(label)
+		control.WithType("unsupported")
 
-		_, errs := field.Validate()
-		control.WithErrors(errs)
-
-		assertEqual(t, control.Render(), `<div class="control" id="email"><label class="label">E-mail</label><input class="field" name="email" id="email" type="text" value="" /><ul class="errors"><li>This field is required</li><li>Must be at least 3 characters</li></ul></div>`)
+		assertEqual(t, control.Render(), `unknown field type: unsupported`)
 	})
 
-	t.Run("it sets errors", func(t *testing.T) {
-		errs := []string{
-			"Required",
-			"Max length not right",
-		}
+	t.Run("it sets type", func(t *testing.T) {
 		e := render.NewEngine()
 		control := NewFormControl("email", e)
-		control.WithErrors(errs)
+		control.WithType(FIELD_EMAIL)
 
-		assertEqual(t, control.Errors(), errs)
+		assertEqual(t, control.Type(), FIELD_EMAIL)
 	})
 
-	t.Run("it sets field", func(t *testing.T) {
+	t.Run("it sets  name", func(t *testing.T) {
 		e := render.NewEngine()
 		control := NewFormControl("email", e)
-		field := NewFormField("email", e)
-		control.WithField(field)
 
-		assertEqual(t, control.Field(), field)
+		assertEqual(t, control.Name(), "email")
 	})
 
-	t.Run("it returns id", func(t *testing.T) {
+	t.Run("it sets id", func(t *testing.T) {
 		e := render.NewEngine()
-		control := NewFormControl("email", e)
+		control := NewFormControl("test_id", e)
 
-		assertEqual(t, control.Id(), "email")
+		assertEqual(t, control.Id(), "test_id")
+
+		control.WithId("new_test_id")
+		assertEqual(t, control.Id(), "new_test_id")
 	})
 
-	t.Run("it sets label", func(t *testing.T) {
+	t.Run("it sets  value", func(t *testing.T) {
 		e := render.NewEngine()
 		control := NewFormControl("email", e)
-		label := NewFormLabel("email", e)
-		control.WithLabel(label)
+		control.WithValue("gatis.dukurs@gmail.com")
 
-		assertEqual(t, control.Label(), label)
+		assertEqual(t, control.Value(), "gatis.dukurs@gmail.com")
 	})
 
-	t.Run("it renders field", func(t *testing.T) {
+	t.Run("it works with validators", func(t *testing.T) {
 		e := render.NewEngine()
 		control := NewFormControl("email", e)
-		field := NewFormField("email", e)
-		control.WithField(field)
+		control.WithValue("")
 
-		assertEqual(t, control.RenderField(), field.Render())
-	})
+		control.WithValidators(Required(), MinLength(3))
 
-	t.Run("it renders label", func(t *testing.T) {
-		e := render.NewEngine()
-		control := NewFormControl("email", e)
-		label := NewFormLabel("E-mail", e)
-		control.WithLabel(label)
+		valid, errors := control.Validate()
 
-		assertEqual(t, control.RenderLabel(), label.Render())
+		assertEqual(t, valid, false)
+		assertEqual(t, len(errors), 2)
+
+		control.WithValue("123")
+
+		valid, errors = control.Validate()
+
+		assertEqual(t, valid, true)
+		assertEqual(t, len(errors), 0)
 	})
 }

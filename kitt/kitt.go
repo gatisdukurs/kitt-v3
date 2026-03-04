@@ -10,8 +10,7 @@ type TemplatePattern = string
 type TemplatePatterns = []TemplatePattern
 
 type Kitt interface {
-	Layout(name string) render.Layout
-	Partial(name string) render.Partial
+	View(name string) render.View
 	Router() router.Router
 	Route(pattern string) router.Route
 	Response(sendable router.RouteResponseSendable) router.RouteResponse
@@ -39,14 +38,9 @@ type kitt struct {
 	httpServer  router.HttpServer
 }
 
-func (k kitt) Layout(name string) render.Layout {
-	l := render.NewLayout(name, k.renderer)
+func (k kitt) View(name string) render.View {
+	l := render.NewView(name, k.renderer)
 	return l
-}
-
-func (k kitt) Partial(name string) render.Partial {
-	p := render.NewPartial(name, k.renderer)
-	return p
 }
 
 func (k kitt) Router() router.Router {

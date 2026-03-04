@@ -13,15 +13,15 @@ func Test_Layout(t *testing.T) {
 	e.WithTemplates("testdata/htmx_navigation.html")
 
 	t.Run("it renders", func(t *testing.T) {
-		l := NewLayout("layout", e)
+		l := NewView("layout", e)
 		assertNotNil(t, l)
 		assertEqual(t, l.Render(), getSnap(t, "layout"))
 	})
 
 	t.Run("it renders partials", func(t *testing.T) {
-		p1 := NewPartial("partial", e)
-		p2 := NewPartial("partial", e)
-		l := NewLayout("layout.partials", e)
+		p1 := NewView("partial", e)
+		p2 := NewView("partial", e)
+		l := NewView("layout.partials", e)
 		l.WithPartial("content", p1)
 		// Skips this one cause there is no slot for this
 		l.WithPartial("navigation", p2)
@@ -30,7 +30,7 @@ func Test_Layout(t *testing.T) {
 	})
 
 	t.Run("it renders without partials", func(t *testing.T) {
-		l := NewLayout("layout.partials", e)
+		l := NewView("layout.partials", e)
 		assertEqual(t, l.Render(), getSnap(t, "layout_partials_without"))
 	})
 
@@ -38,22 +38,22 @@ func Test_Layout(t *testing.T) {
 		ctx := make(AnyCtx)
 		ctx["title"] = "Hello World!"
 
-		l := NewLayout("layout.ctx", e)
+		l := NewView("layout.ctx", e)
 		l.WithCtx(ctx)
 
 		assertEqual(t, l.Render(), getSnap(t, "layout_ctx"))
 	})
 
 	t.Run("it renders with no ctx", func(t *testing.T) {
-		l := NewLayout("layout.ctx", e)
+		l := NewView("layout.ctx", e)
 		assertEqual(t, l.Render(), getSnap(t, "layout_ctx_without"))
 	})
 
 	t.Run("it supports HTMX", func(t *testing.T) {
 		// Add HTMX support in LAYOUT
-		content := NewPartial("htmx.content", e)
-		navigation := NewPartial("htmx.navigation", e)
-		l := NewLayout("layout.htmx", e)
+		content := NewView("htmx.content", e)
+		navigation := NewView("htmx.navigation", e)
+		l := NewView("layout.htmx", e)
 		l.WithPartial("content", content)
 		l.WithPartial("navigation", navigation)
 

@@ -5,121 +5,102 @@ import (
 	"kitt/kitt/render"
 )
 
-const (
-	FIELD_TEXT     = "text"
-	FIELD_EMAIL    = "email"
-	FIELD_PASSWORD = "password"
-	FIELD_TEXTAREA = "textarea"
-)
-
 type FormField interface {
 	render.Renderable
 	Id() string
-	Type() string
-	Name() string
-	WithType(fieldType string) FormField
-	WithId(id string) FormField
-	WithValue(value string) FormField
-	WithValidators(validators ...FormValidator) FormField
-	Value() string
-	Validate() (bool, []string)
+	Label() FormLabel
+	Control() FormControl
+	Errors() []string
+	RenderControl() string
+	RenderLabel() string
+	RenderErrors() string
+	WithLabel(label FormLabel) FormField
+	WithControl(control FormControl) FormField
+	WithErrors(errs []string) FormField
 }
 
 type formField struct {
-	id         string
-	name       string
-	e          render.Engine
-	fieldType  string
-	value      string
-	validators []FormValidator
+	e       render.Engine
+	id      string
+	label   FormLabel
+	control FormControl
+	errs    []string
 }
 
-func (ff formField) Render() string {
-	switch ff.fieldType {
-	case FIELD_TEXT:
-		return ff.renderText()
-	case FIELD_TEXTAREA:
-		return ff.renderTextarea()
-	default:
-		return "unknown field type: " + ff.fieldType
-	}
+func (f formField) Id() string {
+	return f.id
 }
 
-func (ff *formField) renderText() string {
+func (f formField) Label() FormLabel {
+	return f.label
+}
+
+func (f formField) Control() FormControl {
+	return f.control
+}
+
+func (f formField) Errors() []string {
+	return f.errs
+}
+
+func (f *formField) WithErrors(errs []string) FormField {
+	f.errs = errs
+	return f
+}
+
+func (f *formField) WithLabel(label FormLabel) FormField {
+	f.label = label
+	return f
+}
+
+func (f *formField) WithControl(control FormControl) FormField {
+	f.control = control
+	return f
+}
+
+func (f *formField) Render() string {
 	var buf bytes.Buffer
 
-	ff.e.Render(&buf, "form.input", NewFormFieldContext(ff))
+	f.e.Render(&buf, "form.control", NewFormFieldContext(f))
 
 	return buf.String()
 }
 
-func (ff *formField) renderTextarea() string {
+func (f formField) RenderControl() string {
+	if f.control == nil {
+		return ""
+	}
+	return f.control.Render()
+}
+
+func (f formField) RenderLabel() string {
+	if f.label == nil {
+		return ""
+	}
+	return f.label.Render()
+}
+
+func (f formField) RenderErrors() string {
+	if len(f.errs) == 0 {
+		return ""
+	}
+
 	var buf bytes.Buffer
 
-	ff.e.Render(&buf, "form.textarea", NewFormFieldContext(ff))
+	f.e.Render(&buf, "form.errors", f.errs)
 
 	return buf.String()
 }
 
-func (ff formField) Type() string {
-	return ff.fieldType
-}
+func NewFormField(id string, e render.Engine) FormField {
+	controlTpl := `<div class="control" id="{{ .Id }}">{{ .Label }}{{ .Control }}{{ .Errors }}</div>`
+	errsTpl := `<ul class="errors">{{ range . }}<li>{{ . }}</li>{{ end }}</ul>`
 
-func (ff formField) Value() string {
-	return ff.value
-}
-
-func (ff formField) Name() string {
-	return ff.name
-}
-func (ff formField) Id() string {
-	return ff.id
-}
-
-func (ff *formField) WithType(fieldType string) FormField {
-	ff.fieldType = fieldType
-	return ff
-}
-
-func (ff *formField) WithValue(value string) FormField {
-	ff.value = value
-	return ff
-}
-
-func (ff *formField) WithId(id string) FormField {
-	ff.id = id
-	return ff
-}
-
-func (ff *formField) WithValidators(validators ...FormValidator) FormField {
-	ff.validators = validators
-	return ff
-}
-
-func (ff *formField) Validate() (bool, []string) {
-	errors := []string{}
-	value := ff.value
-
-	for _, v := range ff.validators {
-		if ok, err := v(value); !ok {
-			errors = append(errors, err)
-		}
-	}
-
-	return len(errors) == 0, errors
-}
-
-func NewFormField(name string, engine render.Engine) FormField {
-	inputTpl := `<input class="field" name="{{ .Name }}" id="{{ .Id }}" type="{{ .Type }}" value="{{ .Value }}" />`
-	textareaTpl := `<textarea class="field" name="{{ .Name }}" id="{{ .Id }}">{{ .Value }}</textarea>`
-
-	engine.WithTemplate("form.input", inputTpl)
-	engine.WithTemplate("form.textarea", textareaTpl)
+	e.WithTemplate("form.control", controlTpl)
+	e.WithTemplate("form.errors", errsTpl)
 
 	return &formField{
-		e:         engine,
-		name:      name,
-		id:        name,
-		fieldType: FIELD_TEXT,
+		e:  e,
+		id: id,
 	}
 }

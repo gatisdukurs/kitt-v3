@@ -6,81 +6,92 @@ import (
 )
 
 func Test_Form_Field(t *testing.T) {
-	t.Run("it renders default", func(t *testing.T) {
-		e := render.NewEngine()
-		field := NewFormField("email", e)
-		field.WithValue("gatis.dukurs@gmail.com")
-
-		assertEqual(t, field.Render(), `<input class="field" name="email" id="email" type="text" value="gatis.dukurs@gmail.com" />`)
-	})
-
-	t.Run("it renders textarea", func(t *testing.T) {
-		e := render.NewEngine()
-		field := NewFormField("content", e)
-		field.WithType(FIELD_TEXTAREA)
-		field.WithValue("Content")
-
-		assertEqual(t, field.Render(), `<textarea class="field" name="content" id="content">Content</textarea>`)
-	})
-
-	t.Run("it renders unsupported type", func(t *testing.T) {
-		e := render.NewEngine()
-		field := NewFormField("email", e)
-		field.WithType("unsupported")
-
-		assertEqual(t, field.Render(), `unknown field type: unsupported`)
-	})
-
-	t.Run("it sets type", func(t *testing.T) {
-		e := render.NewEngine()
-		field := NewFormField("email", e)
-		field.WithType(FIELD_EMAIL)
-
-		assertEqual(t, field.Type(), FIELD_EMAIL)
-	})
-
-	t.Run("it sets  name", func(t *testing.T) {
+	t.Run("it renders without label and control", func(t *testing.T) {
 		e := render.NewEngine()
 		field := NewFormField("email", e)
 
-		assertEqual(t, field.Name(), "email")
+		assertEqual(t, field.Render(), `<div class="control" id="email"></div>`)
 	})
 
-	t.Run("it sets id", func(t *testing.T) {
-		e := render.NewEngine()
-		field := NewFormField("test_id", e)
-
-		assertEqual(t, field.Id(), "test_id")
-
-		field.WithId("new_test_id")
-		assertEqual(t, field.Id(), "new_test_id")
-	})
-
-	t.Run("it sets  value", func(t *testing.T) {
+	t.Run("it renders with label and control", func(t *testing.T) {
 		e := render.NewEngine()
 		field := NewFormField("email", e)
-		field.WithValue("gatis.dukurs@gmail.com")
+		control := NewFormControl("email", e)
+		field.WithControl(control)
+		label := NewFormLabel("E-mail", e)
+		field.WithLabel(label)
 
-		assertEqual(t, field.Value(), "gatis.dukurs@gmail.com")
+		assertEqual(t, field.Render(), `<div class="control" id="email"><label class="label">E-mail</label><input class="field" name="email" id="email" type="text" value="" /></div>`)
 	})
 
-	t.Run("it works with validators", func(t *testing.T) {
+	t.Run("it renders errors", func(t *testing.T) {
 		e := render.NewEngine()
 		field := NewFormField("email", e)
-		field.WithValue("")
+		label := NewFormLabel("E-mail", e)
+		control := NewFormControl("email", e)
+		control.WithValue("")
+		control.WithValidators(Required(), MinLength(3))
+		field.WithControl(control)
+		field.WithLabel(label)
 
-		field.WithValidators(Required(), MinLength(3))
+		_, errs := control.Validate()
+		field.WithErrors(errs)
 
-		valid, errors := field.Validate()
+		assertEqual(t, field.Render(), `<div class="control" id="email"><label class="label">E-mail</label><input class="field" name="email" id="email" type="text" value="" /><ul class="errors"><li>This field is required</li><li>Must be at least 3 characters</li></ul></div>`)
+	})
 
-		assertEqual(t, valid, false)
-		assertEqual(t, len(errors), 2)
+	t.Run("it sets errors", func(t *testing.T) {
+		errs := []string{
+			"Required",
+			"Max length not right",
+		}
+		e := render.NewEngine()
+		field := NewFormField("email", e)
+		field.WithErrors(errs)
 
-		field.WithValue("123")
+		assertEqual(t, field.Errors(), errs)
+	})
 
-		valid, errors = field.Validate()
+	t.Run("it sets control", func(t *testing.T) {
+		e := render.NewEngine()
+		field := NewFormField("email", e)
+		control := NewFormControl("email", e)
+		field.WithControl(control)
 
-		assertEqual(t, valid, true)
-		assertEqual(t, len(errors), 0)
+		assertEqual(t, field.Control(), control)
+	})
+
+	t.Run("it returns id", func(t *testing.T) {
+		e := render.NewEngine()
+		field := NewFormField("email", e)
+
+		assertEqual(t, field.Id(), "email")
+	})
+
+	t.Run("it sets label", func(t *testing.T) {
+		e := render.NewEngine()
+		field := NewFormField("email", e)
+		label := NewFormLabel("email", e)
+		field.WithLabel(label)
+
+		assertEqual(t, field.Label(), label)
+	})
+
+	t.Run("it renders control", func(t *testing.T) {
+		e := render.NewEngine()
+		field := NewFormField("email", e)
+		control := NewFormControl("email", e)
+		field.WithControl(control)
+
+		assertEqual(t, field.RenderControl(), control.Render())
+	})
+
+	t.Run("it renders label", func(t *testing.T) {
+		e := render.NewEngine()
+		field := NewFormField("email", e)
+		label := NewFormLabel("E-mail", e)
+		field.WithLabel(label)
+
+		assertEqual(t, field.RenderLabel(), label.Render())
 	})
 }

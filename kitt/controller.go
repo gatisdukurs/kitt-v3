@@ -42,12 +42,7 @@ func (Controller) Ctx() KittContext {
 }
 
 // Views
-func (Controller) Layout(name string) render.Layout {
-	view := K().Layout(name)
+func (Controller) View(name string) render.View {
+	view := K().View(name)
 	return view
-}
-
-func (Controller) Partial(name string) render.Partial {
-	partial := K().Partial(name)
-	return partial
 }

@@ -1,4 +1,4 @@
 {{ define "admin.pages.create" }}
     <h1>Create New Page</h1>
-    {{ template "admin.pages.form" }}
+    {{ .Slot "form" }}
 {{ end }}

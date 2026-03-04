@@ -2,7 +2,10 @@ package pages
 
 import (
 	"kitt/app/admin/internal/shared"
+	"kitt/kitt/form"
+	"kitt/kitt/render"
 	"kitt/kitt/router"
+	"net/http"
 )
 
 type Controller struct {
@@ -17,8 +20,8 @@ func (c Controller) Boot() {
 
 func (c Controller) GetList(ctx router.RouteCtx) router.RouteResponse {
 	// View
-	view := c.Layout("admin.layout")
-	content := c.Partial("admin.pages.list")
+	view := c.View("admin.layout")
+	content := c.View("admin.pages.list")
 	navigation := c.Navigation(ctx)
 
 	view.WithPartial("content", content)
@@ -30,8 +33,9 @@ func (c Controller) GetList(ctx router.RouteCtx) router.RouteResponse {
 
 func (c Controller) GetCreate(ctx router.RouteCtx) router.RouteResponse {
 	// View
-	view := c.Layout("admin.layout")
-	content := c.Partial("admin.pages.create")
+	view := c.View("admin.layout")
+	content := c.View("admin.pages.create")
+	content.WithPartial("form", c._PageForm())
 	navigation := c.Navigation(ctx)
 
 	view.WithPartial("content", content)
@@ -42,8 +46,29 @@ func (c Controller) GetCreate(ctx router.RouteCtx) router.RouteResponse {
 }
 
 func (c Controller) PostPage(ctx router.RouteCtx) router.RouteResponse {
-	view := c.Layout("admin.pages.form")
+	view := c.View("admin.pages.form")
 	return c.Response(view)
+}
+
+func (c Controller) _PageForm() form.Form {
+	e := render.NewEngine()
+	f := form.NewForm("page", e)
+	f.WithMethod(http.MethodPost)
+	f.WithAction("/admin/pages/create")
+
+	// title
+	title := form.NewFormField("title-control", e)
+
+	titleField := form.NewFormControl("title", e)
+	titleField.WithValidators(form.Required(), form.MinLength(3))
+	title.WithControl(titleField)
+
+	titleLabel := form.NewFormLabel("Title", e)
+	title.WithLabel(titleLabel)
+
+	f.WithControl(title)
+
+	return f
 }
 
 // func PostPages(ctx *kitt.RouteCtx) {

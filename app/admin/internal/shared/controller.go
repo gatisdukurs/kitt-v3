@@ -10,7 +10,7 @@ type Controller struct {
 	kitt.Controller
 }
 
-func (c Controller) Navigation(rctx router.RouteCtx) render.Partial {
+func (c Controller) Navigation(rctx router.RouteCtx) render.View {
 	nav := Navigation{
 		Items: []NavigationItem{
 			{Label: "Dashboard", Path: "/admin"},
@@ -20,5 +20,5 @@ func (c Controller) Navigation(rctx router.RouteCtx) render.Partial {
 
 	ctx := c.Ctx()
 	ctx.Set("admin.navigation", nav.WithActive(rctx.Request().Path()))
-	return c.Partial("admin.navigation").WithCtx(ctx.Basic())
+	return c.View("admin.navigation").WithCtx(ctx.Basic())
 }

@@ -55,18 +55,18 @@ func Test_Contoller(t *testing.T) {
 
 	t.Run("it provides layout", func(t *testing.T) {
 		c := &Controller{}
-		view := c.Layout("none")
+		view := c.View("none")
 
-		if _, ok := view.(render.Layout); !ok {
+		if _, ok := view.(render.View); !ok {
 			t.Fatalf("not providing layout")
 		}
 	})
 
 	t.Run("it provides partial", func(t *testing.T) {
 		c := &Controller{}
-		view := c.Partial("none")
+		view := c.View("none")
 
-		if _, ok := view.(render.Partial); !ok {
+		if _, ok := view.(render.View); !ok {
 			t.Fatalf("not providing partial")
 		}
 	})

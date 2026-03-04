@@ -8,28 +8,28 @@ import (
 
 type SupportsHTMX interface {
 	HTMX() string
-	WithHTMX(content string, oob ...string) Layout
+	WithHTMX(content string, oob ...string) View
 }
 
-type LayoutCtx interface {
+type ViewCtx interface {
 	Slot(name string) AsHtml
 	Ctx(name string) interface{}
 }
 
-type Layout interface {
+type View interface {
 	Renderable
 	SupportsHTMX
-	Slot(slot string) []Partial
+	Slot(slot string) []Renderable
 	Ctx() AnyCtx
-	WithPartial(slot string, p Partial) Layout
-	WithCtx(AnyCtx) Layout
+	WithPartial(slot string, p Renderable) View
+	WithCtx(AnyCtx) View
 }
 
-type layoutCtx struct {
-	l Layout
+type viewCtx struct {
+	l View
 }
 
-func (lc layoutCtx) Slot(slot string) AsHtml {
+func (lc viewCtx) Slot(slot string) AsHtml {
 	var buf bytes.Buffer
 
 	for _, p := range lc.l.Slot(slot) {
@@ -39,23 +39,23 @@ func (lc layoutCtx) Slot(slot string) AsHtml {
 	return AsHtml(buf.String())
 }
 
-func (lc layoutCtx) Ctx(name string) interface{} {
+func (lc viewCtx) Ctx(name string) interface{} {
 	ctx := lc.l.Ctx()
 	return ctx[name]
 }
 
-type layout struct {
+type view struct {
 	e               Engine
 	name            string
-	slots           map[string][]Partial
+	slots           map[string][]Renderable
 	ctx             AnyCtx
 	HTMXcontentSlot string
 	HTMXoobSlots    []string
 }
 
-func (l *layout) Render() string {
+func (l *view) Render() string {
 	var buf bytes.Buffer
-	err := l.e.Render(&buf, l.name, newLayoutCtx(l))
+	err := l.e.Render(&buf, l.name, newViewCtx(l))
 
 	if err != nil {
 		return err.Error()
@@ -64,7 +64,7 @@ func (l *layout) Render() string {
 	return strings.TrimSpace(buf.String())
 }
 
-func (l *layout) HTMX() string {
+func (l *view) HTMX() string {
 	if l.HTMXcontentSlot == "" {
 		return l.Render()
 	}
@@ -86,7 +86,7 @@ func (l *layout) HTMX() string {
 	return strings.TrimSpace(buf.String())
 }
 
-func (l *layout) renderSlot(slot string) string {
+func (l *view) renderSlot(slot string) string {
 	var buf bytes.Buffer
 	for _, p := range l.Slot(slot) {
 		buf.WriteString(p.Render())
@@ -94,41 +94,41 @@ func (l *layout) renderSlot(slot string) string {
 	return strings.TrimSpace(buf.String())
 }
 
-func (l *layout) WithHTMX(contentSlot string, oobSlots ...string) Layout {
+func (l *view) WithHTMX(contentSlot string, oobSlots ...string) View {
 	l.HTMXcontentSlot = contentSlot
 	l.HTMXoobSlots = oobSlots
 	return l
 }
 
-func (l layout) Ctx() AnyCtx {
+func (l view) Ctx() AnyCtx {
 	return l.ctx
 }
 
-func (l *layout) WithPartial(slot string, p Partial) Layout {
+func (l *view) WithPartial(slot string, p Renderable) View {
 	l.slots[slot] = append(l.slots[slot], p)
 	return l
 }
 
-func (l *layout) WithCtx(ctx AnyCtx) Layout {
+func (l *view) WithCtx(ctx AnyCtx) View {
 	l.ctx = ctx
 	return l
 }
 
-func (l layout) Slot(slot string) []Partial {
+func (l view) Slot(slot string) []Renderable {
 	return l.slots[slot]
 }
 
-func NewLayout(name string, e Engine) Layout {
-	l := &layout{
+func NewView(name string, e Engine) View {
+	l := &view{
 		name:  name,
 		e:     e,
-		slots: make(map[string][]Partial),
+		slots: make(map[string][]Renderable),
 	}
 	return l
 }
 
-func newLayoutCtx(l Layout) LayoutCtx {
-	return &layoutCtx{
+func newViewCtx(l View) ViewCtx {
+	return &viewCtx{
 		l: l,
 	}
 }

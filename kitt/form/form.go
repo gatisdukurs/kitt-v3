@@ -13,7 +13,7 @@ type Form interface {
 	Error() FormError
 	WithError(err FormError) Form
 	WithSuccess(succ FormSuccess) Form
-	WithControl(control FormControl) Form
+	WithControl(control FormField) Form
 	WithMethod(method string) Form
 	WithAction(action string) Form
 	WithValues(values url.Values) Form
@@ -24,13 +24,13 @@ type Form interface {
 	Action() string
 	Method() string
 	Id() string
-	Control(id string) FormControl
+	Control(id string) FormField
 	Validate() bool
 }
 
 type form struct {
 	e           render.Engine
-	controls    []FormControl
+	controls    []FormField
 	method      string
 	action      string
 	id          string
@@ -50,7 +50,7 @@ func (f form) Validate() bool {
 	isValid := true
 
 	for _, c := range f.controls {
-		if ok, errs := c.Field().Validate(); !ok {
+		if ok, errs := c.Control().Validate(); !ok {
 			c.WithErrors(errs)
 			isValid = false
 		}
@@ -71,16 +71,16 @@ func (f *form) WithSuccess(succ FormSuccess) Form {
 
 func (f *form) WithValues(values url.Values) Form {
 	for _, c := range f.controls {
-		if c.Field() != nil {
-			value := values.Get(c.Field().Name())
-			c.Field().WithValue(value)
+		if c.Control() != nil {
+			value := values.Get(c.Control().Name())
+			c.Control().WithValue(value)
 		}
 	}
 
 	return f
 }
 
-func (f *form) WithControl(control FormControl) Form {
+func (f *form) WithControl(control FormField) Form {
 	f.controls = append(f.controls, control)
 	return f
 }
@@ -134,7 +134,7 @@ func (f form) RenderSuccess() string {
 	return f.formSuccess.Render()
 }
 
-func (f form) Control(id string) FormControl {
+func (f form) Control(id string) FormField {
 	for _, c := range f.controls {
 		if c.Id() == id {
 			return c

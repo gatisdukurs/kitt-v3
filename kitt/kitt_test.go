@@ -10,17 +10,9 @@ import (
 func Test_Kitt(t *testing.T) {
 	t.Run("it provides Layout", func(t *testing.T) {
 		K().InTesting()
-		l := K().Layout("none")
-		if _, ok := l.(render.Layout); !ok {
+		l := K().View("none")
+		if _, ok := l.(render.View); !ok {
 			t.Fatalf("not providing Layout")
-		}
-	})
-
-	t.Run("it provides Partial", func(t *testing.T) {
-		K().InTesting()
-		p := K().Partial("none")
-		if _, ok := p.(render.Partial); !ok {
-			t.Fatalf("not providing Partial")
 		}
 	})
 
@@ -57,14 +49,14 @@ func Test_Kitt(t *testing.T) {
 		K().WithTemplates(TemplatePatterns{
 			"testdata/template.html",
 		})
-		l := K().Layout("template")
+		l := K().View("template")
 		assertEqual(t, l.Render(), getSnap(t, "template"))
 	})
 
 	t.Run("it allows to add string templates", func(t *testing.T) {
 		K().InTesting()
 		K().WithTemplate("partial", "<h1>Hello World!</h1>")
-		p := K().Partial("partial")
+		p := K().View("partial")
 		assertEqual(t, p.Render(), "<h1>Hello World!</h1>")
 	})
 
@@ -76,7 +68,7 @@ func Test_Kitt(t *testing.T) {
 			},
 		})
 		K().WithTemplate("partial", "<h1>Hello {{ hw }}</h1>")
-		p := K().Partial("partial")
+		p := K().View("partial")
 		assertEqual(t, p.Render(), "<h1>Hello World!</h1>")
 	})
 
