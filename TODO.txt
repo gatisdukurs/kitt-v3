@@ -1,3 +1,5 @@
+NOW: Add attributes to controls finish it. Also add attributes that can't be set like "value", "id", etc
+
 NOW: Reimplement pages controller actions, continue with POST page endpoint
 and figure out how to create forms easily.
 

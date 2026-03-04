@@ -68,15 +68,16 @@ func (c Controller) _PageForm() form.Form {
 
 	// content
 	content := form.NewFormField("content-field", e)
-	contentControl := form.NewFormControl("title", e)
+	contentControl := form.NewFormControl("content", e)
+	contentControl.WithType(form.FIELD_TEXTAREA)
 	contentControl.WithValidators(form.Required(), form.MinLength(3))
 	content.WithControl(contentControl)
 
-	contentLabel := form.NewFormLabel("Title", e)
+	contentLabel := form.NewFormLabel("Content", e)
 	content.WithLabel(contentLabel)
 
 	f.WithField(title)
-	f.WithField(title)
+	f.WithField(content)
 
 	return f
 }

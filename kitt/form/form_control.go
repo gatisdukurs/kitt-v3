@@ -21,6 +21,7 @@ type FormControl interface {
 	WithId(id string) FormControl
 	WithValue(value string) FormControl
 	WithValidators(validators ...FormValidator) FormControl
+	WithAttribute(key string, value string) FormControl
 	Value() string
 	Validate() (bool, []string)
 }
@@ -28,6 +29,7 @@ type FormControl interface {
 type formControl struct {
 	id         string
 	name       string
+	attributes map[string]string
 	e          render.Engine
 	fieldType  string
 	value      string
@@ -97,6 +99,11 @@ func (fc *formControl) WithValidators(validators ...FormValidator) FormControl {
 	return fc
 }
 
+func (fc *formControl) WithAttribute(key string, value string) FormControl {
+	fc.attributes[key] = value
+	return fc
+}
+
 func (fc *formControl) Validate() (bool, []string) {
 	errors := []string{}
 	value := fc.value
@@ -118,9 +125,10 @@ func NewFormControl(name string, engine render.Engine) FormControl {
 	engine.WithTemplate("form.textarea", textareaTpl)
 
 	return &formControl{
-		e:         engine,
-		name:      name,
-		id:        name,
-		fieldType: FIELD_TEXT,
+		attributes: make(map[string]string),
+		e:          engine,
+		name:       name,
+		id:         name,
+		fieldType:  FIELD_TEXT,
 	}
 }
