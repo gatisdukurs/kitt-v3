@@ -1,4 +1,4 @@
-NOW: Also add attributes that can't be set like "value", "id", etc
+NOW: Add HTMX support to form.
 
 NOW: Reimplement pages controller actions, continue with POST page endpoint
 and figure out how to create forms easily.
@@ -16,3 +16,5 @@ NEXT: Create frontend for displaying added pages.
 
 Think about url herlper functions for templates - NAMED ROUTES that I can then use in templates
 Refactor attributes, that they are all rendered in tags as {{ .Attributes }}
+Also add attributes that can't be set like "value", "id", etc
+Also refactor maybe out attribute and all html-ish things so I dont have duplicate attr rendering and stuff from forms.

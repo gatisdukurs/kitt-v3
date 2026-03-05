@@ -20,6 +20,9 @@ func Test_Form_Context(t *testing.T) {
 		field.WithControl(control)
 		form.WithField(field)
 
+		form.WithAttribute("required", "")
+		form.WithAttribute("autofocus", "true")
+
 		err := NewFormError("Error.", e)
 		form.WithError(err)
 
@@ -35,5 +38,6 @@ func Test_Form_Context(t *testing.T) {
 		assertEqual(t, ctx.Error(), render.AsHtml(form.RenderError()))
 		assertEqual(t, ctx.Success(), render.AsHtml(form.RenderSuccess()))
 		assertEqual(t, ctx.Actions(), render.AsHtml(form.RenderActions()))
+		assertEqual(t, ctx.Attributes(), render.AsAttr(form.RenderAttributes()))
 	})
 }

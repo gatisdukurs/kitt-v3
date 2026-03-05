@@ -2,7 +2,7 @@ package form
 
 import (
 	"bytes"
-	"html"
+	"fmt"
 	"kitt/kitt/render"
 	"strings"
 )
@@ -32,7 +32,7 @@ type FormControl interface {
 type formControl struct {
 	id         string
 	name       string
-	attributes map[string]string
+	attributes []string
 	e          render.Engine
 	fieldType  string
 	value      string
@@ -71,24 +71,7 @@ func (fc formControl) RenderAttributes() string {
 		return ""
 	}
 
-	var b strings.Builder
-
-	for k, v := range fc.attributes {
-		if v == "" {
-			// boolean attribute
-			b.WriteString(" ")
-			b.WriteString(k)
-			continue
-		}
-
-		b.WriteString(" ")
-		b.WriteString(k)
-		b.WriteString(`="`)
-		b.WriteString(html.EscapeString(v))
-		b.WriteString(`"`)
-	}
-
-	return b.String()
+	return " " + strings.Join(fc.attributes, " ")
 }
 
 func (fc formControl) Type() string {
@@ -128,7 +111,17 @@ func (fc *formControl) WithValidators(validators ...FormValidator) FormControl {
 }
 
 func (fc *formControl) WithAttribute(key string, value string) FormControl {
-	fc.attributes[key] = value
+	if key == "" {
+		return fc
+	}
+
+	var attr string
+	if value != "" {
+		attr = fmt.Sprintf(`%s="%s"`, key, value)
+	} else {
+		attr = key
+	}
+	fc.attributes = append(fc.attributes, attr)
 	return fc
 }
 
@@ -153,10 +146,9 @@ func NewFormControl(name string, engine render.Engine) FormControl {
 	engine.WithTemplate("form.textarea", textareaTpl)
 
 	return &formControl{
-		attributes: make(map[string]string),
-		e:          engine,
-		name:       name,
-		id:         name,
-		fieldType:  FIELD_TEXT,
+		e:         engine,
+		name:      name,
+		id:        name,
+		fieldType: FIELD_TEXT,
 	}
 }

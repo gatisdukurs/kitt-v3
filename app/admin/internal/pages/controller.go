@@ -79,10 +79,13 @@ func (c Controller) _PageForm() form.Form {
 	content.WithLabel(contentLabel)
 
 	// Actions
-	// actions := form.NewFormActions("form-actions", e)
+	actions := form.NewFormActions("form-actions", e)
+	save := form.NewFormAction("Save", e)
+	actions.WithAction(save)
 
 	f.WithField(title)
 	f.WithField(content)
+	f.WithActions(actions)
 
 	return f
 }

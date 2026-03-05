@@ -189,4 +189,26 @@ func Test_Form(t *testing.T) {
 
 		assertEqual(t, f.Render(), `<form class="form" action="/" method="POST" id="pages"><div class="actions" id="actions"><button type="button" class="btn" id="save" name="save" value="">Save</button></div></form>`)
 	})
+
+	t.Run("it renders attributes", func(t *testing.T) {
+		engine := render.NewEngine()
+		f := NewForm("pages", engine)
+
+		f.WithAttribute("data-custom", "1")
+		f.WithAttribute("data-required", "")
+
+		assertEqual(t, f.Render(), `<form class="form" action="/" method="POST" id="pages" data-custom="1" data-required></form>`)
+	})
+
+	t.Run("it supports htmx", func(t *testing.T) {
+		engine := render.NewEngine()
+		f := NewForm("pages", engine)
+
+		f.WithHTMXPost("/pages")
+		f.WithHTMXGet("/pages")
+		f.WithHTMXSwap("outerHTML")
+		f.WithHTMXTarget("#pages")
+
+		assertEqual(t, f.Render(), `<form class="form" action="/" method="POST" id="pages" hx-post="/pages" hx-get="/pages" hx-swap="outerHTML" hx-target="#pages"></form>`)
+	})
 }

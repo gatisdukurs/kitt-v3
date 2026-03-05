@@ -2,9 +2,11 @@ package form
 
 import (
 	"bytes"
+	"fmt"
 	"kitt/kitt/render"
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 type Form interface {
@@ -18,11 +20,17 @@ type Form interface {
 	WithAction(action string) Form
 	WithActions(actions FormActions) Form
 	WithValues(values url.Values) Form
+	WithAttribute(key string, value string) Form
+	WithHTMXPost(url string) Form
+	WithHTMXGet(url string) Form
+	WithHTMXTarget(sel string) Form
+	WithHTMXSwap(swap string) Form
 	WithId(id string) Form
 	RenderFields() string
 	RenderError() string
 	RenderSuccess() string
 	RenderActions() string
+	RenderAttributes() string
 	Action() string
 	Method() string
 	Id() string
@@ -32,6 +40,7 @@ type Form interface {
 
 type form struct {
 	e           render.Engine
+	attributes  []string
 	fields      []FormField
 	method      string
 	action      string
@@ -62,6 +71,22 @@ func (f form) Validate() bool {
 	return isValid
 }
 
+func (f *form) WithHTMXPost(url string) Form {
+	return f.WithAttribute("hx-post", url)
+}
+
+func (f *form) WithHTMXGet(url string) Form {
+	return f.WithAttribute("hx-get", url)
+}
+
+func (f *form) WithHTMXTarget(sel string) Form {
+	return f.WithAttribute("hx-target", sel)
+}
+
+func (f *form) WithHTMXSwap(swap string) Form {
+	return f.WithAttribute("hx-swap", swap)
+}
+
 func (f *form) WithError(err FormError) Form {
 	f.formError = err
 	return f
@@ -69,6 +94,21 @@ func (f *form) WithError(err FormError) Form {
 
 func (f *form) WithSuccess(succ FormSuccess) Form {
 	f.formSuccess = succ
+	return f
+}
+
+func (f *form) WithAttribute(key string, value string) Form {
+	if key == "" {
+		return f
+	}
+
+	var attr string
+	if value != "" {
+		attr = fmt.Sprintf(`%s="%s"`, key, value)
+	} else {
+		attr = key
+	}
+	f.attributes = append(f.attributes, attr)
 	return f
 }
 
@@ -149,6 +189,14 @@ func (f form) RenderActions() string {
 	return f.actions.Render()
 }
 
+func (f form) RenderAttributes() string {
+	if len(f.attributes) == 0 {
+		return ""
+	}
+
+	return " " + strings.Join(f.attributes, " ")
+}
+
 func (f form) Field(id string) FormField {
 	for _, field := range f.fields {
 		if field.Id() == id {
@@ -172,7 +220,7 @@ func (f form) Id() string {
 }
 
 func NewForm(id string, e render.Engine) Form {
-	template := `<form class="form" action="{{ .Action }}" method="{{ .Method }}" id="{{ .Id }}">{{ .Success }}{{ .Error }}{{ .Fields }}{{ .Actions }}</form>`
+	template := `<form class="form" action="{{ .Action }}" method="{{ .Method }}" id="{{ .Id }}"{{ .Attributes }}>{{ .Success }}{{ .Error }}{{ .Fields }}{{ .Actions }}</form>`
 	e.WithTemplate("form", template)
 
 	return &form{
