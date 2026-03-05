@@ -11,7 +11,7 @@ func Test_Form_Control(t *testing.T) {
 		control := NewFormControl("email", e)
 		control.WithValue("gatis.dukurs@gmail.com")
 
-		assertEqual(t, control.Render(), `<input class="control" name="email" id="email" type="text" value="gatis.dukurs@gmail.com" />`)
+		assertEqual(t, control.Render(), `<input class="control" name="email" id="email" type="text" value="gatis.dukurs@gmail.com"/>`)
 	})
 
 	t.Run("it renders textarea", func(t *testing.T) {
@@ -82,5 +82,14 @@ func Test_Form_Control(t *testing.T) {
 
 		assertEqual(t, valid, true)
 		assertEqual(t, len(errors), 0)
+	})
+
+	t.Run("it supports attributes", func(t *testing.T) {
+		e := render.NewEngine()
+		control := NewFormControl("email", e)
+		control.WithAttribute("rows", "3")
+		control.WithAttribute("required", "")
+
+		assertEqual(t, control.Render(), `<input class="control" name="email" id="email" type="text" value="" rows="3" required/>`)
 	})
 }

@@ -2,7 +2,9 @@ package form
 
 import (
 	"bytes"
+	"html"
 	"kitt/kitt/render"
+	"strings"
 )
 
 const (
@@ -22,6 +24,7 @@ type FormControl interface {
 	WithValue(value string) FormControl
 	WithValidators(validators ...FormValidator) FormControl
 	WithAttribute(key string, value string) FormControl
+	RenderAttributes() string
 	Value() string
 	Validate() (bool, []string)
 }
@@ -61,6 +64,31 @@ func (fc *formControl) renderTextarea() string {
 	fc.e.Render(&buf, "form.textarea", NewFormControlContext(fc))
 
 	return buf.String()
+}
+
+func (fc formControl) RenderAttributes() string {
+	if len(fc.attributes) == 0 {
+		return ""
+	}
+
+	var b strings.Builder
+
+	for k, v := range fc.attributes {
+		if v == "" {
+			// boolean attribute
+			b.WriteString(" ")
+			b.WriteString(k)
+			continue
+		}
+
+		b.WriteString(" ")
+		b.WriteString(k)
+		b.WriteString(`="`)
+		b.WriteString(html.EscapeString(v))
+		b.WriteString(`"`)
+	}
+
+	return b.String()
 }
 
 func (fc formControl) Type() string {
@@ -118,8 +146,8 @@ func (fc *formControl) Validate() (bool, []string) {
 }
 
 func NewFormControl(name string, engine render.Engine) FormControl {
-	inputTpl := `<input class="control" name="{{ .Name }}" id="{{ .Id }}" type="{{ .Type }}" value="{{ .Value }}" />`
-	textareaTpl := `<textarea class="control" name="{{ .Name }}" id="{{ .Id }}">{{ .Value }}</textarea>`
+	inputTpl := `<input class="control" name="{{ .Name }}" id="{{ .Id }}" type="{{ .Type }}" value="{{ .Value }}"{{ .Attributes }}/>`
+	textareaTpl := `<textarea class="control" name="{{ .Name }}" id="{{ .Id }}"{{ .Attributes }}>{{ .Value }}</textarea>`
 
 	engine.WithTemplate("form.input", inputTpl)
 	engine.WithTemplate("form.textarea", textareaTpl)

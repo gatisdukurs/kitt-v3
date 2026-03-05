@@ -11,6 +11,7 @@ type Renderable interface {
 }
 
 type AsHtml = template.HTML
+type AsAttr = template.HTMLAttr
 type AnyCtx = map[string]interface{}
 type Funcs = template.FuncMap
 

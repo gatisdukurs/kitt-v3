@@ -1,10 +1,13 @@
 package form
 
+import "kitt/kitt/render"
+
 type FormControlContext interface {
 	Name() string
 	Id() string
 	Type() string
 	Value() string
+	Attributes() render.AsAttr
 }
 
 type formControlCtx struct {
@@ -25,6 +28,10 @@ func (c formControlCtx) Type() string {
 
 func (c formControlCtx) Value() string {
 	return c.control.Value()
+}
+
+func (c formControlCtx) Attributes() render.AsAttr {
+	return render.AsAttr(c.control.RenderAttributes())
 }
 
 func NewFormControlContext(control FormControl) FormControlContext {

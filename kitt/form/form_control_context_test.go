@@ -13,5 +13,6 @@ func Test_Form_Control_Context(t *testing.T) {
 
 		assertEqual(t, ctx.Name(), "email")
 		assertEqual(t, ctx.Id(), "email")
+		assertEqual(t, ctx.Attributes(), render.AsAttr(control.RenderAttributes()))
 	})
 }
