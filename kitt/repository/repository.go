@@ -1,34 +1,37 @@
 package repository
 
-type ID = int64
-
-type Repository[T interface{}] interface {
+type Repository[T interface{}, ID interface{}] interface {
 	Create(m *T) (ID, error)
 	ByID(id ID) (T, error)
 	Update(m *T) error
 	Delete(id ID) error
 }
 
-type repo[T interface{}] struct {
+type repo[T interface{}, ID interface{}] struct {
+	driver Driver[ID]
 }
 
-func (r repo[T]) Create(m *T) (ID, error) {
-	return 0, nil
+func (r repo[T, ID]) Create(m *T) (ID, error) {
+	var zero ID
+	return zero, nil
 }
 
-func (r repo[T]) ByID(id ID) (T, error) {
+func (r repo[T, ID]) ByID(id ID) (T, error) {
 	var zero T
 	return zero, nil
 }
 
-func (r repo[T]) Update(m *T) error {
+func (r repo[T, ID]) Update(m *T) error {
 	return nil
 }
 
-func (r repo[T]) Delete(id ID) error {
+func (r repo[T, ID]) Delete(id ID) error {
 	return nil
 }
 
-func NewRepo[T interface{}]() Repository[T] {
-	return &repo[T]{}
+func NewRepo[T interface{}, ID interface{}](driver Driver[ID]) Repository[T, ID] {
+	return &repo[T, ID]{}
 }
+
+// driver := sqlite.NewDriver[User](kitt.SQL(), "users")
+// users := repo.New[User](driver)

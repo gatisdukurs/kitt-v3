@@ -1,4 +1,4 @@
-NOW: Try Model concept to save data etc.
+NOW: Create repos for persistance.
 
 NEXT: Nicer API for working with db, handling errors, etc.
 NEXT: Refactor module concept.
