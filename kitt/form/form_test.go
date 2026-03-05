@@ -176,8 +176,17 @@ func Test_Form(t *testing.T) {
 		assertEqual(t, f.Action(), "/pages")
 	})
 
-	t.Run("it renders controls", func(t *testing.T) {
-		// engine := render.NewEngine()
-		// f := NewForm("pages", engine)
+	t.Run("it renders actions", func(t *testing.T) {
+		engine := render.NewEngine()
+		f := NewForm("pages", engine)
+
+		actions := NewFormActions("actions", engine)
+		action := NewFormAction("save", engine)
+		action.WithLabel("Save")
+		actions.WithAction(action)
+
+		f.WithActions(actions)
+
+		assertEqual(t, f.Render(), `<form class="form" action="/" method="POST" id="pages"><div class="actions" id="actions"><button type="button" class="btn" id="save" name="save" value="">Save</button></div></form>`)
 	})
 }

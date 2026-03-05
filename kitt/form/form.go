@@ -16,11 +16,13 @@ type Form interface {
 	WithField(control FormField) Form
 	WithMethod(method string) Form
 	WithAction(action string) Form
+	WithActions(actions FormActions) Form
 	WithValues(values url.Values) Form
 	WithId(id string) Form
 	RenderFields() string
 	RenderError() string
 	RenderSuccess() string
+	RenderActions() string
 	Action() string
 	Method() string
 	Id() string
@@ -33,6 +35,7 @@ type form struct {
 	fields      []FormField
 	method      string
 	action      string
+	actions     FormActions
 	id          string
 	formError   FormError
 	formSuccess FormSuccess
@@ -95,6 +98,11 @@ func (f *form) WithAction(action string) Form {
 	return f
 }
 
+func (f *form) WithActions(actions FormActions) Form {
+	f.actions = actions
+	return f
+}
+
 func (f *form) WithId(id string) Form {
 	f.id = id
 	return f
@@ -134,6 +142,13 @@ func (f form) RenderSuccess() string {
 	return f.formSuccess.Render()
 }
 
+func (f form) RenderActions() string {
+	if f.actions == nil {
+		return ""
+	}
+	return f.actions.Render()
+}
+
 func (f form) Field(id string) FormField {
 	for _, field := range f.fields {
 		if field.Id() == id {
@@ -157,7 +172,7 @@ func (f form) Id() string {
 }
 
 func NewForm(id string, e render.Engine) Form {
-	template := `<form class="form" action="{{ .Action }}" method="{{ .Method }}" id="{{ .Id }}">{{ .Success }}{{ .Error }}{{ .Fields }}</form>`
+	template := `<form class="form" action="{{ .Action }}" method="{{ .Method }}" id="{{ .Id }}">{{ .Success }}{{ .Error }}{{ .Fields }}{{ .Actions }}</form>`
 	e.WithTemplate("form", template)
 
 	return &form{

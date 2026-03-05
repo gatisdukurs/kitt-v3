@@ -61,6 +61,7 @@ func (c Controller) _PageForm() form.Form {
 
 	titleControl := form.NewFormControl("title", e)
 	titleControl.WithValidators(form.Required(), form.MinLength(3))
+	titleControl.WithAttribute("autofocus", "")
 	title.WithControl(titleControl)
 
 	titleLabel := form.NewFormLabel("Title", e)
@@ -71,10 +72,14 @@ func (c Controller) _PageForm() form.Form {
 	contentControl := form.NewFormControl("content", e)
 	contentControl.WithType(form.FIELD_TEXTAREA)
 	contentControl.WithValidators(form.Required(), form.MinLength(3))
+	contentControl.WithAttribute("rows", "10")
 	content.WithControl(contentControl)
 
 	contentLabel := form.NewFormLabel("Content", e)
 	content.WithLabel(contentLabel)
+
+	// Actions
+	// actions := form.NewFormActions("form-actions", e)
 
 	f.WithField(title)
 	f.WithField(content)

@@ -1,4 +1,4 @@
-NOW: Add attributes to controls finish it. Also add attributes that can't be set like "value", "id", etc
+NOW: Also add attributes that can't be set like "value", "id", etc
 
 NOW: Reimplement pages controller actions, continue with POST page endpoint
 and figure out how to create forms easily.
@@ -15,3 +15,4 @@ NEXT: Nicer API for working with db, handling errors, etc.
 NEXT: Create frontend for displaying added pages.
 
 Think about url herlper functions for templates - NAMED ROUTES that I can then use in templates
+Refactor attributes, that they are all rendered in tags as {{ .Attributes }}

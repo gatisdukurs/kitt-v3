@@ -34,5 +34,6 @@ func Test_Form_Context(t *testing.T) {
 		assertEqual(t, ctx.Fields(), render.AsHtml(form.RenderFields()))
 		assertEqual(t, ctx.Error(), render.AsHtml(form.RenderError()))
 		assertEqual(t, ctx.Success(), render.AsHtml(form.RenderSuccess()))
+		assertEqual(t, ctx.Actions(), render.AsHtml(form.RenderActions()))
 	})
 }
