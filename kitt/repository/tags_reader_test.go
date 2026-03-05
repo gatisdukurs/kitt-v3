@@ -5,8 +5,9 @@ import "testing"
 func Test_Tags_Reader(t *testing.T) {
 	t.Run("it reads tags", func(t *testing.T) {
 		r := NewTagsReader[struct {
-			ID   string `db:"id,pk,required"`
-			Name string `db:"name"`
+			ID    string `db:"id,pk,required"`
+			Name  string `db:"name"`
+			NoTag string
 		}]("db")
 
 		want := []TagsMetadata{

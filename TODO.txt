@@ -1,4 +1,14 @@
 NOW: Create repos for persistance.
+Continue with tags and create model reader that reads in type name so we can create db. 
+Also model reader should cache meta.
+
+ModelMeta{
+  Table: "users",
+  Fields: [
+    {Name:"ID", Column:"id", PK:true, Auto:true},
+    {Name:"Email", Column:"email"}
+  ]
+}
 
 NEXT: Nicer API for working with db, handling errors, etc.
 NEXT: Refactor module concept.
