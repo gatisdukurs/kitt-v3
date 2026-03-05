@@ -10,7 +10,7 @@ func Test_Form_Error(t *testing.T) {
 		e := render.NewEngine()
 		err := NewFormError("Error.", e)
 
-		assertEqual(t, err.Render(), `<div class="error">Error.</div>`)
+		assertEqual(t, err.Render(), `<div class="alert alert--danger">Error.</div>`)
 	})
 
 	t.Run("it sets message", func(t *testing.T) {

@@ -34,7 +34,7 @@ func (f *formSuccess) WithMessage(msg string) FormSuccess {
 }
 
 func NewFormSuccess(msg string, e render.Engine) FormSuccess {
-	tpl := `<div class="success">{{ .Message }}</div>`
+	tpl := `<div class="alert alert--success flash">{{ .Message }}</div>`
 
 	e.WithTemplate("form.success", tpl)
 

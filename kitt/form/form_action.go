@@ -64,7 +64,7 @@ func (f *formAction) WithValue(value string) FormAction {
 }
 
 func NewFormAction(name string, e render.Engine) FormAction {
-	button := `<button type="button" class="btn" id="{{ .Id }}" name="{{ .Name }}" value="{{ .Value }}">{{ .Label }}</button>`
+	button := `<button class="btn" id="{{ .Id }}" name="{{ .Name }}" value="{{ .Value }}">{{ .Label }}</button>`
 
 	e.WithTemplate("form.button", button)
 

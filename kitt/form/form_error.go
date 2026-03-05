@@ -34,7 +34,7 @@ func (f *formError) Render() string {
 }
 
 func NewFormError(msg string, e render.Engine) FormError {
-	tpl := `<div class="error">{{ .Message }}</div>`
+	tpl := `<div class="alert alert--danger">{{ .Message }}</div>`
 
 	e.WithTemplate("form.error", tpl)
 

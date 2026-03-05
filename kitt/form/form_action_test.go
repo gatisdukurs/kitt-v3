@@ -14,7 +14,7 @@ func Test_Form_Action(t *testing.T) {
 		fa.WithLabel("Save")
 		fa.WithValue("save")
 
-		assertEqual(t, fa.Render(), `<button type="button" class="btn" id="action_id" name="submit" value="save">Save</button>`)
+		assertEqual(t, fa.Render(), `<button class="btn" id="action_id" name="submit" value="save">Save</button>`)
 	})
 
 	t.Run("it sets id", func(t *testing.T) {

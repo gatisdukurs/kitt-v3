@@ -33,17 +33,7 @@ func main() {
 	kitt.InitSQL().WithSQLite("db.sqlite")
 	defer kitt.SQL().Close()
 
-	s := &kitt.Services{}
-	k := &kitt.Kernel{
-		Modules: []kitt.Module{
-			&admin.Module{},
-		},
-	}
-
-	k.Boot()
-	k.Migrate()
-	k.RegisterEvents()
-	k.RegisterServices(s)
+	admin.Module{}.Boot()
 
 	// ---- OLD END
 

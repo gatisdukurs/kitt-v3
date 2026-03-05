@@ -46,15 +46,20 @@ func (c Controller) GetCreate(ctx router.RouteCtx) router.RouteResponse {
 }
 
 func (c Controller) PostPage(ctx router.RouteCtx) router.RouteResponse {
-	view := c.View("admin.pages.form")
-	return c.Response(view)
+	f := c._PageForm().WithValues(ctx.Request().FormValues())
+	if f.Validate() {
+		f.WithSuccess("Page Created.")
+	} else {
+		f.WithError("Form has some errors :(")
+	}
+	return c.Response(f)
 }
 
 func (c Controller) _PageForm() form.Form {
 	e := render.NewEngine()
-	f := form.NewForm("page", e)
+	f := form.NewForm("form-page", e)
 	f.WithMethod(http.MethodPost)
-	f.WithAction("/admin/pages/create")
+	f.WithAction("/admin/pages")
 
 	// title
 	title := form.NewFormField("title-field", e)
@@ -87,24 +92,10 @@ func (c Controller) _PageForm() form.Form {
 	f.WithField(content)
 	f.WithActions(actions)
 
+	f.WithHTMX()
+
 	return f
 }
-
-// func PostPages(ctx *kitt.RouteCtx) {
-// 	formCtx := kitt.NewFormCtx().WithRequest(ctx.Request()).WithValidation(kitt.FormCtxValidators{
-// 		"page.title": kitt.Validators{
-// 			kitt.Required(),
-// 			kitt.MinLength(3),
-// 		},
-// 		"page.content": kitt.Validators{
-// 			kitt.Required(),
-// 			kitt.MinLength(10),
-// 		},
-// 	})
-
-// 	isValid := formCtx.Validate()
-
-// 	if isValid {
 
 // 		_, err := kitt.SQL().Exec(
 // 			context.Background(),
@@ -112,16 +103,3 @@ func (c Controller) _PageForm() form.Form {
 // 			formCtx.Value("page.title"),
 // 			formCtx.Value("page.content"),
 // 		)
-
-// 		if err != nil {
-// 			formCtx.SetError(err.Error())
-// 		} else {
-// 			formCtx.SetSuccess("Page created!")
-// 		}
-// 	}
-
-// 	ctx.Response().Send(
-// 		kitt.HTMX("admin.pages.form", formCtx),
-// 		http.StatusOK,
-// 	)
-// }

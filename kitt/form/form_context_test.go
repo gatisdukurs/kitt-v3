@@ -23,11 +23,9 @@ func Test_Form_Context(t *testing.T) {
 		form.WithAttribute("required", "")
 		form.WithAttribute("autofocus", "true")
 
-		err := NewFormError("Error.", e)
-		form.WithError(err)
+		form.WithError("Error.")
 
-		succ := NewFormSuccess("Success.", e)
-		form.WithSuccess(succ)
+		form.WithSuccess("Success.")
 
 		ctx := NewFormContext(form)
 

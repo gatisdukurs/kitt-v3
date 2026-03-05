@@ -2,6 +2,7 @@ package admin
 
 import (
 	"context"
+	"fmt"
 	"kitt/app/admin/internal/dashboard"
 	"kitt/app/admin/internal/pages"
 	"kitt/kitt"
@@ -9,27 +10,15 @@ import (
 
 type Module struct{}
 
-func (Module) Boot() {
+func (m Module) Boot() {
 	dashboard.Controller{}.Boot()
 	pages.Controller{}.Boot()
+
+	// Migrate
+	m.migrate()
 }
 
-func (m Module) Events() {
-	// kitt.Subscribe("router.onRequest", func(e kitt.Event) {
-	// 	ctx := kitt.GetEventContext[*kitt.RouteCtx](e)
-	// 	if ctx.Route().Module == "admin" {
-	// 		ctx.SetVar("admin.navigation", m.nav.WithActive(ctx.Request().Path()))
-	// 	}
-	// })
-}
-
-func (Module) Templates() {}
-
-func (Module) Services(s *kitt.Services) {
-	kitt.Log("admin: Services")
-}
-
-func (Module) Migrate() {
+func (Module) migrate() {
 	_, err := kitt.SQL().Exec(context.Background(), `
 		CREATE TABLE IF NOT EXISTS pages (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -38,8 +27,7 @@ func (Module) Migrate() {
 		);
 	`)
 
-	kitt.Log("admin: Migrate")
 	if err != nil {
-		kitt.Log(err.Error())
+		fmt.Println(err)
 	}
 }

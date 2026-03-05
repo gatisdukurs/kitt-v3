@@ -76,27 +76,21 @@ func Test_Form(t *testing.T) {
 	t.Run("it renders error", func(t *testing.T) {
 		engine := render.NewEngine()
 		f := NewForm("pages", engine)
-		err := NewFormError("Error.", engine)
-
 		assertEqual(t, f.RenderError(), "")
 
-		f.WithError(err)
-
-		assertEqual(t, f.RenderError(), err.Render())
-		assertEqual(t, f.Render(), `<form class="form" action="/" method="POST" id="pages"><div class="error">Error.</div></form>`)
+		f.WithError("Error.")
+		assertEqual(t, f.Render(), `<form class="form" action="/" method="POST" id="pages"><div class="alert alert--danger">Error.</div></form>`)
 	})
 
 	t.Run("it renders success", func(t *testing.T) {
 		engine := render.NewEngine()
 		f := NewForm("pages", engine)
-		succ := NewFormSuccess("Success.", engine)
 
 		assertEqual(t, f.RenderSuccess(), "")
 
-		f.WithSuccess(succ)
+		f.WithSuccess("Success.")
 
-		assertEqual(t, f.RenderSuccess(), succ.Render())
-		assertEqual(t, f.Render(), `<form class="form" action="/" method="POST" id="pages"><div class="success">Success.</div></form>`)
+		assertEqual(t, f.Render(), `<form class="form" action="/" method="POST" id="pages"><div class="alert alert--success flash">Success.</div></form>`)
 	})
 
 	t.Run("it sets values", func(t *testing.T) {
@@ -132,9 +126,8 @@ func Test_Form(t *testing.T) {
 	t.Run("it sets error message", func(t *testing.T) {
 		msg := "Passowrd or username is not correct."
 		engine := render.NewEngine()
-		err := NewFormError(msg, engine)
 		f := NewForm("pages", engine)
-		f.WithError(err)
+		f.WithError(msg)
 
 		assertEqual(t, f.Error().Message(), msg)
 	})
@@ -142,9 +135,8 @@ func Test_Form(t *testing.T) {
 	t.Run("it sets success message", func(t *testing.T) {
 		msg := "Account Created."
 		engine := render.NewEngine()
-		succ := NewFormSuccess(msg, engine)
 		f := NewForm("pages", engine)
-		f.WithSuccess(succ)
+		f.WithSuccess(msg)
 
 		assertEqual(t, f.Success().Message(), msg)
 	})
@@ -187,7 +179,7 @@ func Test_Form(t *testing.T) {
 
 		f.WithActions(actions)
 
-		assertEqual(t, f.Render(), `<form class="form" action="/" method="POST" id="pages"><div class="actions" id="actions"><button type="button" class="btn" id="save" name="save" value="">Save</button></div></form>`)
+		assertEqual(t, f.Render(), `<form class="form" action="/" method="POST" id="pages"><div class="actions" id="actions"><button class="btn" id="save" name="save" value="">Save</button></div></form>`)
 	})
 
 	t.Run("it renders attributes", func(t *testing.T) {
@@ -204,11 +196,22 @@ func Test_Form(t *testing.T) {
 		engine := render.NewEngine()
 		f := NewForm("pages", engine)
 
-		f.WithHTMXPost("/pages")
-		f.WithHTMXGet("/pages")
+		f.WithAction("/pages")
+		f.WithHTMXPost()
+		f.WithHTMXGet()
 		f.WithHTMXSwap("outerHTML")
 		f.WithHTMXTarget("#pages")
 
-		assertEqual(t, f.Render(), `<form class="form" action="/" method="POST" id="pages" hx-post="/pages" hx-get="/pages" hx-swap="outerHTML" hx-target="#pages"></form>`)
+		assertEqual(t, f.Render(), `<form class="form" action="/pages" method="POST" id="pages" hx-post="/pages" hx-get="/pages" hx-swap="outerHTML" hx-target="#pages"></form>`)
+	})
+
+	t.Run("it supports htmx shorthand", func(t *testing.T) {
+		engine := render.NewEngine()
+		f := NewForm("pages", engine)
+
+		f.WithAction("/pages")
+		f.WithHTMX()
+
+		assertEqual(t, f.Render(), `<form class="form" action="/pages" method="POST" id="pages" hx-post="/pages" hx-swap="outerHTML" hx-target="#pages"></form>`)
 	})
 }

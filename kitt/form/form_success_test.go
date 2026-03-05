@@ -10,7 +10,7 @@ func Test_Form_Success(t *testing.T) {
 		e := render.NewEngine()
 		fs := NewFormSuccess("Account Created.", e)
 
-		assertEqual(t, fs.Render(), `<div class="success">Account Created.</div>`)
+		assertEqual(t, fs.Render(), `<div class="alert alert--success flash">Account Created.</div>`)
 	})
 
 	t.Run("it sets message", func(t *testing.T) {

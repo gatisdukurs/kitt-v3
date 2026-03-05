@@ -4,27 +4,29 @@ import (
 	"bytes"
 	"fmt"
 	"kitt/kitt/render"
+	"kitt/kitt/router"
 	"net/http"
 	"net/url"
 	"strings"
 )
 
 type Form interface {
-	render.Renderable
+	router.RouteResponseSendable
 	Success() FormSuccess
 	Error() FormError
-	WithError(err FormError) Form
-	WithSuccess(succ FormSuccess) Form
+	WithError(msg string) Form
+	WithSuccess(msg string) Form
 	WithField(control FormField) Form
 	WithMethod(method string) Form
 	WithAction(action string) Form
 	WithActions(actions FormActions) Form
 	WithValues(values url.Values) Form
 	WithAttribute(key string, value string) Form
-	WithHTMXPost(url string) Form
-	WithHTMXGet(url string) Form
+	WithHTMXPost() Form
+	WithHTMXGet() Form
 	WithHTMXTarget(sel string) Form
 	WithHTMXSwap(swap string) Form
+	WithHTMX() Form
 	WithId(id string) Form
 	RenderFields() string
 	RenderError() string
@@ -71,12 +73,12 @@ func (f form) Validate() bool {
 	return isValid
 }
 
-func (f *form) WithHTMXPost(url string) Form {
-	return f.WithAttribute("hx-post", url)
+func (f *form) WithHTMXPost() Form {
+	return f.WithAttribute("hx-post", f.action)
 }
 
-func (f *form) WithHTMXGet(url string) Form {
-	return f.WithAttribute("hx-get", url)
+func (f *form) WithHTMXGet() Form {
+	return f.WithAttribute("hx-get", f.action)
 }
 
 func (f *form) WithHTMXTarget(sel string) Form {
@@ -87,13 +89,20 @@ func (f *form) WithHTMXSwap(swap string) Form {
 	return f.WithAttribute("hx-swap", swap)
 }
 
-func (f *form) WithError(err FormError) Form {
-	f.formError = err
+func (f *form) WithHTMX() Form {
+	f.WithHTMXPost()
+	f.WithHTMXSwap("outerHTML")
+	f.WithHTMXTarget("#" + f.id)
 	return f
 }
 
-func (f *form) WithSuccess(succ FormSuccess) Form {
-	f.formSuccess = succ
+func (f *form) WithError(msg string) Form {
+	f.formError = NewFormError(msg, f.e)
+	return f
+}
+
+func (f *form) WithSuccess(msg string) Form {
+	f.formSuccess = NewFormSuccess(msg, f.e)
 	return f
 }
 
@@ -217,6 +226,11 @@ func (f form) Method() string {
 
 func (f form) Id() string {
 	return f.id
+}
+
+func (f form) HTMX() string {
+	f.WithHTMX()
+	return f.Render()
 }
 
 func NewForm(id string, e render.Engine) Form {
