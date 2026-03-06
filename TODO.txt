@@ -1,5 +1,4 @@
 NOW: Create repos for persistance.
-Continue with tags and create model reader that reads in type name so we can create db. 
 Also model reader should cache meta.
 
 ModelMeta{

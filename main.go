@@ -29,12 +29,7 @@ func main() {
 	kitt.K().Router().To(router.NewStaticRoute("/css", "./public/css"))
 
 	// ----- OLD START
-
-	kitt.InitSQL().WithSQLite("db.sqlite")
-	defer kitt.SQL().Close()
-
 	admin.Module{}.Boot()
-
 	// ---- OLD END
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)

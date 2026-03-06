@@ -1,11 +1,8 @@
 package admin
 
 import (
-	"context"
-	"fmt"
 	"kitt/app/admin/internal/dashboard"
 	"kitt/app/admin/internal/pages"
-	"kitt/kitt"
 )
 
 type Module struct{}
@@ -19,15 +16,15 @@ func (m Module) Boot() {
 }
 
 func (Module) migrate() {
-	_, err := kitt.SQL().Exec(context.Background(), `
-		CREATE TABLE IF NOT EXISTS pages (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			title TEXT NOT NULL,
-			content TEXT NOT NULL
-		);
-	`)
+	// _, err := kitt.SQL().Exec(context.Background(), `
+	// 	CREATE TABLE IF NOT EXISTS pages (
+	// 		id INTEGER PRIMARY KEY AUTOINCREMENT,
+	// 		title TEXT NOT NULL,
+	// 		content TEXT NOT NULL
+	// 	);
+	// `)
 
-	if err != nil {
-		fmt.Println(err)
-	}
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
 }

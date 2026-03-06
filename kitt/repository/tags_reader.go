@@ -6,8 +6,10 @@ import (
 )
 
 type TagsMetadata struct {
-	Attr string
-	Tags []string
+	Attr  string
+	Type  reflect.Type
+	Index int
+	Tags  []string
 }
 
 type TagsReader[T interface{}] interface {
@@ -41,8 +43,10 @@ func (r reader[T]) Read() []TagsMetadata {
 		}
 
 		meta := TagsMetadata{
-			Attr: field.Name,
-			Tags: strings.Split(tag, ","),
+			Attr:  field.Name,
+			Type:  field.Type,
+			Index: i,
+			Tags:  strings.Split(tag, ","),
 		}
 		tags = append(tags, meta)
 	}
