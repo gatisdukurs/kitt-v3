@@ -1,4 +1,5 @@
 NOW: Create repos for persistance.
+Continue with sqlite driver impolementation and write tests for sqlite.go
 Also model reader should cache meta.
 
 ModelMeta{

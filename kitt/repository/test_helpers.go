@@ -2,6 +2,8 @@ package repository
 
 import (
 	"bytes"
+	"context"
+	"database/sql"
 	"reflect"
 	"strings"
 	"testing"
@@ -94,4 +96,35 @@ func NewTestFakeDriver[ID interface{}]() *testFakeDriver[ID] {
 		DeleteCalled: false,
 		ByIDCalled:   false,
 	}
+}
+
+type mockSqlConn struct {
+}
+
+func (c mockSqlConn) Exec(ctx context.Context, q string, args ...any) (sql.Result, error) {
+	var zero sql.Result
+	return zero, nil
+}
+
+func (c mockSqlConn) Query(ctx context.Context, q string, args ...any) (*sql.Rows, error) {
+	var zero sql.Rows
+
+	return &zero, nil
+}
+
+func (c mockSqlConn) QueryRow(ctx context.Context, q string, args ...any) *sql.Row {
+	var zero sql.Row
+	return &zero
+}
+
+func (c mockSqlConn) Close() error {
+	return nil
+}
+
+func (c mockSqlConn) WithDB(path string) SqlConnection {
+	return c
+}
+
+func NewMockSqlConnection() *mockSqlConn {
+	return &mockSqlConn{}
 }

@@ -1,6 +1,8 @@
 package repository
 
-type sqliteDriver[ID interface{}] struct{}
+type sqliteDriver[ID interface{}] struct {
+	conn SqlConnection
+}
 
 func (d sqliteDriver[ID]) Insert(collection string, values DriverValues) (ID, error) {
 	var zero ID
@@ -20,6 +22,8 @@ func (d sqliteDriver[ID]) ByID(collection string, id ID) (DriverValues, error) {
 	return zero, nil
 }
 
-func NewSqliteDriver[ID interface{}]() Driver[ID] {
-	return &sqliteDriver[ID]{}
+func NewSqliteDriver[ID interface{}](conn SqlConnection) Driver[ID] {
+	return &sqliteDriver[ID]{
+		conn: conn,
+	}
 }
