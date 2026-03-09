@@ -6,11 +6,11 @@ import (
 )
 
 type ModelFieldMeta struct {
-	Attr       string
-	Index      int
-	Type       reflect.Type
-	Key        string
-	PrimaryKey bool
+	Attr  string
+	Index int
+	Type  reflect.Type
+	Key   string
+	Flags []string
 }
 
 type ModelMeta struct {
@@ -38,17 +38,13 @@ func (mr modelReader[T]) Read() ModelMeta {
 
 	for _, tag := range tagsMeta {
 		key := tag.Tags[0]
-		primaryKey := false
-		if len(tag.Tags) > 1 && tag.Tags[1] == "pk" {
-			primaryKey = true
-		}
 
 		fields = append(fields, ModelFieldMeta{
-			Attr:       tag.Attr,
-			Key:        key,
-			Type:       tag.Type,
-			Index:      tag.Index,
-			PrimaryKey: primaryKey,
+			Attr:  tag.Attr,
+			Key:   key,
+			Type:  tag.Type,
+			Index: tag.Index,
+			Flags: tag.Tags[1:],
 		})
 	}
 

@@ -7,4 +7,6 @@ type Driver[ID interface{}] interface {
 	Update(collection string, values DriverValues, id ID) error
 	Delete(collection string, id ID) error
 	ByID(collection string, id ID) (DriverValues, error)
+	DropCollection(collection string) error
+	EnsureCollectionExists(modelMeta ModelMeta) error
 }

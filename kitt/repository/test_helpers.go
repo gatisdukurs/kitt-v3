@@ -51,14 +51,16 @@ type TestUser struct {
 }
 
 type testFakeDriver[ID interface{}] struct {
-	InsertCalled bool
-	InsertValues DriverValues
-	UpdateValues DriverValues
-	UpdateCalled bool
-	DeleteCalled bool
-	ByIDCalled   bool
-	InsertID     ID
-	UpdateID     ID
+	InsertCalled          bool
+	InsertValues          DriverValues
+	UpdateValues          DriverValues
+	UpdateCalled          bool
+	DeleteCalled          bool
+	ByIDCalled            bool
+	InsertID              ID
+	UpdateID              ID
+	EnsureCollectonCalled bool
+	EnsureCollectionError error
 }
 
 func (d *testFakeDriver[ID]) Insert(collection string, values DriverValues) (ID, error) {
@@ -89,6 +91,19 @@ func (d *testFakeDriver[ID]) ByID(collection string, id ID) (DriverValues, error
 	return zero, nil
 }
 
+func (d *testFakeDriver[ID]) EnsureCollectionExists(modelMeta ModelMeta) error {
+	d.EnsureCollectonCalled = true
+
+	if d.EnsureCollectionError != nil {
+		return d.EnsureCollectionError
+	}
+	return nil
+}
+
+func (d *testFakeDriver[ID]) DropCollection(collection string) error {
+	return nil
+}
+
 func NewTestFakeDriver[ID interface{}]() *testFakeDriver[ID] {
 	return &testFakeDriver[ID]{
 		InsertCalled: false,
@@ -99,11 +114,11 @@ func NewTestFakeDriver[ID interface{}]() *testFakeDriver[ID] {
 }
 
 type mockSqlConn struct {
+	Result mockSqlResult
 }
 
 func (c mockSqlConn) Exec(ctx context.Context, q string, args ...any) (sql.Result, error) {
-	var zero sql.Result
-	return zero, nil
+	return c.Result, nil
 }
 
 func (c mockSqlConn) Query(ctx context.Context, q string, args ...any) (*sql.Rows, error) {
@@ -127,4 +142,19 @@ func (c mockSqlConn) WithDB(path string) SqlConnection {
 
 func NewMockSqlConnection() *mockSqlConn {
 	return &mockSqlConn{}
+}
+
+type mockSqlResult struct {
+	InsertId    int64
+	InsertError error
+	Affected    int64
+	RowsError   error
+}
+
+func (r mockSqlResult) LastInsertId() (int64, error) {
+	return r.InsertId, r.InsertError
+}
+
+func (r mockSqlResult) RowsAffected() (int64, error) {
+	return r.Affected, r.RowsError
 }

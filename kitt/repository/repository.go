@@ -3,6 +3,7 @@ package repository
 import (
 	"fmt"
 	"reflect"
+	"slices"
 )
 
 type Repository[T interface{}, ID comparable] interface {
@@ -13,23 +14,23 @@ type Repository[T interface{}, ID comparable] interface {
 }
 
 type repo[T interface{}, ID comparable] struct {
-	driver Driver[ID]
-	meta   ModelMeta
+	driver    Driver[ID]
+	modelMeta ModelMeta
 }
 
 func (r repo[T, ID]) Create(m *T) (ID, error) {
 	values := DriverValues{}
 	v := reflect.ValueOf(m).Elem()
 
-	for _, fieldMeta := range r.meta.Fields {
+	for _, fieldMeta := range r.modelMeta.Fields {
 		values[fieldMeta.Key] = v.Field(fieldMeta.Index).Interface()
 	}
 
-	return r.driver.Insert(r.meta.Collection, values)
+	return r.driver.Insert(r.modelMeta.Collection, values)
 }
 
 func (r repo[T, ID]) ByID(id ID) (T, error) {
-	values, err := r.driver.ByID(r.meta.Collection, id)
+	values, err := r.driver.ByID(r.modelMeta.Collection, id)
 	var zero T
 
 	if err != nil {
@@ -37,7 +38,7 @@ func (r repo[T, ID]) ByID(id ID) (T, error) {
 	}
 
 	v := reflect.ValueOf(&zero).Elem()
-	for _, fieldMeta := range r.meta.Fields {
+	for _, fieldMeta := range r.modelMeta.Fields {
 		if _, ok := values[fieldMeta.Key]; !ok {
 			continue
 		}
@@ -63,8 +64,8 @@ func (r repo[T, ID]) Update(m *T) error {
 	var id ID
 	var zero ID
 
-	for _, fieldMeta := range r.meta.Fields {
-		if fieldMeta.PrimaryKey == true {
+	for _, fieldMeta := range r.modelMeta.Fields {
+		if slices.Contains(fieldMeta.Flags, "pk") {
 			raw := v.Field(fieldMeta.Index).Interface()
 			if converted, ok := raw.(ID); ok {
 				id = converted
@@ -78,19 +79,30 @@ func (r repo[T, ID]) Update(m *T) error {
 		return fmt.Errorf("primary key not found")
 	}
 
-	return r.driver.Update(r.meta.Collection, values, id)
+	return r.driver.Update(r.modelMeta.Collection, values, id)
 }
 
 func (r repo[T, ID]) Delete(id ID) error {
-	return r.driver.Delete(r.meta.Collection, id)
+	return r.driver.Delete(r.modelMeta.Collection, id)
 }
 
-func NewRepo[T interface{}, ID comparable](driver Driver[ID]) Repository[T, ID] {
+func NewRepo[T interface{}, ID comparable](driver Driver[ID]) (Repository[T, ID], error) {
 	// Read the model
-	meta := NewModelReader[T]("db")
+	reader := NewModelReader[T]("db")
+	modelMeta := reader.Read()
 
-	return &repo[T, ID]{
-		meta:   meta.Read(),
-		driver: driver,
+	// Make sure collection exists
+	err := driver.EnsureCollectionExists(modelMeta)
+
+	if err != nil {
+		return nil, err
 	}
+
+	// Init
+	repo := &repo[T, ID]{
+		modelMeta: modelMeta,
+		driver:    driver,
+	}
+
+	return repo, nil
 }
