@@ -9,7 +9,8 @@ type Module struct{}
 
 func (m Module) Boot() {
 	dashboard.Controller{}.Boot()
-	pages.Controller{}.Boot()
+	pages := &pages.Controller{}
+	pages.Boot()
 
 	// Migrate
 	m.migrate()

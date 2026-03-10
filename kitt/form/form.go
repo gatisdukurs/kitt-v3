@@ -38,6 +38,7 @@ type Form interface {
 	Id() string
 	Field(id string) FormField
 	Validate() bool
+	Reset()
 }
 
 type form struct {
@@ -130,6 +131,14 @@ func (f *form) WithValues(values url.Values) Form {
 	}
 
 	return f
+}
+
+func (f *form) Reset() {
+	for _, field := range f.fields {
+		if field.Control() != nil {
+			field.Control().WithValue("")
+		}
+	}
 }
 
 func (f *form) WithField(field FormField) Form {

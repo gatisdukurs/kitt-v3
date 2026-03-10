@@ -7,9 +7,10 @@ import (
 )
 
 type Repository[T interface{}, ID comparable] interface {
-	Create(m *T) (ID, error)
+	Create(m T) (ID, error)
 	ByID(id ID) (T, error)
-	Update(m *T) error
+	All() []T
+	Update(m T) error
 	Delete(id ID) error
 }
 
@@ -18,9 +19,15 @@ type repo[T interface{}, ID comparable] struct {
 	modelMeta ModelMeta
 }
 
-func (r repo[T, ID]) Create(m *T) (ID, error) {
+func (r repo[T, ID]) All() []T {
+	items := []T{}
+
+	return items
+}
+
+func (r repo[T, ID]) Create(m T) (ID, error) {
 	values := DriverValues{}
-	v := reflect.ValueOf(m).Elem()
+	v := reflect.ValueOf(&m).Elem()
 
 	for _, fieldMeta := range r.modelMeta.Fields {
 		values[fieldMeta.Key] = v.Field(fieldMeta.Index).Interface()
@@ -57,9 +64,9 @@ func (r repo[T, ID]) ByID(id ID) (T, error) {
 	return zero, nil
 }
 
-func (r repo[T, ID]) Update(m *T) error {
+func (r repo[T, ID]) Update(m T) error {
 	values := DriverValues{}
-	v := reflect.ValueOf(m).Elem()
+	v := reflect.ValueOf(&m).Elem()
 
 	var id ID
 	var zero ID
@@ -106,4 +113,20 @@ func NewRepo[T interface{}, ID comparable](driver Driver[ID]) (Repository[T, ID]
 	}
 
 	return repo, nil
+}
+
+func Repo[T any, ID int64](dbType string, dbPath string) Repository[T, ID] {
+	if dbType == DRIVER_SQL {
+		conn := NewSqliteConn(dbPath)
+		driver := NewSqliteDriver[ID](conn)
+		repo, err := NewRepo[T, ID](driver)
+
+		if err != nil {
+			panic(err)
+		}
+
+		return repo
+	} else {
+		panic("DRIVER NOT IMPLEMENTED")
+	}
 }

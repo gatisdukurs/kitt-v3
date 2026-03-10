@@ -11,5 +11,20 @@
         >Create New Page</a>
     </div>
 </div>
-<p>List of pages go here.</p>
+<p>
+    <table>
+        <thead>
+            <th>#</th>
+            <th>Title</th>
+        </thead>
+        <tbody>
+            {{ range .Ctx "pages" }}
+            <tr>
+                <td>{{ .Id }}</td>
+                <td>{{ .Title }}</td>
+            </tr>
+            {{ end }}
+        </tbody>
+    </table>
+</p>
 {{ end }}

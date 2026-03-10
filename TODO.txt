@@ -1,17 +1,11 @@
-NOW: Create repos for persistance.
-Continue with sqlite driver impolementation and write tests for sqlite.go
-Also model reader should cache meta.
+NOW: Add list pages
 
-ModelMeta{
-  Table: "users",
-  Fields: [
-    {Name:"ID", Column:"id", PK:true, Auto:true},
-    {Name:"Email", Column:"email"}
-  ]
-}
+NEXT: Make kitt config, like db etc. And maybe repo init thing that already boots repos from settings?
+NEXT: Services concept.
+
+NEXT: Refactor module concept.
 
 NEXT: Nicer API for working with db, handling errors, etc.
-NEXT: Refactor module concept.
 NEXT: Add loading for HTMX?
 
 Get Rid of KittContext and use just render context, like Controller.ViewCtx()

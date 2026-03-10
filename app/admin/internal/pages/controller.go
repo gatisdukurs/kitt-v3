@@ -1,24 +1,34 @@
 package pages
 
 import (
+	"fmt"
 	"kitt/app/admin/internal/shared"
 	"kitt/kitt/form"
 	"kitt/kitt/render"
+	"kitt/kitt/repository"
 	"kitt/kitt/router"
 	"net/http"
 )
 
 type Controller struct {
 	shared.Controller
+	pages repository.Repository[Page, int64]
 }
 
-func (c Controller) Boot() {
+func (c *Controller) Boot() {
+	// Repo
+	c.pages = repository.Repo[Page, int64](repository.DRIVER_SQL, "db.sqlite")
+
+	// Routes
 	c.GET("/admin/pages", c.GetList)
 	c.GET("/admin/pages/create", c.GetCreate)
 	c.POST("/admin/pages", c.PostPage)
 }
 
 func (c Controller) GetList(ctx router.RouteCtx) router.RouteResponse {
+	// Data
+	// pages := c.pages
+
 	// View
 	view := c.View("admin.layout")
 	content := c.View("admin.pages.list")
@@ -46,9 +56,21 @@ func (c Controller) GetCreate(ctx router.RouteCtx) router.RouteResponse {
 }
 
 func (c Controller) PostPage(ctx router.RouteCtx) router.RouteResponse {
-	f := c._PageForm().WithValues(ctx.Request().FormValues())
+	values := ctx.Request().FormValues()
+	f := c._PageForm().WithValues(values)
+
 	if f.Validate() {
-		f.WithSuccess("Page Created.")
+		id, err := c.pages.Create(Page{
+			Title:   values.Get("title"),
+			Content: values.Get("content"),
+		})
+
+		if err != nil {
+			f.WithError(err.Error())
+		} else {
+			f.Reset()
+			f.WithSuccess(fmt.Sprintf("Page Created. ID: %d", id))
+		}
 	} else {
 		f.WithError("Form has some errors :(")
 	}
@@ -96,10 +118,3 @@ func (c Controller) _PageForm() form.Form {
 
 	return f
 }
-
-// 		_, err := kitt.SQL().Exec(
-// 			context.Background(),
-// 			"INSERT INTO pages (title, content) VALUES (?,?)",
-// 			formCtx.Value("page.title"),
-// 			formCtx.Value("page.content"),
-// 		)

@@ -2,16 +2,19 @@ package repository
 
 import (
 	"fmt"
+	"os"
 	"testing"
 )
 
 func Test_Repository(t *testing.T) {
+	dbPath := "test.db"
+	os.Remove(dbPath)
 	t.Run("it creates", func(t *testing.T) {
 		d := NewTestFakeDriver[int]()
 		d.InsertID = 1
 		r, err := NewRepo[TestUser, int](d)
 
-		id, err := r.Create(&TestUser{
+		id, err := r.Create(TestUser{
 			ID:   10,
 			Name: "Gatis",
 		})
@@ -49,7 +52,7 @@ func Test_Repository(t *testing.T) {
 		d := NewTestFakeDriver[int]()
 		r, err := NewRepo[TestUser, int](d)
 
-		user := &TestUser{
+		user := TestUser{
 			ID:   22,
 			Name: "Gatis Dukurs",
 		}
@@ -77,5 +80,17 @@ func Test_Repository(t *testing.T) {
 
 		assertEqual(t, err, d.EnsureCollectionError)
 		assertEqual(t, repo, nil)
+	})
+
+	t.Run("repo factory works", func(t *testing.T) {
+		repo := Repo[TestUser, int64](DRIVER_SQL, dbPath)
+
+		if _, ok := repo.(Repository[TestUser, int64]); !ok {
+			t.Fatalf("repo factory not working")
+		}
+	})
+
+	t.Run("it returns all", func(t *testing.T) {
+
 	})
 }

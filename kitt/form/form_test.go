@@ -93,7 +93,7 @@ func Test_Form(t *testing.T) {
 		assertEqual(t, f.Render(), `<form class="form" action="/" method="POST" id="pages"><div class="alert alert--success flash">Success.</div></form>`)
 	})
 
-	t.Run("it sets values", func(t *testing.T) {
+	t.Run("it sets values and resets", func(t *testing.T) {
 		email := "gatis.dukurs@gmail.com"
 		password := "secret"
 		engine := render.NewEngine()
@@ -121,6 +121,9 @@ func Test_Form(t *testing.T) {
 
 		assertEqual(t, control1.Value(), password)
 		assertEqual(t, control.Value(), email)
+
+		f.Reset()
+		assertEqual(t, control.Value(), "")
 	})
 
 	t.Run("it sets error message", func(t *testing.T) {
