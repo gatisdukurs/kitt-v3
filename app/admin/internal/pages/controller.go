@@ -27,7 +27,7 @@ func (c *Controller) Boot() {
 
 func (c Controller) GetList(ctx router.RouteCtx) router.RouteResponse {
 	// Data
-	// pages := c.pages
+	// pages := c.pages.All()
 
 	// View
 	view := c.View("admin.layout")

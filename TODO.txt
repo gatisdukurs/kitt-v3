@@ -1,4 +1,22 @@
-NOW: Add list pages
+NOW: Refactor repo to have like 
+
+
+driver->select()->form(table)->execute()
+driver->select()->from(table)->where()->orderBy()->limit()->offset()->execute()
+driver->insert(DriverValues)->in(table)->execute()
+driver->update(DriverValues)->in(table)->where()->execute()
+driver->delete()->from(table)->where()->execute()
+
+repo->where()->get()
+repo->where()->orderBy()->get()
+repo->where()->orderBy()->limit()->offset()->get()
+
+repo->all()
+repo->byId()
+repo->insert(Model)
+repo->update(Model)
+repo->delete(Model)
+
 
 NEXT: Make kitt config, like db etc. And maybe repo init thing that already boots repos from settings?
 NEXT: Services concept.

@@ -2,10 +2,9 @@ package repository
 
 import (
 	"context"
-	"database/sql"
-	"errors"
 	"fmt"
 	"reflect"
+	"slices"
 	"strings"
 	"time"
 )
@@ -118,62 +117,82 @@ func (sql sqliteDriver[ID]) Delete(id ID) error {
 	return nil
 }
 
-func (s sqliteDriver[ID]) ByID(id ID) (DriverValues, error) {
-	table := s.modelMeta.Collection
+func (sql sqliteDriver[ID]) ByID(id ID) (DriverValues, error) {
+	query := NewQueryBuilder()
 	keys := []string{}
+	primaryKey := "id"
 
-	for _, field := range s.modelMeta.Fields {
+	for _, field := range sql.modelMeta.Fields {
+		keys = append(keys, field.Key)
+		if slices.Contains(field.Flags, "pk") {
+			primaryKey = field.Key
+		}
+	}
+
+	query.Select(keys...)
+	query.From(sql.modelMeta.Collection)
+	query.Where(primaryKey, "=", id)
+
+	return sql.First(query)
+}
+
+func (sql sqliteDriver[ID]) Find(builder QueryBuilder) ([]DriverValues, error) {
+	keys := []string{}
+	values := []DriverValues{}
+	query, args := builder.Build()
+
+	for _, field := range sql.modelMeta.Fields {
 		keys = append(keys, field.Key)
 	}
 
-	q := fmt.Sprintf(`SELECT %s FROM  %s WHERE id = ?`, strings.Join(keys, ","), table)
-	row := s.conn.QueryRow(context.Background(), q, id)
+	rows, err := sql.conn.Query(context.Background(), query, args...)
 
-	scanValues := make([]any, len(keys))
-	scanPtrs := make([]any, len(keys))
-
-	for i := range scanValues {
-		scanPtrs[i] = &scanValues[i]
-	}
-
-	err := row.Scan(scanPtrs...)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, nil
-		}
-		return nil, err
+		return values, err
 	}
 
-	// map values
-	values := make(DriverValues)
-	for i, key := range keys {
-		v := scanValues[i]
+	for rows.Next() {
+		v := make(DriverValues)
+		scanValues := make([]any, len(keys))
+		scanPtrs := make([]any, len(keys))
 
-		// sqlite often returns []byte for TEXT
-		if b, ok := v.([]byte); ok {
-			values[key] = string(b)
-		} else {
-			values[key] = v
+		for i := range scanValues {
+			scanPtrs[i] = &scanValues[i]
 		}
+
+		err := rows.Scan(scanPtrs...)
+		if err != nil {
+			return values, err
+		}
+
+		for i, key := range keys {
+			value := scanValues[i]
+
+			if b, ok := value.([]byte); ok {
+				v[key] = string(b)
+			} else {
+				v[key] = value
+			}
+		}
+
+		values = append(values, v)
+	}
+
+	return values, nil
+}
+
+func (sql sqliteDriver[ID]) First(query QueryBuilder) (DriverValues, error) {
+	values, err := sql.Find(query)
+
+	if err != nil {
+		return nil, err
 	}
 
 	if len(values) == 0 {
 		return nil, nil
 	}
 
-	return values, nil
-}
-
-func (sql sqliteDriver[ID]) Find(query QueryBuilder) ([]DriverValues, error) {
-	values := []DriverValues{}
-
-	return values, nil
-}
-
-func (sql sqliteDriver[ID]) First(query QueryBuilder) (DriverValues, error) {
-	values := make(DriverValues)
-
-	return values, nil
+	return values[0], err
 }
 
 func (sql sqliteDriver[ID]) DropCollection() error {

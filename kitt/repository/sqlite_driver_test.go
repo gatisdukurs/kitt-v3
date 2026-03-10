@@ -152,7 +152,7 @@ func Test_Sqlite_Driver(t *testing.T) {
 		assertEqual(t, qValues["username"], "Gatis")
 	})
 
-	t.Run("it supports query", func(t *testing.T) {
+	t.Run("it supports Find and First", func(t *testing.T) {
 		conn := NewSqliteConn(dbPath)
 		driver := NewSqliteDriver(conn)
 
@@ -177,6 +177,19 @@ func Test_Sqlite_Driver(t *testing.T) {
 		driver.Insert(iValues)
 
 		// Now query
+		query := NewQueryBuilder()
+		query.Select("id", "username")
+		query.From("users")
+		values, err := driver.Find(query)
 
+		assertEqual(t, err, nil)
+		assertEqual(t, len(values), 2)
+		assertEqual(t, values[0]["username"], "dumdum")
+		assertEqual(t, values[1]["username"], "Gatis")
+
+		vs, err := driver.First(query)
+
+		assertEqual(t, err, nil)
+		assertEqual(t, vs["username"], "dumdum")
 	})
 }
