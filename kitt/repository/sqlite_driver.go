@@ -164,6 +164,18 @@ func (s sqliteDriver[ID]) ByID(id ID) (DriverValues, error) {
 	return values, nil
 }
 
+func (sql sqliteDriver[ID]) Find(query Query) ([]DriverValues, error) {
+	values := []DriverValues{}
+
+	return values, nil
+}
+
+func (sql sqliteDriver[ID]) First(query Query) (DriverValues, error) {
+	values := make(DriverValues)
+
+	return values, nil
+}
+
 func (sql sqliteDriver[ID]) DropCollection() error {
 	table := sql.modelMeta.Collection
 	q := fmt.Sprintf(`DROP TABLE IF EXISTS %s`, table)

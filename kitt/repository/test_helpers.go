@@ -112,6 +112,13 @@ func (d *testFakeDriver[ID]) ByID(id ID) (DriverValues, error) {
 	return zero, nil
 }
 
+func (d testFakeDriver[ID]) Find(q Query) ([]DriverValues, error) {
+	return nil, nil
+}
+func (d testFakeDriver[ID]) First(q Query) (DriverValues, error) {
+	return nil, nil
+}
+
 func (d *testFakeDriver[ID]) CreateCollection() error {
 	d.EnsureCollectonCalled = true
 

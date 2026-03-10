@@ -151,4 +151,32 @@ func Test_Sqlite_Driver(t *testing.T) {
 
 		assertEqual(t, qValues["username"], "Gatis")
 	})
+
+	t.Run("it supports query", func(t *testing.T) {
+		conn := NewSqliteConn(dbPath)
+		driver := NewSqliteDriver(conn)
+
+		modelMeta := ModelMeta{
+			Collection: "users",
+			Fields: []ModelFieldMeta{
+				{Key: "id", Type: reflect.TypeOf(int64(0)), Flags: []string{"pk", "auto"}},
+				{Key: "username", Type: reflect.TypeOf(""), Flags: []string{"notnull", "unique"}},
+			},
+		}
+
+		driver.WithModelMeta(modelMeta)
+		driver.CreateCollection()
+		defer driver.DropCollection()
+
+		// Insert
+		iValues := make(DriverValues)
+		iValues["username"] = "dumdum"
+
+		driver.Insert(iValues)
+		iValues["username"] = "Gatis"
+		driver.Insert(iValues)
+
+		// Now query
+
+	})
 }
