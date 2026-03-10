@@ -89,7 +89,21 @@ func (sql sqliteDriver[ID]) Insert(values DriverValues) (ID, error) {
 }
 
 func (sql sqliteDriver[ID]) Update(values DriverValues, id ID) error {
-	return nil
+	set := []string{}
+	args := []interface{}{}
+
+	for k, v := range values {
+		set = append(set, fmt.Sprintf(`%s=?`, k))
+		args = append(args, v)
+	}
+
+	args = append(args, id)
+
+	q := fmt.Sprintf(`UPDATE %s SET %s WHERE id = ?`, sql.modelMeta.Collection, strings.Join(set, ","))
+
+	_, err := sql.conn.Exec(context.Background(), q, args...)
+
+	return err
 }
 
 func (sql sqliteDriver[ID]) Delete(id ID) error {

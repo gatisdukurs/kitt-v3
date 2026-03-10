@@ -113,4 +113,42 @@ func Test_Sqlite_Driver(t *testing.T) {
 		assertEqual(t, err, nil)
 		assertEqual(t, qValues, nil)
 	})
+
+	t.Run("it updates", func(t *testing.T) {
+		conn := NewSqliteConn(dbPath)
+		driver := NewSqliteDriver(conn)
+
+		modelMeta := ModelMeta{
+			Collection: "users",
+			Fields: []ModelFieldMeta{
+				{Key: "id", Type: reflect.TypeOf(int64(0)), Flags: []string{"pk", "auto"}},
+				{Key: "username", Type: reflect.TypeOf(""), Flags: []string{"notnull", "unique"}},
+			},
+		}
+
+		driver.WithModelMeta(modelMeta)
+		driver.CreateCollection()
+		defer driver.DropCollection()
+
+		// Insert
+		iValues := make(DriverValues)
+		iValues["username"] = "dumdum"
+
+		id, err := driver.Insert(iValues)
+
+		assertEqual(t, err, nil)
+
+		// Update
+		uValues := make(DriverValues)
+		uValues["username"] = "Gatis"
+
+		err = driver.Update(uValues, id)
+
+		assertEqual(t, err, nil)
+
+		// Query to see if updated
+		qValues, err := driver.ByID(id)
+
+		assertEqual(t, qValues["username"], "Gatis")
+	})
 }
