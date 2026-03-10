@@ -3,10 +3,11 @@ package repository
 type DriverValues = map[string]interface{}
 
 type Driver[ID interface{}] interface {
-	Insert(collection string, values DriverValues) (ID, error)
-	Update(collection string, values DriverValues, id ID) error
-	Delete(collection string, id ID) error
-	ByID(collection string, id ID) (DriverValues, error)
-	DropCollection(collection string) error
-	EnsureCollectionExists(modelMeta ModelMeta) error
+	Insert(values DriverValues) (ID, error)
+	Update(values DriverValues, id ID) error
+	Delete(id ID) error
+	ByID(id ID) (DriverValues, error)
+	DropCollection() error
+	CreateCollection() error
+	WithModelMeta(modelMeta ModelMeta) Driver[ID]
 }

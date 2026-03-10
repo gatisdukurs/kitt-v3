@@ -26,11 +26,11 @@ func (r repo[T, ID]) Create(m *T) (ID, error) {
 		values[fieldMeta.Key] = v.Field(fieldMeta.Index).Interface()
 	}
 
-	return r.driver.Insert(r.modelMeta.Collection, values)
+	return r.driver.Insert(values)
 }
 
 func (r repo[T, ID]) ByID(id ID) (T, error) {
-	values, err := r.driver.ByID(r.modelMeta.Collection, id)
+	values, err := r.driver.ByID(id)
 	var zero T
 
 	if err != nil {
@@ -79,20 +79,21 @@ func (r repo[T, ID]) Update(m *T) error {
 		return fmt.Errorf("primary key not found")
 	}
 
-	return r.driver.Update(r.modelMeta.Collection, values, id)
+	return r.driver.Update(values, id)
 }
 
 func (r repo[T, ID]) Delete(id ID) error {
-	return r.driver.Delete(r.modelMeta.Collection, id)
+	return r.driver.Delete(id)
 }
 
 func NewRepo[T interface{}, ID comparable](driver Driver[ID]) (Repository[T, ID], error) {
 	// Read the model
 	reader := NewModelReader[T]("db")
 	modelMeta := reader.Read()
+	driver.WithModelMeta(modelMeta)
 
 	// Make sure collection exists
-	err := driver.EnsureCollectionExists(modelMeta)
+	err := driver.CreateCollection()
 
 	if err != nil {
 		return nil, err

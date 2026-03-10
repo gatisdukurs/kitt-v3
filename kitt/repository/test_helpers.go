@@ -18,8 +18,29 @@ func getBufStr(buf *bytes.Buffer) string {
 	return strings.TrimSpace(buf.String())
 }
 
+func isNil(v any) bool {
+	if v == nil {
+		return true
+	}
+
+	rv := reflect.ValueOf(v)
+
+	switch rv.Kind() {
+	case reflect.Chan, reflect.Func, reflect.Interface, reflect.Map, reflect.Pointer, reflect.Slice:
+		return rv.IsNil()
+	default:
+		return false
+	}
+}
+
 func assertEqual(t *testing.T, have interface{}, want interface{}) {
-	if !reflect.DeepEqual(have, want) {
+	t.Helper()
+
+	if isNil(have) && isNil(want) {
+		return
+	}
+
+	if !reflect.DeepEqual(have, want) && have != want {
 		t.Fatal("not equal", have, "\n\n", want)
 	}
 }
@@ -63,25 +84,25 @@ type testFakeDriver[ID interface{}] struct {
 	EnsureCollectionError error
 }
 
-func (d *testFakeDriver[ID]) Insert(collection string, values DriverValues) (ID, error) {
+func (d *testFakeDriver[ID]) Insert(values DriverValues) (ID, error) {
 	d.InsertCalled = true
 	d.InsertValues = values
 	return d.InsertID, nil
 }
 
-func (d *testFakeDriver[ID]) Update(collection string, values DriverValues, id ID) error {
+func (d *testFakeDriver[ID]) Update(values DriverValues, id ID) error {
 	d.UpdateCalled = true
 	d.UpdateValues = values
 	d.UpdateID = id
 	return nil
 }
 
-func (d *testFakeDriver[ID]) Delete(collection string, id ID) error {
+func (d *testFakeDriver[ID]) Delete(id ID) error {
 	d.DeleteCalled = true
 	return nil
 }
 
-func (d *testFakeDriver[ID]) ByID(collection string, id ID) (DriverValues, error) {
+func (d *testFakeDriver[ID]) ByID(id ID) (DriverValues, error) {
 	d.ByIDCalled = true
 	var zero = DriverValues{}
 
@@ -91,7 +112,7 @@ func (d *testFakeDriver[ID]) ByID(collection string, id ID) (DriverValues, error
 	return zero, nil
 }
 
-func (d *testFakeDriver[ID]) EnsureCollectionExists(modelMeta ModelMeta) error {
+func (d *testFakeDriver[ID]) CreateCollection() error {
 	d.EnsureCollectonCalled = true
 
 	if d.EnsureCollectionError != nil {
@@ -100,7 +121,11 @@ func (d *testFakeDriver[ID]) EnsureCollectionExists(modelMeta ModelMeta) error {
 	return nil
 }
 
-func (d *testFakeDriver[ID]) DropCollection(collection string) error {
+func (d *testFakeDriver[ID]) WithModelMeta(modelMeta ModelMeta) Driver[ID] {
+	return d
+}
+
+func (d *testFakeDriver[ID]) DropCollection() error {
 	return nil
 }
 

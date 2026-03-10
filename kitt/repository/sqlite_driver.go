@@ -2,6 +2,8 @@ package repository
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 	"reflect"
 	"strings"
@@ -51,10 +53,13 @@ func parseDefaultFlag(flag string) string {
 }
 
 type sqliteDriver[ID int64] struct {
-	conn SqlConnection
+	conn      SqlConnection
+	modelMeta ModelMeta
 }
 
-func (sql sqliteDriver[ID]) Insert(table string, values DriverValues) (ID, error) {
+func (sql sqliteDriver[ID]) Insert(values DriverValues) (ID, error) {
+	table := sql.modelMeta.Collection
+
 	var zero ID
 	args := []interface{}{}
 	keys := []string{}
@@ -83,26 +88,82 @@ func (sql sqliteDriver[ID]) Insert(table string, values DriverValues) (ID, error
 	return ID(raw), nil
 }
 
-func (sql sqliteDriver[ID]) Update(table string, values DriverValues, id ID) error {
+func (sql sqliteDriver[ID]) Update(values DriverValues, id ID) error {
 	return nil
 }
 
-func (sql sqliteDriver[ID]) Delete(table string, id ID) error {
+func (sql sqliteDriver[ID]) Delete(id ID) error {
+	q := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, sql.modelMeta.Collection)
+
+	_, err := sql.conn.Exec(context.Background(), q, id)
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
-func (sql sqliteDriver[ID]) ByID(table string, id ID) (DriverValues, error) {
+func (s sqliteDriver[ID]) ByID(id ID) (DriverValues, error) {
+	table := s.modelMeta.Collection
+	keys := []string{}
+
+	for _, field := range s.modelMeta.Fields {
+		keys = append(keys, field.Key)
+	}
+
+	q := fmt.Sprintf(`SELECT %s FROM  %s WHERE id = ?`, strings.Join(keys, ","), table)
+	row := s.conn.QueryRow(context.Background(), q, id)
+
+	scanValues := make([]any, len(keys))
+	scanPtrs := make([]any, len(keys))
+
+	for i := range scanValues {
+		scanPtrs[i] = &scanValues[i]
+	}
+
+	err := row.Scan(scanPtrs...)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	// map values
 	values := make(DriverValues)
+	for i, key := range keys {
+		v := scanValues[i]
+
+		// sqlite often returns []byte for TEXT
+		if b, ok := v.([]byte); ok {
+			values[key] = string(b)
+		} else {
+			values[key] = v
+		}
+	}
+
+	if len(values) == 0 {
+		return nil, nil
+	}
+
 	return values, nil
 }
 
-func (sql sqliteDriver[ID]) DropCollection(table string) error {
+func (sql sqliteDriver[ID]) DropCollection() error {
+	table := sql.modelMeta.Collection
 	q := fmt.Sprintf(`DROP TABLE IF EXISTS %s`, table)
 	_, err := sql.conn.Exec(context.Background(), q)
 	return err
 }
 
-func (sql sqliteDriver[ID]) EnsureCollectionExists(modelMeta ModelMeta) error {
+func (sql *sqliteDriver[ID]) WithModelMeta(modelMeta ModelMeta) Driver[ID] {
+	sql.modelMeta = modelMeta
+	return sql
+}
+
+func (sql sqliteDriver[ID]) CreateCollection() error {
+	modelMeta := sql.modelMeta
 	ctx := context.Background()
 
 	tableFields := []string{}
