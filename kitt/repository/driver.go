@@ -11,8 +11,8 @@ type Driver[ID interface{}] interface {
 	Delete(id ID) error
 
 	ByID(id ID) (DriverValues, error)
-	Find(query Query) ([]DriverValues, error)
-	First(query Query) (DriverValues, error)
+	Find(query QueryBuilder) ([]DriverValues, error)
+	First(query QueryBuilder) (DriverValues, error)
 
 	DropCollection() error
 	CreateCollection() error

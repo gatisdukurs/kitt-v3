@@ -27,7 +27,7 @@ func Test_Query(t *testing.T) {
 	})
 
 	t.Run("it builds where", func(t *testing.T) {
-		q := Query{
+		q := SelectQuery{
 			Where: []Condition{
 				{Field: "id", Op: "=", Value: 10},
 				{Field: "age", Op: ">", Value: 30},
@@ -43,7 +43,7 @@ func Test_Query(t *testing.T) {
 	})
 
 	t.Run("it builds order by", func(t *testing.T) {
-		by := Query{
+		by := SelectQuery{
 			OrderBy: []Order{
 				{Field: "id", Desc: true},
 				{Field: "age", Desc: false},
@@ -56,7 +56,7 @@ func Test_Query(t *testing.T) {
 	})
 
 	t.Run("it builds limit and offset", func(t *testing.T) {
-		q := Query{
+		q := SelectQuery{
 			Limit:  100,
 			Offset: 200,
 		}
@@ -68,7 +68,7 @@ func Test_Query(t *testing.T) {
 
 	t.Run("it builds proper queries", func(t *testing.T) {
 		// Empty
-		q := Query{}
+		q := SelectQuery{}
 		str, args, err := BuildQuery(q)
 
 		assertEqual(t, str, str)

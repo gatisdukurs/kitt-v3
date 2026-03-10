@@ -16,7 +16,7 @@ type QueryBuilder interface {
 	Build() (string, []any)
 }
 
-type Query struct {
+type SelectQuery struct {
 	Fields  []string
 	Table   string
 	Where   []Condition
@@ -37,18 +37,18 @@ type Order struct {
 }
 
 type builder struct {
-	query       Query
+	selectQuery SelectQuery
 	queryString string
 	queryArgs   []any
 }
 
 func (b *builder) Select(fields ...string) QueryBuilder {
-	b.query.Fields = fields
+	b.selectQuery.Fields = fields
 	return b
 }
 
 func (b *builder) From(table string) QueryBuilder {
-	b.query.Table = table
+	b.selectQuery.Table = table
 	return b
 }
 
@@ -59,7 +59,7 @@ func (b *builder) Where(field string, op string, value any) QueryBuilder {
 		Value: value,
 	}
 
-	b.query.Where = append(b.query.Where, condition)
+	b.selectQuery.Where = append(b.selectQuery.Where, condition)
 
 	return b
 }
@@ -69,7 +69,7 @@ func (b *builder) OrderAscBy(field string) QueryBuilder {
 		Field: field,
 		Desc:  false,
 	}
-	b.query.OrderBy = append(b.query.OrderBy, order)
+	b.selectQuery.OrderBy = append(b.selectQuery.OrderBy, order)
 
 	return b
 }
@@ -79,23 +79,23 @@ func (b *builder) OrderDescBy(field string) QueryBuilder {
 		Field: field,
 		Desc:  false,
 	}
-	b.query.OrderBy = append(b.query.OrderBy, order)
+	b.selectQuery.OrderBy = append(b.selectQuery.OrderBy, order)
 
 	return b
 }
 
 func (b *builder) Limit(limit int) QueryBuilder {
-	b.query.Limit = limit
+	b.selectQuery.Limit = limit
 	return b
 }
 
 func (b *builder) Offset(offset int) QueryBuilder {
-	b.query.Offset = offset
+	b.selectQuery.Offset = offset
 	return b
 }
 
 func (b builder) Build() (string, []any) {
-	str, args, err := BuildQuery(b.query)
+	str, args, err := BuildQuery(b.selectQuery)
 
 	if err != nil {
 		panic(err)
@@ -106,7 +106,7 @@ func (b builder) Build() (string, []any) {
 
 func NewQueryBuilder() QueryBuilder {
 	return &builder{
-		query:       Query{},
+		selectQuery: SelectQuery{},
 		queryString: "",
 		queryArgs:   []any{},
 	}
@@ -116,7 +116,7 @@ func BuildCondition(condition Condition) (string, any) {
 	return fmt.Sprintf(`%s %s ?`, condition.Field, condition.Op), condition.Value
 }
 
-func BuildWhere(query Query) (string, []any) {
+func BuildWhere(query SelectQuery) (string, []any) {
 	conditions := query.Where
 	where := []string{}
 	args := []any{}
@@ -130,7 +130,7 @@ func BuildWhere(query Query) (string, []any) {
 	return fmt.Sprintf(`WHERE %s`, strings.Join(where, " AND ")), args
 }
 
-func BuildOrderBy(query Query) string {
+func BuildOrderBy(query SelectQuery) string {
 	orderBys := query.OrderBy
 	conditions := []string{}
 
@@ -147,7 +147,7 @@ func BuildOrderBy(query Query) string {
 	return str
 }
 
-func BuildLimitOffset(query Query) string {
+func BuildLimitOffset(query SelectQuery) string {
 	limit := query.Limit
 	offset := query.Offset
 
@@ -166,7 +166,7 @@ func BuildLimitOffset(query Query) string {
 	return ""
 }
 
-func BuildQuery(query Query) (string, []any, error) {
+func BuildQuery(query SelectQuery) (string, []any, error) {
 	fields := "*"
 	table := query.Table
 	where := ""

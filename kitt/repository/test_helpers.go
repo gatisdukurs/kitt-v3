@@ -112,10 +112,10 @@ func (d *testFakeDriver[ID]) ByID(id ID) (DriverValues, error) {
 	return zero, nil
 }
 
-func (d testFakeDriver[ID]) Find(q Query) ([]DriverValues, error) {
+func (d testFakeDriver[ID]) Find(q QueryBuilder) ([]DriverValues, error) {
 	return nil, nil
 }
-func (d testFakeDriver[ID]) First(q Query) (DriverValues, error) {
+func (d testFakeDriver[ID]) First(q QueryBuilder) (DriverValues, error) {
 	return nil, nil
 }
 

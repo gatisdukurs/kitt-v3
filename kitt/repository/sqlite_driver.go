@@ -164,13 +164,13 @@ func (s sqliteDriver[ID]) ByID(id ID) (DriverValues, error) {
 	return values, nil
 }
 
-func (sql sqliteDriver[ID]) Find(query Query) ([]DriverValues, error) {
+func (sql sqliteDriver[ID]) Find(query QueryBuilder) ([]DriverValues, error) {
 	values := []DriverValues{}
 
 	return values, nil
 }
 
-func (sql sqliteDriver[ID]) First(query Query) (DriverValues, error) {
+func (sql sqliteDriver[ID]) First(query QueryBuilder) (DriverValues, error) {
 	values := make(DriverValues)
 
 	return values, nil
