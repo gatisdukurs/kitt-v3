@@ -2,6 +2,7 @@ package repository
 
 import (
 	"reflect"
+	"slices"
 	"strings"
 )
 
@@ -14,6 +15,7 @@ type ModelFieldMeta struct {
 }
 
 type ModelMeta struct {
+	PrimaryKey string
 	Collection string
 	Fields     []ModelFieldMeta
 }
@@ -31,6 +33,7 @@ func (mr modelReader[T]) Read() ModelMeta {
 	tagsMeta := tagReader.Read()
 
 	var zero T
+	var primaryKey string
 	t := reflect.TypeOf(zero)
 	table := strings.ToLower(t.Name())
 
@@ -38,6 +41,10 @@ func (mr modelReader[T]) Read() ModelMeta {
 
 	for _, tag := range tagsMeta {
 		key := tag.Tags[0]
+
+		if slices.Contains(tag.Tags[1:], "pk") {
+			primaryKey = key
+		}
 
 		fields = append(fields, ModelFieldMeta{
 			Attr:  tag.Attr,
@@ -49,6 +56,7 @@ func (mr modelReader[T]) Read() ModelMeta {
 	}
 
 	return ModelMeta{
+		PrimaryKey: primaryKey,
 		Collection: table,
 		Fields:     fields,
 	}

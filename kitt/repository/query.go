@@ -5,204 +5,357 @@ import (
 	"strings"
 )
 
-type QueryBuilder interface {
-	Select(fields ...string) QueryBuilder
-	From(table string) QueryBuilder
-	Where(field string, op string, value any) QueryBuilder
-	OrderAscBy(field string) QueryBuilder
-	OrderDescBy(field string) QueryBuilder
-	Limit(limit int) QueryBuilder
-	Offset(offset int) QueryBuilder
+type Sqlizer interface {
 	Build() (string, []any)
 }
 
-type SelectQuery struct {
-	Fields  []string
-	Table   string
-	Where   []Condition
-	OrderBy []Order
-	Limit   int
-	Offset  int
+type Clause interface {
+	Build() (string, []any)
 }
 
-type Condition struct {
-	Field string
-	Op    string
-	Value any
+const (
+	ASC  = "ASC"
+	DESC = "DESC"
+)
+
+// Query Builders
+// SELECT
+type SelectBuilder struct {
+	Sqlizer
+
+	table   string
+	columns []string
+
+	orderBy []string
+	limit   *int
+	offset  *int
+
+	where Clause
 }
 
-type Order struct {
-	Field string
-	Desc  bool
+func (sb *SelectBuilder) Columns(columns ...string) *SelectBuilder {
+	sb.columns = columns
+	return sb
 }
 
-type builder struct {
-	selectQuery SelectQuery
-	queryString string
-	queryArgs   []any
+func (sb *SelectBuilder) Where(where Clause) *SelectBuilder {
+	sb.where = where
+	return sb
 }
 
-func (b *builder) Select(fields ...string) QueryBuilder {
-	b.selectQuery.Fields = fields
-	return b
+func (sb *SelectBuilder) OrderBy(column string, direction string) *SelectBuilder {
+	sb.orderBy = append(sb.orderBy, fmt.Sprintf(`%s %s`, column, direction))
+	return sb
 }
 
-func (b *builder) From(table string) QueryBuilder {
-	b.selectQuery.Table = table
-	return b
+func (sb *SelectBuilder) Limit(limit int) *SelectBuilder {
+	sb.limit = &limit
+	return sb
 }
 
-func (b *builder) Where(field string, op string, value any) QueryBuilder {
-	condition := Condition{
-		Field: field,
-		Op:    op,
-		Value: value,
-	}
-
-	b.selectQuery.Where = append(b.selectQuery.Where, condition)
-
-	return b
+func (sb *SelectBuilder) Offset(offset int) *SelectBuilder {
+	sb.offset = &offset
+	return sb
 }
 
-func (b *builder) OrderAscBy(field string) QueryBuilder {
-	order := Order{
-		Field: field,
-		Desc:  false,
-	}
-	b.selectQuery.OrderBy = append(b.selectQuery.OrderBy, order)
-
-	return b
-}
-
-func (b *builder) OrderDescBy(field string) QueryBuilder {
-	order := Order{
-		Field: field,
-		Desc:  false,
-	}
-	b.selectQuery.OrderBy = append(b.selectQuery.OrderBy, order)
-
-	return b
-}
-
-func (b *builder) Limit(limit int) QueryBuilder {
-	b.selectQuery.Limit = limit
-	return b
-}
-
-func (b *builder) Offset(offset int) QueryBuilder {
-	b.selectQuery.Offset = offset
-	return b
-}
-
-func (b builder) Build() (string, []any) {
-	str, args, err := BuildQuery(b.selectQuery)
-
-	if err != nil {
-		panic(err)
-	}
-
-	return str, args
-}
-
-func NewQueryBuilder() QueryBuilder {
-	return &builder{
-		selectQuery: SelectQuery{},
-		queryString: "",
-		queryArgs:   []any{},
-	}
-}
-
-func BuildCondition(condition Condition) (string, any) {
-	return fmt.Sprintf(`%s %s ?`, condition.Field, condition.Op), condition.Value
-}
-
-func BuildWhere(query SelectQuery) (string, []any) {
-	conditions := query.Where
-	where := []string{}
+func (sb SelectBuilder) Build() (string, []any) {
 	args := []any{}
+	query := "SELECT"
 
-	for _, condition := range conditions {
-		condition, arg := BuildCondition(condition)
-		where = append(where, condition)
-		args = append(args, arg)
-	}
+	// Columns
+	query += BuildColumns(sb.columns)
 
-	return fmt.Sprintf(`WHERE %s`, strings.Join(where, " AND ")), args
-}
-
-func BuildOrderBy(query SelectQuery) string {
-	orderBys := query.OrderBy
-	conditions := []string{}
-
-	for _, condition := range orderBys {
-		order := "ASC"
-		if condition.Desc {
-			order = "DESC"
-		}
-		conditions = append(conditions, fmt.Sprintf(`%s %s`, condition.Field, order))
-	}
-
-	str := fmt.Sprintf(`ORDER BY %s`, strings.Join(conditions, ", "))
-
-	return str
-}
-
-func BuildLimitOffset(query SelectQuery) string {
-	limit := query.Limit
-	offset := query.Offset
-
-	if limit > 0 && offset > 0 {
-		return fmt.Sprintf(`LIMIT %d OFFSET %d`, limit, offset)
-	}
-
-	if limit > 0 {
-		return fmt.Sprintf(`LIMIT %d`, limit)
-	}
-
-	if offset > 0 {
-		return fmt.Sprintf(`LIMIT -1 OFFSET %d`, offset)
-	}
-
-	return ""
-}
-
-func BuildQuery(query SelectQuery) (string, []any, error) {
-	fields := "*"
-	table := query.Table
-	where := ""
-	args := []any{}
-	q := ""
-
-	// Table
-	if table == "" {
-		return "", nil, fmt.Errorf("No table")
-	}
-
-	// Fields
-	if len(query.Fields) > 0 {
-		fields = strings.Join(query.Fields, ", ")
-	}
-
-	q = fmt.Sprintf(`SELECT %s FROM %s`, fields, table)
+	// From
+	query += BuildFrom(sb.table)
 
 	// Where
-	if len(query.Where) > 0 {
-		where, args = BuildWhere(query)
-		q += " " + where
+	if sb.where != nil {
+		where, whereArgs := sb.where.Build()
+		query += fmt.Sprintf(" WHERE %s", where)
+
+		args = append(args, whereArgs...)
 	}
 
 	// Order by
-	if len(query.OrderBy) > 0 {
-		orderBy := BuildOrderBy(query)
-		q += " " + orderBy
+	if len(sb.orderBy) > 0 {
+		query += fmt.Sprintf(" ORDER BY %s", strings.Join(sb.orderBy, ", "))
 	}
 
-	// Limit, Offset
-	limitOffset := BuildLimitOffset(query)
-
-	if limitOffset != "" {
-		q += " " + limitOffset
+	// Limit
+	if sb.limit != nil {
+		query += fmt.Sprintf(" LIMIT %d", *sb.limit)
 	}
 
-	return q, args, nil
+	// Offset
+	if sb.offset != nil {
+		query += fmt.Sprintf(" OFFSET %d", *sb.offset)
+	}
+
+	return query, args
+}
+
+func SELECT(table string) *SelectBuilder {
+	return &SelectBuilder{
+		table: table,
+	}
+}
+
+// INSERT
+type InsertBuilder struct {
+	Sqlizer
+
+	table   string
+	columns []string
+	rows    [][]any
+}
+
+func (ib *InsertBuilder) Columns(columns ...string) *InsertBuilder {
+	ib.columns = columns
+	return ib
+}
+
+func (ib *InsertBuilder) Row(values ...any) *InsertBuilder {
+	if len(values) != len(ib.columns) {
+		panic("columns != rows")
+	}
+
+	ib.rows = append(ib.rows, values)
+	return ib
+}
+
+func (ib *InsertBuilder) Build() (string, []any) {
+	args := []any{}
+
+	query := fmt.Sprintf("INSERT INTO %s", ib.table)
+	query += fmt.Sprintf(" (%s)", strings.Join(ib.columns, ", "))
+
+	query += " VALUES "
+
+	placeholders := make([]string, len(ib.columns))
+	for i := range placeholders {
+		placeholders[i] = "?"
+	}
+
+	valuePlaceholders := fmt.Sprintf(`(%s)`, strings.Join(placeholders, ", "))
+	valueRows := []string{}
+
+	if len(ib.rows) == 0 {
+		valueRows = append(valueRows, valuePlaceholders)
+	}
+
+	for _, row := range ib.rows {
+		valueRows = append(valueRows, valuePlaceholders)
+		args = append(args, row...)
+	}
+
+	query += strings.Join(valueRows, ", ")
+
+	return query, args
+}
+
+func INSERT(table string) *InsertBuilder {
+	return &InsertBuilder{
+		table: table,
+	}
+}
+
+// UPDATE
+type UpdateBuilder struct {
+	Sqlizer
+
+	table   string
+	columns []string
+	values  []any
+	where   Clause
+}
+
+func (ub *UpdateBuilder) Set(column string, value any) *UpdateBuilder {
+	ub.columns = append(ub.columns, column)
+	ub.values = append(ub.values, value)
+
+	return ub
+}
+
+func (ub *UpdateBuilder) Where(where Clause) *UpdateBuilder {
+	ub.where = where
+
+	return ub
+}
+
+func (ub UpdateBuilder) Build() (string, []any) {
+	args := []any{}
+	query := fmt.Sprintf("UPDATE %s", ub.table)
+
+	// Set
+	set := []string{}
+	for i, column := range ub.columns {
+		set = append(set, fmt.Sprintf(`%s = ?`, column))
+		args = append(args, ub.values[i])
+	}
+	query += " SET " + strings.Join(set, ", ")
+
+	// Where
+	if ub.where == nil {
+		panic("no where clause")
+	}
+	where, whereArgs := ub.where.Build()
+	query += fmt.Sprintf(" WHERE %s", where)
+	args = append(args, whereArgs...)
+
+	return query, args
+}
+
+func UPDATE(table string) *UpdateBuilder {
+	return &UpdateBuilder{
+		table: table,
+	}
+}
+
+// DELETE
+type DeleteBuilder struct {
+	Sqlizer
+
+	table string
+
+	where Clause
+}
+
+func (db *DeleteBuilder) Where(c Clause) *DeleteBuilder {
+	db.where = c
+	return db
+}
+
+func (db DeleteBuilder) Build() (string, []any) {
+	args := []any{}
+	query := "DELETE"
+	query += BuildFrom(db.table)
+
+	if db.where == nil {
+		panic("no where clause")
+	}
+
+	where, args := db.where.Build()
+	query += fmt.Sprintf(" WHERE %s", where)
+
+	return query, args
+}
+
+func DELETE(table string) *DeleteBuilder {
+	return &DeleteBuilder{
+		table: table,
+	}
+}
+
+// Build Functions
+func BuildColumns(columns []string) string {
+	if len(columns) == 0 {
+		return " *"
+	}
+
+	return " " + strings.Join(columns, ", ")
+}
+
+func BuildFrom(table string) string {
+	return " FROM " + table
+}
+
+// Ops
+type GroupClause struct {
+	operator string
+	clauses  []Clause
+}
+
+func And(clauses ...Clause) Clause {
+	return GroupClause{
+		operator: "AND",
+		clauses:  clauses,
+	}
+}
+
+func Or(clauses ...Clause) Clause {
+	return GroupClause{
+		operator: "OR",
+		clauses:  clauses,
+	}
+}
+
+func (g GroupClause) Build() (string, []any) {
+	var parts []string
+	var args []any
+
+	for _, clause := range g.clauses {
+		if clause == nil {
+			continue
+		}
+
+		sql, clauseArgs := clause.Build()
+		if sql == "" {
+			continue
+		}
+
+		parts = append(parts, sql)
+		args = append(args, clauseArgs...)
+	}
+
+	if len(parts) == 0 {
+		return "", nil
+	}
+
+	if len(parts) == 1 {
+		return parts[0], args
+	}
+
+	return "(" + strings.Join(parts, " "+g.operator+" ") + ")", args
+}
+
+type ExprClause struct {
+	sql  string
+	args []any
+}
+
+func Expr(sql string, args ...any) Clause {
+	return ExprClause{
+		sql:  sql,
+		args: args,
+	}
+}
+
+func (e ExprClause) Build() (string, []any) {
+	return e.sql, e.args
+}
+
+func Eq(column string, value any) Clause {
+	return Expr(fmt.Sprintf("%s = ?", column), value)
+}
+
+func Ne(column string, value any) Clause {
+	return Expr(fmt.Sprintf("%s != ?", column), value)
+}
+
+func Gt(column string, value any) Clause {
+	return Expr(fmt.Sprintf("%s > ?", column), value)
+}
+
+func Gte(column string, value any) Clause {
+	return Expr(fmt.Sprintf("%s >= ?", column), value)
+}
+
+func Lt(column string, value any) Clause {
+	return Expr(fmt.Sprintf("%s < ?", column), value)
+}
+
+func Lte(column string, value any) Clause {
+	return Expr(fmt.Sprintf("%s <= ?", column), value)
+}
+
+func Like(column string, value any) Clause {
+	return Expr(fmt.Sprintf("%s LIKE ?", column), value)
+}
+
+func IsNull(column string) Clause {
+	return Expr(fmt.Sprintf("%s IS NULL", column))
+}
+
+func IsNotNull(column string) Clause {
+	return Expr(fmt.Sprintf("%s IS NOT NULL", column))
 }

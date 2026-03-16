@@ -10,6 +10,7 @@ func Test_Model_Reader(t *testing.T) {
 		mr := NewModelReader[TestUser]("db")
 
 		assertEqual(t, mr.Read(), ModelMeta{
+			PrimaryKey: "id",
 			Collection: "testuser",
 			Fields: []ModelFieldMeta{
 				{Attr: "ID", Key: "id", Type: reflect.TypeOf(int(0)), Index: 0, Flags: []string{"pk", "required"}},

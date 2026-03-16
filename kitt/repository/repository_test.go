@@ -91,6 +91,18 @@ func Test_Repository(t *testing.T) {
 	})
 
 	t.Run("it returns all", func(t *testing.T) {
+		d := NewTestFakeDriver[int]()
+		r, _ := NewRepo[TestUser, int](d)
 
+		rows := r.Find(SELECT("users"))
+
+		assertEqual(t, d.FindCalled, true)
+		assertEqual(t, len(rows), 0)
+
+		d.FindError = fmt.Errorf("Find error")
+
+		rows = r.Find(SELECT("users"))
+
+		assertEqual(t, len(rows), 0)
 	})
 }

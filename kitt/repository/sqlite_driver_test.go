@@ -177,9 +177,8 @@ func Test_Sqlite_Driver(t *testing.T) {
 		driver.Insert(iValues)
 
 		// Now query
-		query := NewQueryBuilder()
-		query.Select("id", "username")
-		query.From("users")
+		query := SELECT("users")
+		query.Columns("id", "username")
 		values, err := driver.Find(query)
 
 		assertEqual(t, err, nil)

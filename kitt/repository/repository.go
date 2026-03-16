@@ -1,15 +1,13 @@
 package repository
 
 import (
-	"fmt"
 	"reflect"
-	"slices"
 )
 
 type Repository[T interface{}, ID comparable] interface {
 	Create(m T) (ID, error)
 	ByID(id ID) (T, error)
-	All() []T
+	Find(q *SelectBuilder) []T
 	Update(m T) error
 	Delete(id ID) error
 }
@@ -19,32 +17,61 @@ type repo[T interface{}, ID comparable] struct {
 	modelMeta ModelMeta
 }
 
-func (r repo[T, ID]) All() []T {
+func (r repo[T, ID]) Find(q *SelectBuilder) []T {
 	items := []T{}
+	values, err := r.driver.Find(q)
+
+	if err == nil {
+		for _, v := range values {
+			items = append(items, r.toModel(v))
+		}
+	}
 
 	return items
 }
 
 func (r repo[T, ID]) Create(m T) (ID, error) {
-	values := DriverValues{}
-	v := reflect.ValueOf(&m).Elem()
-
-	for _, fieldMeta := range r.modelMeta.Fields {
-		values[fieldMeta.Key] = v.Field(fieldMeta.Index).Interface()
-	}
-
+	values := r.toDriverValues(m)
 	return r.driver.Insert(values)
 }
 
 func (r repo[T, ID]) ByID(id ID) (T, error) {
 	values, err := r.driver.ByID(id)
-	var zero T
+	var m T
 
 	if err != nil {
-		return zero, err
+		return m, err
 	}
 
-	v := reflect.ValueOf(&zero).Elem()
+	m = r.toModel(values)
+
+	return m, nil
+}
+
+func (r repo[T, ID]) Update(m T) error {
+	values := r.toDriverValues(m)
+
+	// get primary and unset it
+	idKey := r.modelMeta.PrimaryKey
+	id, ok := values[idKey].(ID)
+
+	if !ok {
+		panic("primary key type not matching ID")
+	}
+
+	delete(values, idKey)
+
+	return r.driver.Update(values, id)
+}
+
+func (r repo[T, ID]) Delete(id ID) error {
+	return r.driver.Delete(id)
+}
+
+func (r repo[T, ID]) toModel(values DriverValues) T {
+	var m T
+
+	v := reflect.ValueOf(&m).Elem()
 	for _, fieldMeta := range r.modelMeta.Fields {
 		if _, ok := values[fieldMeta.Key]; !ok {
 			continue
@@ -61,36 +88,18 @@ func (r repo[T, ID]) ByID(id ID) (T, error) {
 		}
 	}
 
-	return zero, nil
+	return m
 }
 
-func (r repo[T, ID]) Update(m T) error {
-	values := DriverValues{}
+func (r repo[T, ID]) toDriverValues(m T) DriverValues {
+	values := make(DriverValues)
 	v := reflect.ValueOf(&m).Elem()
 
-	var id ID
-	var zero ID
-
 	for _, fieldMeta := range r.modelMeta.Fields {
-		if slices.Contains(fieldMeta.Flags, "pk") {
-			raw := v.Field(fieldMeta.Index).Interface()
-			if converted, ok := raw.(ID); ok {
-				id = converted
-			}
-			continue
-		}
 		values[fieldMeta.Key] = v.Field(fieldMeta.Index).Interface()
 	}
 
-	if id == zero {
-		return fmt.Errorf("primary key not found")
-	}
-
-	return r.driver.Update(values, id)
-}
-
-func (r repo[T, ID]) Delete(id ID) error {
-	return r.driver.Delete(id)
+	return values
 }
 
 func NewRepo[T interface{}, ID comparable](driver Driver[ID]) (Repository[T, ID], error) {

@@ -2,132 +2,190 @@ package repository
 
 import "testing"
 
-func Test_Query(t *testing.T) {
-	// q := Query{
-	// 	Where: []Filter{
-	// 		{Field: ""}
-	// 	},
-	// }
-
-	// t.Run("it builds", func(t *testing.T) {
-	// 	res := BuildQuery(q)
-
-	// 	assertEqual(t, res, ``)
-	// })
-
-	t.Run("it builds condition", func(t *testing.T) {
-		str, arg := BuildCondition(Condition{
-			Field: "id",
-			Op:    "=",
-			Value: 10,
-		})
-
-		assertEqual(t, str, `id = ?`)
-		assertEqual(t, arg, 10)
+func Test_SELECT(t *testing.T) {
+	t.Run("SELECT id, name FROM users", func(t *testing.T) {
+		q := SELECT("users").Columns("id", "name")
+		sql, _ := q.Build()
+		assertEqual(t, sql, `SELECT id, name FROM users`)
 	})
 
-	t.Run("it builds where", func(t *testing.T) {
-		q := SelectQuery{
-			Where: []Condition{
-				{Field: "id", Op: "=", Value: 10},
-				{Field: "age", Op: ">", Value: 30},
-			},
-		}
-
-		where, args := BuildWhere(q)
-
-		assertEqual(t, where, `WHERE id = ? AND age > ?`)
-		assertEqual(t, args, []any{
-			10, 30,
-		})
+	t.Run("SELECT * FROM users", func(t *testing.T) {
+		q := SELECT("users")
+		sql, _ := q.Build()
+		assertEqual(t, sql, `SELECT * FROM users`)
 	})
 
-	t.Run("it builds order by", func(t *testing.T) {
-		by := SelectQuery{
-			OrderBy: []Order{
-				{Field: "id", Desc: true},
-				{Field: "age", Desc: false},
-			},
-		}
+	t.Run("it supports where", func(t *testing.T) {
+		q := SELECT("users")
+		q.Where(Gt("id", 1))
 
-		orderBy := BuildOrderBy(by)
-
-		assertEqual(t, orderBy, `ORDER BY id DESC, age ASC`)
+		sql, args := q.Build()
+		assertEqual(t, sql, `SELECT * FROM users WHERE id > ?`)
+		assertEqual(t, args, []any{1})
 	})
 
-	t.Run("it builds limit and offset", func(t *testing.T) {
-		q := SelectQuery{
-			Limit:  100,
-			Offset: 200,
-		}
+	t.Run("It supports order by", func(t *testing.T) {
+		q := SELECT("users")
+		q.OrderBy("id", DESC)
+		q.OrderBy("age", ASC)
 
-		str := BuildLimitOffset(q)
+		sql, args := q.Build()
 
-		assertEqual(t, str, `LIMIT 100 OFFSET 200`)
+		assertEqual(t, sql, `SELECT * FROM users ORDER BY id DESC, age ASC`)
+		assertEqual(t, args, []any{})
 	})
 
-	t.Run("it builds proper queries", func(t *testing.T) {
-		// Empty
-		q := SelectQuery{}
-		str, args, err := BuildQuery(q)
+	t.Run("It supports limit", func(t *testing.T) {
+		q := SELECT("users")
+		q.Limit(10)
 
-		assertEqual(t, str, str)
+		sql, args := q.Build()
+
+		assertEqual(t, sql, `SELECT * FROM users LIMIT 10`)
+		assertEqual(t, args, []any{})
+	})
+
+	t.Run("It supports offset", func(t *testing.T) {
+		q := SELECT("users")
+		q.Offset(20)
+
+		sql, args := q.Build()
+
+		assertEqual(t, sql, `SELECT * FROM users OFFSET 20`)
+		assertEqual(t, args, []any{})
+	})
+}
+
+func Test_INSERT(t *testing.T) {
+	t.Run("INSERT INTO users (name, age) VALUES (?, ?)", func(t *testing.T) {
+		q := INSERT("users").Columns("name", "age")
+		q.Row("Gatis", 18)
+
+		sql, args := q.Build()
+		assertEqual(t, sql, `INSERT INTO users (name, age) VALUES (?, ?)`)
+		assertEqual(t, len(args), 2)
+	})
+
+	t.Run("It supports rows", func(t *testing.T) {
+		q := INSERT("users").Columns("name", "age")
+		q.Row("Gatis", 42)
+		q.Row("Kristine", 18)
+
+		sql, args := q.Build()
+		assertEqual(t, sql, `INSERT INTO users (name, age) VALUES (?, ?), (?, ?)`)
+		assertEqual(t, len(args), 4)
+	})
+}
+
+func Test_UPDATE(t *testing.T) {
+	t.Run("UPDATE users SET age = ? WHERE id = ?", func(t *testing.T) {
+		q := UPDATE("users")
+		q.Set("age", 18)
+		q.Where(Eq("id", 1))
+
+		sql, args := q.Build()
+
+		assertEqual(t, sql, `UPDATE users SET age = ? WHERE id = ?`)
+		assertEqual(t, args, []any{18, 1})
+	})
+}
+
+func Test_DELETE(t *testing.T) {
+	t.Run("DELETE FROM users WHERE id = ?", func(t *testing.T) {
+		q := DELETE("users")
+		q.Where(Eq("id", 1))
+
+		sql, args := q.Build()
+		assertEqual(t, sql, `DELETE FROM users WHERE id = ?`)
+		assertEqual(t, len(args), 1)
+	})
+}
+
+func Test_GroupClause(t *testing.T) {
+	t.Run("AND", func(t *testing.T) {
+		sql, args := And(
+			Lt("id", 10),
+			Gt("id", 1),
+		).Build()
+
+		assertEqual(t, sql, `(id < ? AND id > ?)`)
+		assertEqual(t, args, []any{10, 1})
+	})
+
+	t.Run("OR", func(t *testing.T) {
+		sql, args := Or(
+			Lt("id", 10),
+			Gt("id", 1),
+		).Build()
+
+		assertEqual(t, sql, `(id < ? OR id > ?)`)
+		assertEqual(t, args, []any{10, 1})
+	})
+
+	t.Run("AND OR", func(t *testing.T) {
+		sql, args := Or(
+			Lt("id", 10),
+			Gt("id", 1),
+			And(Eq("age", 10), Ne("age", 20)),
+		).Build()
+
+		assertEqual(t, sql, `(id < ? OR id > ? OR (age = ? AND age != ?))`)
+		assertEqual(t, args, []any{10, 1, 10, 20})
+	})
+}
+
+func Test_Expressions(t *testing.T) {
+	t.Run("=", func(t *testing.T) {
+		sql, args := Eq("id", 1).Build()
+		assertEqual(t, sql, "id = ?")
+		assertEqual(t, args, []any{1})
+	})
+
+	t.Run("!=", func(t *testing.T) {
+		sql, args := Ne("id", 1).Build()
+		assertEqual(t, sql, "id != ?")
+		assertEqual(t, args, []any{1})
+	})
+
+	t.Run(">", func(t *testing.T) {
+		sql, args := Gt("id", 1).Build()
+		assertEqual(t, sql, "id > ?")
+		assertEqual(t, args, []any{1})
+	})
+
+	t.Run(">=", func(t *testing.T) {
+		sql, args := Gte("id", 1).Build()
+		assertEqual(t, sql, "id >= ?")
+		assertEqual(t, args, []any{1})
+	})
+
+	t.Run("<", func(t *testing.T) {
+		sql, args := Lt("id", 1).Build()
+		assertEqual(t, sql, "id < ?")
+		assertEqual(t, args, []any{1})
+	})
+
+	t.Run("<=", func(t *testing.T) {
+		sql, args := Lte("id", 1).Build()
+		assertEqual(t, sql, "id <= ?")
+		assertEqual(t, args, []any{1})
+	})
+
+	t.Run("LIKE", func(t *testing.T) {
+		sql, args := Like("id", 1).Build()
+		assertEqual(t, sql, "id LIKE ?")
+		assertEqual(t, args, []any{1})
+	})
+
+	t.Run("IS NULL", func(t *testing.T) {
+		sql, args := IsNull("id").Build()
+		assertEqual(t, sql, "id IS NULL")
 		assertEqual(t, args, nil)
-		assertNotNil(t, err)
-
-		// With table
-		q.Table = "todo"
-		str, _, _ = BuildQuery(q)
-		assertEqual(t, str, `SELECT * FROM todo`)
-
-		// With table, fields
-		q.Fields = []string{"id", "completed"}
-		str, _, _ = BuildQuery(q)
-		assertEqual(t, str, `SELECT id, completed FROM todo`)
-
-		// With table, fields, simple where
-		q.Where = []Condition{
-			{Field: "completed", Op: "=", Value: true},
-		}
-		str, args, _ = BuildQuery(q)
-		assertEqual(t, str, `SELECT id, completed FROM todo WHERE completed = ?`)
-		assertEqual(t, args, []any{true})
-
-		// With table, fields, complex where
-		q.Fields = append(q.Fields, "age")
-		q.Where = []Condition{
-			{Field: "completed", Op: "=", Value: true},
-			{Field: "age", Op: ">", Value: 10},
-		}
-		str, args, _ = BuildQuery(q)
-		assertEqual(t, str, `SELECT id, completed, age FROM todo WHERE completed = ? AND age > ?`)
-		assertEqual(t, args, []any{true, 10})
-
-		// With table, fields, complex where, limit, offset
-		q.Limit = 10
-		q.Offset = 20
-		str, args, _ = BuildQuery(q)
-		assertEqual(t, str, `SELECT id, completed, age FROM todo WHERE completed = ? AND age > ? LIMIT 10 OFFSET 20`)
-		assertEqual(t, args, []any{true, 10})
 	})
 
-	t.Run("it builds queries", func(t *testing.T) {
-		builder := NewQueryBuilder()
-		builder.
-			Select("id", "name").
-			From("todo").
-			Where("completed", "=", true).
-			Where("age", ">=", 10).
-			OrderAscBy("age").
-			OrderDescBy("id").
-			Limit(10).
-			Offset(20)
-
-		query, args := builder.Build()
-
-		assertEqual(t, query, `SELECT id, name FROM todo WHERE completed = ? AND age >= ? ORDER BY age ASC, id ASC LIMIT 10 OFFSET 20`)
-		assertEqual(t, args, []any{
-			true, 10,
-		})
+	t.Run("IS NOT NULL", func(t *testing.T) {
+		sql, args := IsNotNull("id").Build()
+		assertEqual(t, sql, "id IS NOT NULL")
+		assertEqual(t, args, nil)
 	})
 }

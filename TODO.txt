@@ -1,23 +1,5 @@
 NOW: Refactor repo to have like 
 
-
-driver->select()->form(table)->execute()
-driver->select()->from(table)->where()->orderBy()->limit()->offset()->execute()
-driver->insert(DriverValues)->in(table)->execute()
-driver->update(DriverValues)->in(table)->where()->execute()
-driver->delete()->from(table)->where()->execute()
-
-repo->where()->get()
-repo->where()->orderBy()->get()
-repo->where()->orderBy()->limit()->offset()->get()
-
-repo->all()
-repo->byId()
-repo->insert(Model)
-repo->update(Model)
-repo->delete(Model)
-
-
 NEXT: Make kitt config, like db etc. And maybe repo init thing that already boots repos from settings?
 NEXT: Services concept.
 
@@ -37,3 +19,45 @@ Refactor attributes, that they are all rendered in tags as {{ .Attributes }}
 Also add attributes that can't be set like "value", "id", etc
 Also refactor maybe out attribute and all html-ish things so I dont have duplicate attr rendering and stuff from forms.
 Make form tests less depending on template changes of elements
+
+==== SelectBuilder
+
+Done for now
+
+Distinct
+Join
+LeftJoin
+GroupBy
+Having
+
+==== InsertBuilder
+
+DONE for now, the rest is optional
+
+ValuesMap
+DefaultValues
+FromSelect
+OnConflict
+DoNothing
+DoUpdate...
+Returning
+
+==== UpdateBuilder
+
+DONE for now, the rest is optional for now
+
+SetExpr
+SetSubquery
+OrderBy
+Limit
+Offset
+Returning
+
+==== DeleteBuilder
+
+Done for now
+
+OrderBy
+Limit
+Offset
+Returning

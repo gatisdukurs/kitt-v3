@@ -56,24 +56,25 @@ type sqliteDriver[ID int64] struct {
 	modelMeta ModelMeta
 }
 
-func (sql sqliteDriver[ID]) Insert(values DriverValues) (ID, error) {
-	table := sql.modelMeta.Collection
+func (d sqliteDriver[ID]) Insert(values DriverValues) (ID, error) {
+	table := d.modelMeta.Collection
+	q := INSERT(table)
 
-	var zero ID
-	args := []interface{}{}
-	keys := []string{}
-	bindings := []string{}
-
+	columns := []string{}
+	row := []any{}
 	for k, v := range values {
-		keys = append(keys, k)
-		args = append(args, v)
-		bindings = append(bindings, "?")
+		columns = append(columns, k)
+		row = append(row, v)
 	}
 
-	q := fmt.Sprintf(`INSERT INTO %s (%s) VALUES (%s)`, table, strings.Join(keys, ","), strings.Join(bindings, ","))
+	q.Columns(columns...)
+	q.Row(row...)
 
-	res, err := sql.conn.Exec(context.Background(), q, args...)
+	sql, args := q.Build()
 
+	res, err := d.conn.Exec(context.Background(), sql, args...)
+
+	var zero ID
 	if err != nil {
 		return zero, err
 	}
@@ -87,28 +88,29 @@ func (sql sqliteDriver[ID]) Insert(values DriverValues) (ID, error) {
 	return ID(raw), nil
 }
 
-func (sql sqliteDriver[ID]) Update(values DriverValues, id ID) error {
-	set := []string{}
-	args := []interface{}{}
-
-	for k, v := range values {
-		set = append(set, fmt.Sprintf(`%s=?`, k))
-		args = append(args, v)
+func (d sqliteDriver[ID]) Update(values DriverValues, id ID) error {
+	table := d.modelMeta.Collection
+	q := UPDATE(table)
+	for column, value := range values {
+		q.Set(column, value)
 	}
 
-	args = append(args, id)
+	q.Where(Eq("id", id))
 
-	q := fmt.Sprintf(`UPDATE %s SET %s WHERE id = ?`, sql.modelMeta.Collection, strings.Join(set, ","))
+	sql, args := q.Build()
 
-	_, err := sql.conn.Exec(context.Background(), q, args...)
+	_, err := d.conn.Exec(context.Background(), sql, args...)
 
 	return err
 }
 
-func (sql sqliteDriver[ID]) Delete(id ID) error {
-	q := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, sql.modelMeta.Collection)
+func (d sqliteDriver[ID]) Delete(id ID) error {
+	table := d.modelMeta.Collection
+	q := DELETE(table)
+	q.Where(Eq("id", id))
+	sql, args := q.Build()
 
-	_, err := sql.conn.Exec(context.Background(), q, id)
+	_, err := d.conn.Exec(context.Background(), sql, args...)
 
 	if err != nil {
 		return err
@@ -117,35 +119,35 @@ func (sql sqliteDriver[ID]) Delete(id ID) error {
 	return nil
 }
 
-func (sql sqliteDriver[ID]) ByID(id ID) (DriverValues, error) {
-	query := NewQueryBuilder()
+func (d sqliteDriver[ID]) ByID(id ID) (DriverValues, error) {
+	table := d.modelMeta.Collection
+	q := SELECT(table)
 	keys := []string{}
 	primaryKey := "id"
 
-	for _, field := range sql.modelMeta.Fields {
+	for _, field := range d.modelMeta.Fields {
 		keys = append(keys, field.Key)
 		if slices.Contains(field.Flags, "pk") {
 			primaryKey = field.Key
 		}
 	}
 
-	query.Select(keys...)
-	query.From(sql.modelMeta.Collection)
-	query.Where(primaryKey, "=", id)
+	q.Columns(keys...)
+	q.Where(Eq(primaryKey, id))
 
-	return sql.First(query)
+	return d.First(q)
 }
 
-func (sql sqliteDriver[ID]) Find(builder QueryBuilder) ([]DriverValues, error) {
+func (d sqliteDriver[ID]) Find(q *SelectBuilder) ([]DriverValues, error) {
 	keys := []string{}
 	values := []DriverValues{}
-	query, args := builder.Build()
+	sql, args := q.Build()
 
-	for _, field := range sql.modelMeta.Fields {
+	for _, field := range d.modelMeta.Fields {
 		keys = append(keys, field.Key)
 	}
 
-	rows, err := sql.conn.Query(context.Background(), query, args...)
+	rows, err := d.conn.Query(context.Background(), sql, args...)
 
 	if err != nil {
 		return values, err
@@ -181,8 +183,9 @@ func (sql sqliteDriver[ID]) Find(builder QueryBuilder) ([]DriverValues, error) {
 	return values, nil
 }
 
-func (sql sqliteDriver[ID]) First(query QueryBuilder) (DriverValues, error) {
-	values, err := sql.Find(query)
+func (d sqliteDriver[ID]) First(q *SelectBuilder) (DriverValues, error) {
+	q.Limit(1)
+	values, err := d.Find(q)
 
 	if err != nil {
 		return nil, err

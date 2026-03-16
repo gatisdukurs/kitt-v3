@@ -82,6 +82,8 @@ type testFakeDriver[ID interface{}] struct {
 	UpdateID              ID
 	EnsureCollectonCalled bool
 	EnsureCollectionError error
+	FindCalled            bool
+	FindError             error
 }
 
 func (d *testFakeDriver[ID]) Insert(values DriverValues) (ID, error) {
@@ -112,10 +114,16 @@ func (d *testFakeDriver[ID]) ByID(id ID) (DriverValues, error) {
 	return zero, nil
 }
 
-func (d testFakeDriver[ID]) Find(q QueryBuilder) ([]DriverValues, error) {
+func (d *testFakeDriver[ID]) Find(q *SelectBuilder) ([]DriverValues, error) {
+	d.FindCalled = true
+
+	if d.FindError != nil {
+		return nil, d.FindError
+	}
+
 	return nil, nil
 }
-func (d testFakeDriver[ID]) First(q QueryBuilder) (DriverValues, error) {
+func (d testFakeDriver[ID]) First(q *SelectBuilder) (DriverValues, error) {
 	return nil, nil
 }
 
