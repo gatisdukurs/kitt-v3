@@ -56,6 +56,10 @@ type sqliteDriver[ID int64] struct {
 	modelMeta ModelMeta
 }
 
+func (d sqliteDriver[ID]) Query() FindQuery {
+	return SELECT(d.modelMeta.Collection)
+}
+
 func (d sqliteDriver[ID]) Insert(values DriverValues) (ID, error) {
 	table := d.modelMeta.Collection
 	q := INSERT(table)
@@ -138,7 +142,7 @@ func (d sqliteDriver[ID]) ByID(id ID) (DriverValues, error) {
 	return d.First(q)
 }
 
-func (d sqliteDriver[ID]) Find(q *SelectBuilder) ([]DriverValues, error) {
+func (d sqliteDriver[ID]) Find(q FindQuery) ([]DriverValues, error) {
 	keys := []string{}
 	values := []DriverValues{}
 	sql, args := q.Build()
@@ -183,7 +187,7 @@ func (d sqliteDriver[ID]) Find(q *SelectBuilder) ([]DriverValues, error) {
 	return values, nil
 }
 
-func (d sqliteDriver[ID]) First(q *SelectBuilder) (DriverValues, error) {
+func (d sqliteDriver[ID]) First(q FindQuery) (DriverValues, error) {
 	q.Limit(1)
 	values, err := d.Find(q)
 

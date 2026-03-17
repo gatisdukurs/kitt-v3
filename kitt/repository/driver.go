@@ -10,9 +10,10 @@ type Driver[ID interface{}] interface {
 	Update(values DriverValues, id ID) error
 	Delete(id ID) error
 
+	Query() FindQuery
 	ByID(id ID) (DriverValues, error)
-	Find(query *SelectBuilder) ([]DriverValues, error)
-	First(query *SelectBuilder) (DriverValues, error)
+	Find(query FindQuery) ([]DriverValues, error)
+	First(query FindQuery) (DriverValues, error)
 
 	DropCollection() error
 	CreateCollection() error

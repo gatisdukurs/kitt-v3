@@ -114,7 +114,11 @@ func (d *testFakeDriver[ID]) ByID(id ID) (DriverValues, error) {
 	return zero, nil
 }
 
-func (d *testFakeDriver[ID]) Find(q *SelectBuilder) ([]DriverValues, error) {
+func (d *testFakeDriver[ID]) Query() FindQuery {
+	return SELECT("users")
+}
+
+func (d *testFakeDriver[ID]) Find(q FindQuery) ([]DriverValues, error) {
 	d.FindCalled = true
 
 	if d.FindError != nil {
@@ -123,7 +127,7 @@ func (d *testFakeDriver[ID]) Find(q *SelectBuilder) ([]DriverValues, error) {
 
 	return nil, nil
 }
-func (d testFakeDriver[ID]) First(q *SelectBuilder) (DriverValues, error) {
+func (d testFakeDriver[ID]) First(q FindQuery) (DriverValues, error) {
 	return nil, nil
 }
 

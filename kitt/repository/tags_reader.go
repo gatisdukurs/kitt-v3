@@ -42,11 +42,16 @@ func (r reader[T]) Read() []TagsMetadata {
 			continue
 		}
 
+		ts := strings.Split(tag, ",")
+		for i, f := range ts {
+			ts[i] = strings.TrimSpace(f)
+		}
+
 		meta := TagsMetadata{
 			Attr:  field.Name,
 			Type:  field.Type,
 			Index: i,
-			Tags:  strings.Split(tag, ","),
+			Tags:  ts,
 		}
 		tags = append(tags, meta)
 	}

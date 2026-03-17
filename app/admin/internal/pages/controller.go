@@ -27,11 +27,16 @@ func (c *Controller) Boot() {
 
 func (c Controller) GetList(ctx router.RouteCtx) router.RouteResponse {
 	// Data
-	// pages := c.pages.All()
+	query := c.pages.Query()
+	rows := c.pages.Find(query)
+	pagesCtx := c.Ctx()
+	pagesCtx.Set("pages", rows)
 
 	// View
 	view := c.View("admin.layout")
 	content := c.View("admin.pages.list")
+	content.WithCtx(pagesCtx.Basic())
+
 	navigation := c.Navigation(ctx)
 
 	view.WithPartial("content", content)

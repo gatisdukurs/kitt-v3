@@ -5,9 +5,10 @@ import (
 )
 
 type Repository[T interface{}, ID comparable] interface {
+	Query() FindQuery
 	Create(m T) (ID, error)
 	ByID(id ID) (T, error)
-	Find(q *SelectBuilder) []T
+	Find(query FindQuery) []T
 	Update(m T) error
 	Delete(id ID) error
 }
@@ -17,7 +18,11 @@ type repo[T interface{}, ID comparable] struct {
 	modelMeta ModelMeta
 }
 
-func (r repo[T, ID]) Find(q *SelectBuilder) []T {
+func (r repo[T, ID]) Query() FindQuery {
+	return r.driver.Query()
+}
+
+func (r repo[T, ID]) Find(q FindQuery) []T {
 	items := []T{}
 	values, err := r.driver.Find(q)
 
@@ -32,6 +37,10 @@ func (r repo[T, ID]) Find(q *SelectBuilder) []T {
 
 func (r repo[T, ID]) Create(m T) (ID, error) {
 	values := r.toDriverValues(m)
+
+	idKey := r.modelMeta.PrimaryKey
+	delete(values, idKey)
+
 	return r.driver.Insert(values)
 }
 

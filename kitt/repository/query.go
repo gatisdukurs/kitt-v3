@@ -19,6 +19,15 @@ const (
 )
 
 // Query Builders
+type FindQuery interface {
+	Columns(columns ...string) FindQuery
+	Where(where Clause) FindQuery
+	OrderBy(column string, direction string) FindQuery
+	Limit(limit int) FindQuery
+	Offset(offset int) FindQuery
+	Build() (string, []any)
+}
+
 // SELECT
 type SelectBuilder struct {
 	Sqlizer
@@ -33,27 +42,27 @@ type SelectBuilder struct {
 	where Clause
 }
 
-func (sb *SelectBuilder) Columns(columns ...string) *SelectBuilder {
+func (sb *SelectBuilder) Columns(columns ...string) FindQuery {
 	sb.columns = columns
 	return sb
 }
 
-func (sb *SelectBuilder) Where(where Clause) *SelectBuilder {
+func (sb *SelectBuilder) Where(where Clause) FindQuery {
 	sb.where = where
 	return sb
 }
 
-func (sb *SelectBuilder) OrderBy(column string, direction string) *SelectBuilder {
+func (sb *SelectBuilder) OrderBy(column string, direction string) FindQuery {
 	sb.orderBy = append(sb.orderBy, fmt.Sprintf(`%s %s`, column, direction))
 	return sb
 }
 
-func (sb *SelectBuilder) Limit(limit int) *SelectBuilder {
+func (sb *SelectBuilder) Limit(limit int) FindQuery {
 	sb.limit = &limit
 	return sb
 }
 
-func (sb *SelectBuilder) Offset(offset int) *SelectBuilder {
+func (sb *SelectBuilder) Offset(offset int) FindQuery {
 	sb.offset = &offset
 	return sb
 }
@@ -94,7 +103,7 @@ func (sb SelectBuilder) Build() (string, []any) {
 	return query, args
 }
 
-func SELECT(table string) *SelectBuilder {
+func SELECT(table string) FindQuery {
 	return &SelectBuilder{
 		table: table,
 	}
