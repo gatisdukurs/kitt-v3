@@ -1,6 +1,7 @@
 package router
 
 import (
+	"net/http"
 	"testing"
 )
 
@@ -102,5 +103,19 @@ func Test_Route(t *testing.T) {
 		response := r.Execute(ctx)
 
 		assertEqual(t, response, nil)
+	})
+
+	t.Run("it supporst :id", func(t *testing.T) {
+		r := NewRoute("/page/:id/delete/:age")
+		r.GET(func(ctx RouteCtx) RouteResponse {
+			return nil
+		})
+
+		assertEqual(t, r.Match(http.MethodGet, "/page/12/delete/18"), true)
+
+		params := r.Params("/page/12/delete/18")
+
+		assertEqual(t, params["id"], "12")
+		assertEqual(t, params["age"], "18")
 	})
 }

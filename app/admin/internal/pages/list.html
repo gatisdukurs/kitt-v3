@@ -1,9 +1,9 @@
 {{ define "admin.pages.list" }}
-<div class="grid grid--2">
+<div class="grid grid--2-keep">
     <h1>Pages</h1>
     <div>
         <a 
-        class="btn"
+        class="btn btn--sm"
         hx-get="/admin/pages/create"
         hx-target="#content"
         hx-swap="innerHTML"
@@ -12,16 +12,21 @@
     </div>
 </div>
 <p>
-    <table>
+    <table class="table">
         <thead>
-            <th>#</th>
-            <th>Title</th>
+            <th class="num">#</th>
+            <th class="col-grow">Title</th>
+            <th class="actions"></th>
         </thead>
         <tbody>
             {{ range .Ctx "pages" }}
             <tr>
-                <td>{{ .ID }}</td>
-                <td>{{ .Title }}</td>
+                <td class="num">{{ .ID }}</td>
+                <td class="col-grow">{{ .Title }}</td>
+                <td class="actions">
+                    <button class="btn btn--sm btn--secondary">Edit</button>
+                    <button class="btn btn--sm btn--danger">Delete</button>
+                </td>
             </tr>
             {{ end }}
         </tbody>

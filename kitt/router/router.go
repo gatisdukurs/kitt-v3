@@ -43,6 +43,8 @@ func (r router) ServeHTTP(response http.ResponseWriter, request *http.Request) {
 
 	for _, route := range r.routes {
 		if route.Match(method, path) {
+			ctx.WithParams(route.Params(path))
+
 			routeResponse := route.Execute(ctx)
 			if routeResponse != nil {
 				ctx.Response().WithStatus(routeResponse.Status())

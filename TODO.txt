@@ -1,6 +1,8 @@
 == TODO
 
-NOW: Write tests for Query for driver and repo, write tests for ID create and update case for repo?
+NOW: Add :params to routes
+
+NEXT: Add delete and edit for pages.
 
 NEXT: Make kitt config, like db etc. And maybe repo init thing that already boots repos from settings?
 NEXT: Services concept.

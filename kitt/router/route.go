@@ -14,6 +14,7 @@ type Route interface {
 	Handler(method string, handler RouteHandler) Route
 	Pattern() string
 	Match(method string, path string) bool
+	Params(path string) map[string]string
 	Execute(ctx RouteCtx) RouteResponse
 }
 
@@ -54,14 +55,69 @@ func (r route) Match(method, path string) bool {
 		return false
 	}
 
+	pattern := normalizePath(r.pattern)
+	path = normalizePath(path)
+
 	// wildcard support: "/assets/*"
-	if strings.HasSuffix(r.pattern, "/*") {
-		prefix := strings.TrimSuffix(r.pattern, "/*")
-		return strings.HasPrefix(path, prefix)
+	if strings.HasSuffix(pattern, "/*") {
+		prefix := strings.TrimSuffix(pattern, "/*")
+		return path == prefix || strings.HasPrefix(path, prefix+"/")
 	}
 
-	// exact match
-	return r.pattern == strings.TrimSuffix(path, "/")
+	patternParts := splitPath(pattern)
+	pathParts := splitPath(path)
+
+	if len(patternParts) != len(pathParts) {
+		return false
+	}
+
+	for i := range patternParts {
+		pp := patternParts[i]
+		p := pathParts[i]
+
+		if isParamSegment(pp) {
+			continue
+		}
+
+		if pp != p {
+			return false
+		}
+	}
+
+	return true
+}
+
+func (r route) Params(path string) map[string]string {
+	params := make(map[string]string)
+
+	pattern := normalizePath(r.pattern)
+	path = normalizePath(path)
+
+	// no params for wildcard routes
+	if strings.HasSuffix(pattern, "/*") {
+		return params
+	}
+
+	patternParts := splitPath(pattern)
+	pathParts := splitPath(path)
+
+	if len(patternParts) != len(pathParts) {
+		return params
+	}
+
+	for i := range patternParts {
+		pp := patternParts[i]
+		p := pathParts[i]
+
+		if isParamSegment(pp) {
+			name := strings.TrimPrefix(pp, ":")
+			if name != "" {
+				params[name] = p
+			}
+		}
+	}
+
+	return params
 }
 
 func NewRoute(pattern string) Route {
@@ -69,4 +125,30 @@ func NewRoute(pattern string) Route {
 		method:  http.MethodGet,
 		pattern: strings.TrimSuffix(pattern, "/"),
 	}
+}
+
+func normalizePath(path string) string {
+	if path == "" {
+		return "/"
+	}
+
+	path = strings.TrimSuffix(path, "/")
+	if path == "" {
+		return "/"
+	}
+
+	return path
+}
+
+func splitPath(path string) []string {
+	path = strings.Trim(path, "/")
+	if path == "" {
+		return nil
+	}
+
+	return strings.Split(path, "/")
+}
+
+func isParamSegment(segment string) bool {
+	return strings.HasPrefix(segment, ":") && len(segment) > 1
 }

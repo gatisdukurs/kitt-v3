@@ -4,7 +4,8 @@
 
 /* ---------- Theme tokens ---------- */
 :root {
-  --bg: #F9FAFB;
+  /* --bg: #F9FAFB; */
+  --bg: #fff;
   --text: #555;
   --muted: #999;
   --text-strong: #444;
@@ -96,6 +97,11 @@ hr {
 .grid--3 { grid-template-columns: repeat(3, 1fr); }
 .grid--4 { grid-template-columns: repeat(4, 1fr); }
 
+.grid--2-keep {
+  grid-template-columns: 1fr auto;
+  align-items: center;
+}
+
 /* 12-column grid */
 .grid--12 {
   grid-template-columns: repeat(12, 1fr);
@@ -177,6 +183,69 @@ textarea.control { resize: none; }
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 18%, transparent);
 }
 
+/* ---------- Button sizes ---------- */
+
+.btn--tiny {
+  padding: 3px 8px;
+  font-size: 0.75rem;
+  line-height: 1.2;
+}
+
+.btn--sm {
+  padding: 6px 12px;
+  font-size: 0.85rem;
+}
+
+.btn--lg {
+  padding: calc(var(--space) * 1.25) calc(var(--space) * 2.5);
+  font-size: 1.1rem;
+}
+
+/* ---------- Button colors ---------- */
+
+.btn--success {
+  background: var(--success);
+  color: #fff;
+}
+
+.btn--danger {
+  background: var(--danger);
+  color: #fff;
+}
+
+.btn--secondary {
+  background: #f3f4f6;
+  color: var(--text-strong);
+  border: 1px solid var(--border);
+  text-shadow: none;
+}
+
+.btn--outline {
+  background: transparent;
+  border-color: var(--border);
+  color: var(--text-strong);
+  text-shadow: none;
+}
+
+.btn--outline.btn--danger {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.btn--outline.btn--success {
+  border-color: var(--success);
+  color: var(--success);
+}
+
+.btn:hover {
+  filter: brightness(0.95);
+}
+
+.btn--secondary:hover,
+.btn--outline:hover {
+  background: #f9fafb;
+}
+
 /* ---------- Cards ---------- */
 .card {
   background: #fff;
@@ -241,6 +310,110 @@ textarea.control { resize: none; }
     grid-column: span 1;
   }
 
-  .container { padding: calc(var(--pad) * 0.75); }
-  .nav { padding: calc(var(--pad) * 0.75); }
+  /* .container { padding: calc(var(--pad) * 0.75); }
+  .nav { padding: calc(var(--pad) * 0.75); } */
+}
+
+/* ---------- Tables ---------- */
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  /* border: 1px solid var(--border); */
+  /* border-radius: var(--radius); */
+  overflow: hidden;
+}
+
+.table th,
+.table td {
+  padding: var(--space);
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+/* header */
+.table thead {
+  background: #F3F4F6;
+}
+
+.table th {
+  font-weight: 700;
+  color: var(--text-strong);
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
+}
+
+/* zebra rows */
+.table.zebra tbody tr:nth-child(even) {
+  background: #FAFAFA;
+}
+
+/* hover */
+.table tbody tr:hover {
+  background: color-mix(in srgb, var(--primary) 6%, white);
+}
+
+/* remove last border */
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* compact variant */
+.table--compact th,
+.table--compact td {
+  padding: 8px var(--space);
+}
+
+/* actions column */
+.table .actions {
+  white-space: nowrap;
+}
+
+.table .actions .btn + .btn {
+  margin-left: var(--space);
+}
+
+/* numeric columns */
+.table .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.table .col-grow {
+  width: 100%;
+}
+
+/* ---------- Alignment helpers ---------- */
+
+.right {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+}
+
+.between {
+  display: flex;
+  justify-content: space-between;
+}
+
+.middle {
+  align-items: center;
+}
+
+.justify-end {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.items-start {
+  align-items: flex-start;
 }

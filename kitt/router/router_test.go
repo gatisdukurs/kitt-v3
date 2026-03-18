@@ -120,4 +120,28 @@ func Test_Router(t *testing.T) {
 			t.Fatalf("unexpected body: %q", w.Body.String())
 		}
 	})
+
+	t.Run("it adds url params to context", func(t *testing.T) {
+		str := "Hello World!"
+		router := NewRouter()
+
+		page := NewRoute("/page/:id/delete")
+		page.GET(func(ctx RouteCtx) RouteResponse {
+			id := ctx.Param("id")
+
+			if id != "12" {
+				t.Fatal("url param nost se in context")
+			}
+
+			sendable := newFakeRenderable(str)
+			response := NewRouteResponse(sendable)
+			return response
+		})
+		router.To(page)
+
+		r := httptest.NewRequest("GET", "/page/12/delete", nil)
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, r)
+
+	})
 }

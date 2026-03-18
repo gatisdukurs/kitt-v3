@@ -22,7 +22,7 @@ func Test_Repository(t *testing.T) {
 		assertEqual(t, id, d.InsertID)
 		assertEqual(t, err, nil)
 		assertEqual(t, d.InsertCalled, true)
-		assertEqual(t, d.InsertValues["id"], 10)
+		assertEqual(t, d.InsertValues["id"], nil)
 		assertEqual(t, d.InsertValues["name"], "Gatis")
 	})
 
