@@ -3,6 +3,8 @@
 NOW: 
 
 2. Add edit for pages.
+3. change toaster to an OOB object capability, so I can return same list of pages, but with error msg.
+and then I can use that also for success messages, like in forms, etc.
 
 NEXT: Make kitt config, like db etc. And maybe repo init thing that already boots repos from settings?
 NEXT: Services concept.

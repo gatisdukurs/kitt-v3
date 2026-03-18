@@ -91,7 +91,6 @@ func (c Controller) DeletePage(ctx router.RouteCtx) router.RouteResponse {
 		return c.ResponseString(err.Error()).WithStatus(http.StatusInternalServerError)
 	}
 
-	// Return list of pages
 	query := c.pages.Query()
 	rows := c.pages.Find(query)
 	contentCtx := c.Ctx()
