@@ -82,7 +82,8 @@ func Test_Route(t *testing.T) {
 		r := NewRoute("/home")
 		r.GET(func(ctx RouteCtx) RouteResponse {
 			sendable := newFakeRenderable(str)
-			response := NewRouteResponse(sendable)
+			response := NewRouteResponse()
+			response.WithSendable(sendable)
 
 			return response
 		})

@@ -32,7 +32,14 @@ func (Controller) DELETE(pattern string, handler router.RouteHandler) router.Rou
 }
 
 func (Controller) Response(sendable router.RouteResponseSendable) router.RouteResponse {
-	response := K().Response(sendable)
+	response := router.NewRouteResponse()
+	response.WithSendable(sendable)
+	return response
+}
+
+func (Controller) ResponseString(body string) router.RouteResponse {
+	response := router.NewRouteResponse()
+	response.WithStringResponse(body)
 	return response
 }
 

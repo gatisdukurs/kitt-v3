@@ -1,8 +1,8 @@
 == TODO
 
-NOW: Add :params to routes
+NOW: 
 
-NEXT: Add delete and edit for pages.
+2. Add edit for pages.
 
 NEXT: Make kitt config, like db etc. And maybe repo init thing that already boots repos from settings?
 NEXT: Services concept.

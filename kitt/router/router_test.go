@@ -107,7 +107,8 @@ func Test_Router(t *testing.T) {
 		home := NewRoute("/home")
 		home.GET(func(ctx RouteCtx) RouteResponse {
 			sendable := newFakeRenderable(str)
-			response := NewRouteResponse(sendable)
+			response := NewRouteResponse()
+			response.WithSendable(sendable)
 			return response
 		})
 		router.To(home)
@@ -134,7 +135,8 @@ func Test_Router(t *testing.T) {
 			}
 
 			sendable := newFakeRenderable(str)
-			response := NewRouteResponse(sendable)
+			response := NewRouteResponse()
+			response.WithSendable(sendable)
 			return response
 		})
 		router.To(page)

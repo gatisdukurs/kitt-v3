@@ -23,6 +23,7 @@ func (c *Controller) Boot() {
 	c.GET("/admin/pages", c.GetList)
 	c.GET("/admin/pages/create", c.GetCreate)
 	c.POST("/admin/pages", c.PostPage)
+	c.DELETE("/admin/pages/:id", c.DeletePage)
 }
 
 func (c Controller) GetList(ctx router.RouteCtx) router.RouteResponse {
@@ -80,6 +81,25 @@ func (c Controller) PostPage(ctx router.RouteCtx) router.RouteResponse {
 		f.WithError("Form has some errors :(")
 	}
 	return c.Response(f)
+}
+
+func (c Controller) DeletePage(ctx router.RouteCtx) router.RouteResponse {
+	id := ctx.ParamInt64("id")
+	err := c.pages.Delete(id)
+
+	if err != nil {
+		return c.ResponseString(err.Error()).WithStatus(http.StatusInternalServerError)
+	}
+
+	// Return list of pages
+	query := c.pages.Query()
+	rows := c.pages.Find(query)
+	contentCtx := c.Ctx()
+	contentCtx.Set("pages", rows)
+	content := c.View("admin.pages.list")
+	content.WithCtx(contentCtx.Basic())
+
+	return c.Response(content)
 }
 
 func (c Controller) _PageForm() form.Form {

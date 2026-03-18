@@ -79,4 +79,16 @@ func Test_Contoller(t *testing.T) {
 			t.Fatalf("not providing route response")
 		}
 	})
+
+	t.Run("it provides route response with string", func(t *testing.T) {
+		c := &Controller{}
+		str := "Hello World!"
+		response := c.ResponseString(str)
+
+		if _, ok := response.(router.RouteResponse); !ok {
+			t.Fatalf("not providing route response")
+		}
+
+		assertEqual(t, response.Body(), str)
+	})
 }
