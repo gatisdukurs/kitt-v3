@@ -9,6 +9,11 @@ and then I can use that also for success messages, like in forms, etc.
 NEXT: Make kitt config, like db etc. And maybe repo init thing that already boots repos from settings?
 NEXT: Services concept.
 
+NEXT: Figure out how to solve this issue with changing attributes and sharing action:
+
+f.WithAction(fmt.Sprintf("/admin/pages/%d/edit", id))
+f.WithHTMXPost()
+
 NEXT: Refactor module concept.
 
 NEXT: Add loading for HTMX?

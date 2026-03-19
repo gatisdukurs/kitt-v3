@@ -24,7 +24,13 @@
                 <td class="num">{{ .ID }}</td>
                 <td class="col-grow">{{ .Title }}</td>
                 <td class="actions">
-                    <button class="btn btn--sm btn--secondary">Edit</button>
+                    <button 
+                        class="btn btn--sm btn--secondary"
+                        hx-get="/admin/pages/{{ .ID }}/edit"
+                        hx-target="#content"
+                        hx-swap="innerHTML"
+                        hx-push-url="true"
+                    >Edit</button>
                     <button 
                         class="btn btn--sm btn--danger"
                         hx-delete="/admin/pages/{{ .ID }}"

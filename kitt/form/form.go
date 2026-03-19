@@ -43,7 +43,7 @@ type Form interface {
 
 type form struct {
 	e           render.Engine
-	attributes  []string
+	attributes  map[string]string
 	fields      []FormField
 	method      string
 	action      string
@@ -108,17 +108,7 @@ func (f *form) WithSuccess(msg string) Form {
 }
 
 func (f *form) WithAttribute(key string, value string) Form {
-	if key == "" {
-		return f
-	}
-
-	var attr string
-	if value != "" {
-		attr = fmt.Sprintf(`%s="%s"`, key, value)
-	} else {
-		attr = key
-	}
-	f.attributes = append(f.attributes, attr)
+	f.attributes[key] = value
 	return f
 }
 
@@ -212,7 +202,17 @@ func (f form) RenderAttributes() string {
 		return ""
 	}
 
-	return " " + strings.Join(f.attributes, " ")
+	attrs := []string{}
+
+	for k, v := range f.attributes {
+		if v == "" {
+			attrs = append(attrs, k)
+		} else {
+			attrs = append(attrs, fmt.Sprintf(`%s="%s"`, k, v))
+		}
+	}
+
+	return " " + strings.Join(attrs, " ")
 }
 
 func (f form) Field(id string) FormField {
@@ -247,9 +247,10 @@ func NewForm(id string, e render.Engine) Form {
 	e.WithTemplate("form", template)
 
 	return &form{
-		e:      e,
-		id:     id,
-		method: http.MethodPost,
-		action: "/",
+		e:          e,
+		id:         id,
+		method:     http.MethodPost,
+		action:     "/",
+		attributes: make(map[string]string),
 	}
 }

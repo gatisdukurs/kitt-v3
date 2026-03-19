@@ -53,7 +53,7 @@ func Test_Contoller(t *testing.T) {
 		}
 	})
 
-	t.Run("it provides layout", func(t *testing.T) {
+	t.Run("it provides view", func(t *testing.T) {
 		c := &Controller{}
 		view := c.View("none")
 
