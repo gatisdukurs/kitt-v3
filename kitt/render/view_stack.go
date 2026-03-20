@@ -7,14 +7,14 @@ import (
 
 type ViewStack interface {
 	Renderable
-	WithView(view Renderable) ViewStack
+	WithRenderable(view Renderable) ViewStack
 }
 
 type viewStack struct {
 	views []Renderable
 }
 
-func (vs *viewStack) WithView(view Renderable) ViewStack {
+func (vs *viewStack) WithRenderable(view Renderable) ViewStack {
 	vs.views = append(vs.views, view)
 	return vs
 }

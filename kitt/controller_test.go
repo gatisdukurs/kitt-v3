@@ -91,4 +91,11 @@ func Test_Contoller(t *testing.T) {
 
 		assertEqual(t, response.Body(), str)
 	})
+
+	t.Run("it has stack shortcut", func(t *testing.T) {
+		c := &Controller{}
+		stack := c.Stack()
+
+		assertEqual(t, stack.Render(), "")
+	})
 }

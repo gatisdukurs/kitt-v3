@@ -2,6 +2,8 @@ package dashboard
 
 import (
 	"kitt/app/admin/internal/shared"
+	"kitt/kitt/htmx"
+	"kitt/kitt/render"
 	"kitt/kitt/router"
 )
 
@@ -13,14 +15,25 @@ func (c Controller) Boot() {
 	c.GET("/admin", c.GetDashboard)
 }
 
-func (c Controller) GetDashboard(rctx router.RouteCtx) router.RouteResponse {
+func (c Controller) GetDashboard(ctx router.RouteCtx) router.RouteResponse {
 	// View
-	view := c.View("admin.layout")
 	content := c.View("admin.dashboard")
-	navigation := c.Navigation(rctx)
+	navigation := c.Navigation(ctx)
 
-	view.WithPartial("content", content)
-	view.WithPartial("navigation", navigation)
-	// Send
-	return c.Response(view)
+	if ctx.Request().HTMX() {
+		contentHtmx := htmx.NewElement(content).WithId("content")
+		navigationHtmx := htmx.NewElement(navigation).
+			WithId("navigation").
+			WithSwap(htmx.HTMX_SWAP_DEFAULT)
+
+		stack := render.NewViewStack()
+		stack.WithRenderable(contentHtmx)
+		stack.WithRenderable(navigationHtmx)
+		return c.Response(stack)
+	} else {
+		view := c.View("admin.layout")
+		view.WithPartial("content", content)
+		view.WithPartial("navigation", navigation)
+		return c.Response(view)
+	}
 }

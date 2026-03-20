@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"kitt/app/admin/internal/shared"
 	"kitt/kitt/form"
+	"kitt/kitt/htmx"
 	"kitt/kitt/render"
 	"kitt/kitt/repository"
 	"kitt/kitt/router"
@@ -37,17 +38,30 @@ func (c Controller) GetList(ctx router.RouteCtx) router.RouteResponse {
 	pagesCtx := c.Ctx()
 	pagesCtx.Set("pages", rows)
 
-	// View
-	view := c.View("admin.layout")
+	// Views
 	content := c.View("admin.pages.list")
 	content.WithCtx(pagesCtx.Basic())
 
 	navigation := c.Navigation(ctx)
 
-	view.WithPartial("content", content)
-	view.WithPartial("navigation", navigation)
-	// Send
-	return c.Response(view)
+	// HTMX vs Regular
+	if ctx.Request().HTMX() {
+		contentHtmx := c.Htmx(content).WithId("content")
+		navigationHtmx := c.Htmx(navigation).
+			WithId("navigation").
+			WithSwap(htmx.HTMX_SWAP_DEFAULT)
+
+		stack := c.Stack()
+		stack.WithRenderable(contentHtmx)
+		stack.WithRenderable(navigationHtmx)
+
+		return c.Response(stack)
+	} else {
+		view := c.View("admin.layout")
+		view.WithPartial("content", content)
+		view.WithPartial("navigation", navigation)
+		return c.Response(view)
+	}
 }
 
 func (c Controller) GetEdit(ctx router.RouteCtx) router.RouteResponse {
@@ -63,18 +77,22 @@ func (c Controller) GetEdit(ctx router.RouteCtx) router.RouteResponse {
 	values.Set("title", row.Title)
 	values.Set("content", row.Content)
 
-	// View
+	// Views
 	f := c._PageForm(fmt.Sprintf("/admin/pages/%d/edit", id), values)
+	content := c.View("admin.pages.edit").WithPartial("form", f)
 
-	view := c.View("admin.layout")
-	content := c.View("admin.pages.edit")
-	content.WithPartial("form", f)
-	navigation := c.Navigation(ctx)
-
-	view.WithPartial("content", content)
-	view.WithPartial("navigation", navigation)
-	// Send
-	return c.Response(view)
+	if ctx.Request().HTMX() {
+		contentHtmx := c.Htmx(content).WithId("content")
+		stack := c.Stack()
+		stack.WithRenderable(contentHtmx)
+		return c.Response(stack)
+	} else {
+		navigation := c.Navigation(ctx)
+		view := c.View("admin.layout")
+		view.WithPartial("content", content)
+		view.WithPartial("navigation", navigation)
+		return c.Response(view)
+	}
 }
 
 func (c Controller) PostEdit(ctx router.RouteCtx) router.RouteResponse {
@@ -97,35 +115,33 @@ func (c Controller) PostEdit(ctx router.RouteCtx) router.RouteResponse {
 		if err != nil {
 			f.WithError(err.Error())
 		} else {
-			f.WithSuccess(fmt.Sprintf("Page Updated. ID: %d", id))
+			stack := c.Stack(f, c.ToastHtmx("success", "Page Updated!"))
+			return c.Response(stack)
 		}
 	} else {
 		f.WithError("Form has some errors :(")
 	}
-
-	// stack := render.NewViewStack()
-	// stack.WithView(f)
-
-	// toastCtx := c.Ctx()
-	// toastCtx.Set("type", "success")
-	// toastCtx.Set("message", "Toast message here.")
-
-	// stack.WithOOB("", "beforeend:#toast-container", c.View("admin.toast").WithCtx(toastCtx.Basic()))
 
 	return c.Response(f)
 }
 
 func (c Controller) GetCreate(ctx router.RouteCtx) router.RouteResponse {
 	// View
-	view := c.View("admin.layout")
 	content := c.View("admin.pages.create")
 	content.WithPartial("form", c._PageForm("/admin/pages", url.Values{}))
-	navigation := c.Navigation(ctx)
 
-	view.WithPartial("content", content)
-	view.WithPartial("navigation", navigation)
-	// Send
-	return c.Response(view)
+	if ctx.Request().HTMX() {
+		contentHtmx := c.Htmx(content).WithId("content")
+		stack := c.Stack()
+		stack.WithRenderable(contentHtmx)
+		return c.Response(stack)
+	} else {
+		navigation := c.Navigation(ctx)
+		view := c.View("admin.layout")
+		view.WithPartial("content", content)
+		view.WithPartial("navigation", navigation)
+		return c.Response(view)
+	}
 }
 
 func (c Controller) PostPage(ctx router.RouteCtx) router.RouteResponse {
@@ -142,7 +158,8 @@ func (c Controller) PostPage(ctx router.RouteCtx) router.RouteResponse {
 			f.WithError(err.Error())
 		} else {
 			f.Reset()
-			f.WithSuccess(fmt.Sprintf("Page Created. ID: %d", id))
+			stack := c.Stack(f, c.ToastHtmx("success", "Page created ID: %d", id))
+			return c.Response(stack)
 		}
 	} else {
 		f.WithError("Form has some errors :(")
@@ -154,16 +171,17 @@ func (c Controller) DeletePage(ctx router.RouteCtx) router.RouteResponse {
 	id := ctx.ParamInt64("id")
 	err := c.pages.Delete(id)
 
-	if err != nil {
-		return c.ResponseString(err.Error()).WithStatus(http.StatusInternalServerError)
-	}
-
 	query := c.pages.Query()
 	rows := c.pages.Find(query)
 	contentCtx := c.Ctx()
 	contentCtx.Set("pages", rows)
 	content := c.View("admin.pages.list")
 	content.WithCtx(contentCtx.Basic())
+
+	if err != nil {
+		stack := c.Stack(content, c.ToastHtmx("danger", "Error: %s", err))
+		return c.Response(stack)
+	}
 
 	return c.Response(content)
 }

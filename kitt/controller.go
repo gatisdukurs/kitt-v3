@@ -1,6 +1,8 @@
 package kitt
 
 import (
+	"fmt"
+	"kitt/kitt/htmx"
 	"kitt/kitt/render"
 	"kitt/kitt/router"
 )
@@ -52,4 +54,33 @@ func (Controller) Ctx() KittContext {
 func (Controller) View(name string) render.View {
 	view := K().View(name)
 	return view
+}
+
+func (Controller) Stack(renderables ...render.Renderable) render.ViewStack {
+	stack := render.NewViewStack()
+
+	for _, r := range renderables {
+		stack.WithRenderable(r)
+	}
+
+	return stack
+}
+
+func (Controller) Htmx(view render.Renderable) htmx.HTMXElement {
+	return htmx.NewElement(view)
+}
+
+func (c Controller) ToastHtmx(t string, message string, args ...any) htmx.HTMXElement {
+
+	if len(args) > 0 {
+		message = fmt.Sprintf(message, args...)
+	}
+
+	toastCtx := c.Ctx()
+	toastCtx.Set("type", t)
+	toastCtx.Set("message", message)
+	toast := c.View("admin.toast").WithCtx(toastCtx.Basic())
+	toastHtmx := c.Htmx(toast).WithId("toast-container").WithSwap(htmx.HTMX_SWAP_AFTER_BEGIN)
+
+	return toastHtmx
 }
