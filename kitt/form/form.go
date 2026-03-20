@@ -7,6 +7,7 @@ import (
 	"kitt/kitt/router"
 	"net/http"
 	"net/url"
+	"sort"
 	"strings"
 )
 
@@ -202,9 +203,17 @@ func (f form) RenderAttributes() string {
 		return ""
 	}
 
-	attrs := []string{}
+	keys := make([]string, 0, len(f.attributes))
+	for k := range f.attributes {
+		keys = append(keys, k)
+	}
 
-	for k, v := range f.attributes {
+	sort.Strings(keys)
+
+	attrs := make([]string, 0, len(keys))
+
+	for _, k := range keys {
+		v := f.attributes[k]
 		if v == "" {
 			attrs = append(attrs, k)
 		} else {

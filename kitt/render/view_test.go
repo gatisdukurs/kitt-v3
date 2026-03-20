@@ -48,17 +48,4 @@ func Test_Layout(t *testing.T) {
 		l := NewView("layout.ctx", e)
 		assertEqual(t, l.Render(), getSnap(t, "layout_ctx_without"))
 	})
-
-	t.Run("it supports HTMX", func(t *testing.T) {
-		// Add HTMX support in LAYOUT
-		content := NewView("htmx.content", e)
-		navigation := NewView("htmx.navigation", e)
-		l := NewView("layout.htmx", e)
-		l.WithPartial("content", content)
-		l.WithPartial("navigation", navigation)
-
-		l.WithHTMX("content", "navigation")
-
-		assertEqual(t, l.HTMX(), getSnap(t, "layout_htmx"))
-	})
 }

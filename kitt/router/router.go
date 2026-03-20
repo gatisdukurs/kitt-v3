@@ -48,11 +48,7 @@ func (r router) ServeHTTP(response http.ResponseWriter, request *http.Request) {
 			routeResponse := route.Execute(ctx)
 			if routeResponse != nil {
 				ctx.Response().WithStatus(routeResponse.Status())
-				if ctx.Request().HTMX() {
-					ctx.Response().Send(routeResponse.HTMX())
-				} else {
-					ctx.Response().Send(routeResponse.Body())
-				}
+				ctx.Response().Send(routeResponse.Body())
 			}
 			return
 		}

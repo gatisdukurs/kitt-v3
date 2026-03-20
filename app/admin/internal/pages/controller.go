@@ -46,7 +46,6 @@ func (c Controller) GetList(ctx router.RouteCtx) router.RouteResponse {
 
 	view.WithPartial("content", content)
 	view.WithPartial("navigation", navigation)
-	view.WithHTMX("content", "navigation")
 	// Send
 	return c.Response(view)
 }
@@ -74,7 +73,6 @@ func (c Controller) GetEdit(ctx router.RouteCtx) router.RouteResponse {
 
 	view.WithPartial("content", content)
 	view.WithPartial("navigation", navigation)
-	view.WithHTMX("content", "navigation")
 	// Send
 	return c.Response(view)
 }
@@ -105,6 +103,15 @@ func (c Controller) PostEdit(ctx router.RouteCtx) router.RouteResponse {
 		f.WithError("Form has some errors :(")
 	}
 
+	// stack := render.NewViewStack()
+	// stack.WithView(f)
+
+	// toastCtx := c.Ctx()
+	// toastCtx.Set("type", "success")
+	// toastCtx.Set("message", "Toast message here.")
+
+	// stack.WithOOB("", "beforeend:#toast-container", c.View("admin.toast").WithCtx(toastCtx.Basic()))
+
 	return c.Response(f)
 }
 
@@ -117,7 +124,6 @@ func (c Controller) GetCreate(ctx router.RouteCtx) router.RouteResponse {
 
 	view.WithPartial("content", content)
 	view.WithPartial("navigation", navigation)
-	view.WithHTMX("content", "navigation")
 	// Send
 	return c.Response(view)
 }

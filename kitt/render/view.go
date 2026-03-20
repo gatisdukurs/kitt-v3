@@ -2,14 +2,8 @@ package render
 
 import (
 	"bytes"
-	"fmt"
 	"strings"
 )
-
-type SupportsHTMX interface {
-	HTMX() string
-	WithHTMX(content string, oob ...string) View
-}
 
 type ViewCtx interface {
 	Slot(name string) AsHtml
@@ -18,7 +12,6 @@ type ViewCtx interface {
 
 type View interface {
 	Renderable
-	SupportsHTMX
 	Slot(slot string) []Renderable
 	Ctx() AnyCtx
 	WithPartial(slot string, p Renderable) View
@@ -26,21 +19,21 @@ type View interface {
 }
 
 type viewCtx struct {
-	l View
+	view View
 }
 
-func (lc viewCtx) Slot(slot string) AsHtml {
+func (vc viewCtx) Slot(slot string) AsHtml {
 	var buf bytes.Buffer
 
-	for _, p := range lc.l.Slot(slot) {
+	for _, p := range vc.view.Slot(slot) {
 		buf.WriteString(p.Render())
 	}
 
 	return AsHtml(buf.String())
 }
 
-func (lc viewCtx) Ctx(name string) interface{} {
-	ctx := lc.l.Ctx()
+func (vc viewCtx) Ctx(name string) interface{} {
+	ctx := vc.view.Ctx()
 	return ctx[name]
 }
 
@@ -53,9 +46,9 @@ type view struct {
 	HTMXoobSlots    []string
 }
 
-func (l *view) Render() string {
+func (v *view) Render() string {
 	var buf bytes.Buffer
-	err := l.e.Render(&buf, l.name, newViewCtx(l))
+	err := v.e.Render(&buf, v.name, newViewCtx(v))
 
 	if err != nil {
 		return err.Error()
@@ -64,71 +57,43 @@ func (l *view) Render() string {
 	return strings.TrimSpace(buf.String())
 }
 
-func (l *view) HTMX() string {
-	if l.HTMXcontentSlot == "" {
-		return l.Render()
-	}
-
+func (v *view) renderSlot(slot string) string {
 	var buf bytes.Buffer
-
-	buf.WriteString(l.renderSlot(l.HTMXcontentSlot))
-
-	for _, slot := range l.HTMXoobSlots {
-		buf.WriteString(
-			fmt.
-				Sprintf(`<div id="%s" hx-swap-oob="true">%s</div>`,
-					slot,
-					l.renderSlot(slot),
-				),
-		)
-	}
-
-	return strings.TrimSpace(buf.String())
-}
-
-func (l *view) renderSlot(slot string) string {
-	var buf bytes.Buffer
-	for _, p := range l.Slot(slot) {
+	for _, p := range v.Slot(slot) {
 		buf.WriteString(p.Render())
 	}
 	return strings.TrimSpace(buf.String())
 }
 
-func (l *view) WithHTMX(contentSlot string, oobSlots ...string) View {
-	l.HTMXcontentSlot = contentSlot
-	l.HTMXoobSlots = oobSlots
-	return l
+func (v view) Ctx() AnyCtx {
+	return v.ctx
 }
 
-func (l view) Ctx() AnyCtx {
-	return l.ctx
+func (v *view) WithPartial(slot string, p Renderable) View {
+	v.slots[slot] = append(v.slots[slot], p)
+	return v
 }
 
-func (l *view) WithPartial(slot string, p Renderable) View {
-	l.slots[slot] = append(l.slots[slot], p)
-	return l
+func (v *view) WithCtx(ctx AnyCtx) View {
+	v.ctx = ctx
+	return v
 }
 
-func (l *view) WithCtx(ctx AnyCtx) View {
-	l.ctx = ctx
-	return l
-}
-
-func (l view) Slot(slot string) []Renderable {
-	return l.slots[slot]
+func (v view) Slot(slot string) []Renderable {
+	return v.slots[slot]
 }
 
 func NewView(name string, e Engine) View {
-	l := &view{
+	v := &view{
 		name:  name,
 		e:     e,
 		slots: make(map[string][]Renderable),
 	}
-	return l
+	return v
 }
 
-func newViewCtx(l View) ViewCtx {
+func newViewCtx(v View) ViewCtx {
 	return &viewCtx{
-		l: l,
+		view: v,
 	}
 }

@@ -2,57 +2,19 @@
 <script defer src="https://unpkg.com/htmx.org@1.9.12"></script>
 
 <script>
-function getToastContainer() {
-    let container = document.getElementById("toast-container")
+document.addEventListener("htmx:afterSwap", () => {
+  document.querySelectorAll(".toast").forEach((toast) => {
+    if (toast.dataset.init) return;
+    toast.dataset.init = "true";
 
-    if (!container) {
-        container = document.createElement("div")
-        container.id = "toast-container"
-        container.className = "toast-container"
-        document.body.appendChild(container)
-    }
-
-    return container
-}
-
-function showToast(message, type = "error") {
-    const container = getToastContainer()
-
-    const toast = document.createElement("div")
-    toast.className = `toast toast--${type}`
-    toast.textContent = message
-
-    container.appendChild(toast)
-
-    requestAnimationFrame(() => {
-        toast.classList.add("toast--show")
-    })
-
+    // auto hide
     setTimeout(() => {
-        toast.classList.remove("toast--show")
-        toast.classList.add("toast--hide")
+      toast.classList.remove("toast--show");
+      toast.classList.add("toast--hide");
 
-        setTimeout(() => toast.remove(), 200)
-    }, 5000)
-}
-
-document.addEventListener("htmx:responseError", function (event) {
-    const xhr = event.detail.xhr
-    let message = `Request failed (${xhr.status})`
-
-    if (xhr.responseText && xhr.responseText.trim() !== "") {
-        message = xhr.responseText
-    }
-
-    showToast(message, "error")
-})
-
-document.addEventListener("htmx:sendError", function () {
-    showToast("Network error", "error")
-})
-
-document.addEventListener("htmx:timeout", function () {
-    showToast("Request timed out", "error")
-})
+      setTimeout(() => toast.remove(), 200);
+    }, 3000);
+  });
+});
 </script>
 {{ end }}

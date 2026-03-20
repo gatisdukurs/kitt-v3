@@ -4,7 +4,6 @@ import "net/http"
 
 type RouteResponseSendable interface {
 	Render() string
-	HTMX() string
 }
 
 type RouteResponse interface {
@@ -13,7 +12,6 @@ type RouteResponse interface {
 	WithStatus(status int) RouteResponse
 	WithSendable(sendable RouteResponseSendable) RouteResponse
 	WithStringResponse(response string) RouteResponse
-	HTMX() string
 }
 
 type routeResponse struct {
@@ -48,18 +46,6 @@ func (rr routeResponse) Body() string {
 
 	if rr.sendable != nil {
 		return rr.sendable.Render()
-	}
-
-	return ""
-}
-
-func (rr routeResponse) HTMX() string {
-	if rr.response != "" {
-		return rr.response
-	}
-
-	if rr.sendable != nil {
-		return rr.sendable.HTMX()
 	}
 
 	return ""

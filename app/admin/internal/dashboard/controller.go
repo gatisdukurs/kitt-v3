@@ -21,7 +21,6 @@ func (c Controller) GetDashboard(rctx router.RouteCtx) router.RouteResponse {
 
 	view.WithPartial("content", content)
 	view.WithPartial("navigation", navigation)
-	view.WithHTMX("content", "navigation")
 	// Send
 	return c.Response(view)
 }

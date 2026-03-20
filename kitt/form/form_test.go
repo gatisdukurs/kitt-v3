@@ -205,7 +205,7 @@ func Test_Form(t *testing.T) {
 		f.WithHTMXSwap("outerHTML")
 		f.WithHTMXTarget("#pages")
 
-		assertEqual(t, f.Render(), `<form class="form" action="/pages" method="POST" id="pages" hx-post="/pages" hx-get="/pages" hx-swap="outerHTML" hx-target="#pages"></form>`)
+		assertEqual(t, f.Render(), `<form class="form" action="/pages" method="POST" id="pages" hx-get="/pages" hx-post="/pages" hx-swap="outerHTML" hx-target="#pages"></form>`)
 	})
 
 	t.Run("it supports htmx shorthand", func(t *testing.T) {
