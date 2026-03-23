@@ -1,21 +1,16 @@
 == TODO
 
-NEXT: Queue Workers, like pulling data from external apis and stuff?
+NEXT: Make kitt config, like db etc. 
 
-NEXT: Make kitt config, like db etc. And maybe repo init thing that already boots repos from settings?
 NEXT: Services concept.
-
 NEXT: Add loading for HTMX?
-
-Get Rid of KittContext and use just render context, like Controller.ViewCtx()
-
 NEXT: Create frontend for displaying added pages.
+
 NEXT: Write some tests for controllers and see how it goes.
 
-Form/Templates:
+
 
 Think about url herlper functions for templates - NAMED ROUTES that I can then use in templates
-Refactor attributes for form, that they are all rendered in tags as {{ .Attributes }}
-Also add attributes that can't be set like "value", "id", etc
-Also refactor maybe out attribute and all html-ish things so I dont have duplicate attr rendering and stuff from forms.
+
+!!! Also add attributes that can't be set like "value", "id", etc
 Make form tests less depending on template changes of elements
