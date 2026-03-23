@@ -194,27 +194,4 @@ func Test_Form(t *testing.T) {
 
 		assertEqual(t, f.Render(), `<form class="form" action="/" method="POST" id="pages" data-custom="1" data-required></form>`)
 	})
-
-	t.Run("it supports htmx", func(t *testing.T) {
-		engine := render.NewEngine()
-		f := NewForm("pages", engine)
-
-		f.WithAction("/pages")
-		f.WithHTMXPost()
-		f.WithHTMXGet()
-		f.WithHTMXSwap("outerHTML")
-		f.WithHTMXTarget("#pages")
-
-		assertEqual(t, f.Render(), `<form class="form" action="/pages" method="POST" id="pages" hx-get="/pages" hx-post="/pages" hx-swap="outerHTML" hx-target="#pages"></form>`)
-	})
-
-	t.Run("it supports htmx shorthand", func(t *testing.T) {
-		engine := render.NewEngine()
-		f := NewForm("pages", engine)
-
-		f.WithAction("/pages")
-		f.WithHTMX()
-
-		assertEqual(t, f.Render(), `<form class="form" action="/pages" method="POST" id="pages" hx-post="/pages" hx-swap="outerHTML" hx-target="#pages"></form>`)
-	})
 }

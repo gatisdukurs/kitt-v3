@@ -13,31 +13,32 @@ import (
 
 type Form interface {
 	router.RouteResponseSendable
+
 	Success() FormSuccess
 	Error() FormError
+
 	WithError(msg string) Form
 	WithSuccess(msg string) Form
 	WithField(control FormField) Form
-	WithMethod(method string) Form
-	WithAction(action string) Form
 	WithActions(actions FormActions) Form
 	WithValues(values url.Values) Form
+
+	WithMethod(method string) Form
+	WithAction(action string) Form
 	WithAttribute(key string, value string) Form
-	WithHTMXPost() Form
-	WithHTMXGet() Form
-	WithHTMXTarget(sel string) Form
-	WithHTMXSwap(swap string) Form
-	WithHTMX() Form
 	WithId(id string) Form
+
 	RenderFields() string
 	RenderError() string
 	RenderSuccess() string
 	RenderActions() string
 	RenderAttributes() string
+
 	Action() string
 	Method() string
 	Id() string
 	Field(id string) FormField
+
 	Validate() bool
 	Reset()
 }
@@ -73,29 +74,6 @@ func (f form) Validate() bool {
 	}
 
 	return isValid
-}
-
-func (f *form) WithHTMXPost() Form {
-	return f.WithAttribute("hx-post", f.action)
-}
-
-func (f *form) WithHTMXGet() Form {
-	return f.WithAttribute("hx-get", f.action)
-}
-
-func (f *form) WithHTMXTarget(sel string) Form {
-	return f.WithAttribute("hx-target", sel)
-}
-
-func (f *form) WithHTMXSwap(swap string) Form {
-	return f.WithAttribute("hx-swap", swap)
-}
-
-func (f *form) WithHTMX() Form {
-	f.WithHTMXPost()
-	f.WithHTMXSwap("outerHTML")
-	f.WithHTMXTarget("#" + f.id)
-	return f
 }
 
 func (f *form) WithError(msg string) Form {
@@ -244,11 +222,6 @@ func (f form) Method() string {
 
 func (f form) Id() string {
 	return f.id
-}
-
-func (f form) HTMX() string {
-	f.WithHTMX()
-	return f.Render()
 }
 
 func NewForm(id string, e render.Engine) Form {

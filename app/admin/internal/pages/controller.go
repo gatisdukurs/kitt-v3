@@ -224,7 +224,5 @@ func (c Controller) _PageForm(action string, values url.Values) form.Form {
 	f.WithActions(actions)
 	f.WithValues(values)
 
-	f.WithHTMX()
-
 	return f
 }
