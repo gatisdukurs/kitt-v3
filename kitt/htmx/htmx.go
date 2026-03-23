@@ -3,6 +3,7 @@ package htmx
 import (
 	"bytes"
 	"fmt"
+	"kitt/kitt/form"
 	"kitt/kitt/render"
 	"strings"
 )
@@ -72,4 +73,10 @@ func NewElement(view render.Renderable) HTMXElement {
 	return &htmxEl{
 		view: view,
 	}
+}
+
+func HTMXForm(form form.Form) form.Form {
+	form.WithAttribute("hx-post", form.Action())
+	form.WithAttribute("hx-swap", HTMX_SWAP_OUTER)
+	return form
 }

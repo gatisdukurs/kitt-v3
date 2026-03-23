@@ -1,6 +1,7 @@
 package htmx
 
 import (
+	"kitt/kitt/form"
 	"kitt/kitt/render"
 	"testing"
 )
@@ -31,6 +32,20 @@ func Test_HTMX(t *testing.T) {
 
 		if have != want {
 			t.Fatalf("Not equal: %s -> %s", have, want)
+		}
+	})
+
+	t.Run("it adds attributes to form", func(t *testing.T) {
+		e := render.NewEngine()
+		form := form.NewForm("login", e)
+
+		form = HTMXForm(form)
+
+		have := form.Render()
+		want := `<form class="form" action="/" hx-post="/" hx-swap="outerHTML" id="login" method="POST"></form>`
+
+		if have != want {
+			t.Fatalf("not equal: %s -> %s", have, want)
 		}
 	})
 }
