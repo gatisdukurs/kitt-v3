@@ -12,12 +12,12 @@ type TemplatePatterns = []TemplatePattern
 type Kitt interface {
 	View(name string) render.View
 	Router() router.Router
-	Route(pattern string) router.Route
-	Ctx() KittContext
 	WithTemplate(name string, str string) Kitt
 	WithTemplates(patterns TemplatePatterns) Kitt
 	WithTemplateFuncs(funcs render.Funcs) Kitt
+	WithModule(module Module) Kitt
 	WithHttpServer(handler router.HttpServer) Kitt
+	Boot()
 	ServeHttp(ctx context.Context, host string) error
 	InTesting()
 }
@@ -31,10 +31,10 @@ func ensureInitialized() {
 }
 
 type kitt struct {
-	renderer    render.Engine
-	router      router.Router
-	httpHandler router.HttpHandler
-	httpServer  router.HttpServer
+	renderer   render.Engine
+	router     router.Router
+	httpServer router.HttpServer
+	modules    map[string]Module
 }
 
 func (k kitt) View(name string) render.View {
@@ -46,12 +46,9 @@ func (k kitt) Router() router.Router {
 	return k.router
 }
 
-func (k kitt) Route(pattern string) router.Route {
-	return router.NewRoute(pattern)
-}
-
-func (k kitt) Ctx() KittContext {
-	return NewKittCtx()
+func (k *kitt) WithModule(module Module) Kitt {
+	k.modules[module.Id()] = module
+	return k
 }
 
 func (k *kitt) WithTemplates(patterns TemplatePatterns) Kitt {
@@ -76,6 +73,12 @@ func (k *kitt) WithHttpServer(server router.HttpServer) Kitt {
 	return k
 }
 
+func (k kitt) Boot() {
+	for _, m := range k.modules {
+		m.Boot()
+	}
+}
+
 func (k kitt) ServeHttp(ctx context.Context, host string) error {
 	return k.httpServer.ListenAndServe(ctx, host, k.router)
 }
@@ -96,7 +99,9 @@ func K() Kitt {
 }
 
 func newKitt() Kitt {
-	k := &kitt{}
+	k := &kitt{
+		modules: make(map[string]Module),
+	}
 	k.init()
 	return k
 }

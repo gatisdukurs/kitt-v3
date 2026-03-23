@@ -3,29 +3,28 @@ package admin
 import (
 	"kitt/app/admin/internal/dashboard"
 	"kitt/app/admin/internal/pages"
+	"kitt/kitt/repository"
 )
 
-type Module struct{}
-
-func (m Module) Boot() {
-	dashboard.Controller{}.Boot()
-	pages := &pages.Controller{}
-	pages.Boot()
-
-	// Migrate
-	m.migrate()
+type Module struct {
+	pagesRepo repository.Repository[pages.Page, int64]
+	pagesCtrl *pages.Controller
+	dashCtrl  *dashboard.Controller
 }
 
-func (Module) migrate() {
-	// _, err := kitt.SQL().Exec(context.Background(), `
-	// 	CREATE TABLE IF NOT EXISTS pages (
-	// 		id INTEGER PRIMARY KEY AUTOINCREMENT,
-	// 		title TEXT NOT NULL,
-	// 		content TEXT NOT NULL
-	// 	);
-	// `)
+func (Module) Id() string {
+	return "admin"
+}
 
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
+func (m *Module) Boot() {
+	// Pages
+	m.pagesRepo = repository.Repo[pages.Page, int64](repository.DRIVER_SQL, "db.sqlite")
+	m.pagesCtrl = &pages.Controller{
+		Pages: m.pagesRepo,
+	}
+	m.pagesCtrl.Boot()
+
+	// Dashboard
+	m.dashCtrl = &dashboard.Controller{}
+	m.dashCtrl.Boot()
 }

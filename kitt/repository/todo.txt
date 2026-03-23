@@ -1,0 +1,43 @@
+DB/Repos:
+
+==== SelectBuilder
+
+Done for now
+
+Distinct
+Join
+LeftJoin
+GroupBy
+Having
+
+==== InsertBuilder
+
+DONE for now, the rest is optional
+
+ValuesMap
+DefaultValues
+FromSelect
+OnConflict
+DoNothing
+DoUpdate...
+Returning
+
+==== UpdateBuilder
+
+DONE for now, the rest is optional for now
+
+SetExpr
+SetSubquery
+OrderBy
+Limit
+Offset
+Returning
+
+==== DeleteBuilder
+
+Done for now
+
+OrderBy
+Limit
+Offset
+Returning

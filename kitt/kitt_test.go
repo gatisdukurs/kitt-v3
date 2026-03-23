@@ -24,14 +24,6 @@ func Test_Kitt(t *testing.T) {
 		}
 	})
 
-	t.Run("it provides route", func(t *testing.T) {
-		K().InTesting()
-		r := K().Route("/home")
-		if _, ok := r.(router.Route); !ok {
-			t.Fatalf("not providing router")
-		}
-	})
-
 	t.Run("it allows to add templates", func(t *testing.T) {
 		K().InTesting()
 		K().WithTemplates(TemplatePatterns{
@@ -60,13 +52,6 @@ func Test_Kitt(t *testing.T) {
 		assertEqual(t, p.Render(), "<h1>Hello World!</h1>")
 	})
 
-	t.Run("it provides basic context", func(t *testing.T) {
-		K().InTesting()
-		ctx := K().Ctx().Basic()
-		ctx["foo"] = "bar"
-		assertEqual(t, ctx["foo"], "bar")
-	})
-
 	t.Run("it serves", func(t *testing.T) {
 		K().InTesting()
 		addr := ":3000"
@@ -88,6 +73,15 @@ func Test_Kitt(t *testing.T) {
 		err := K().ServeHttp(context.Background(), addr)
 
 		assertError(t, err)
+	})
+
+	t.Run("it supports modules", func(t *testing.T) {
+		k := K()
+		m := NewFakeModule()
+		k.WithModule(m)
+		k.Boot()
+
+		assertEqual(t, m.Booted, true)
 	})
 
 }

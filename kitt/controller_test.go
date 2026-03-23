@@ -44,15 +44,6 @@ func Test_Contoller(t *testing.T) {
 		assertEqual(t, route.Pattern(), "DELETE /home")
 	})
 
-	t.Run("it provides context", func(t *testing.T) {
-		c := &Controller{}
-		ctx := c.Ctx()
-
-		if _, ok := ctx.(KittContext); !ok {
-			t.Fatalf("not providing ctx")
-		}
-	})
-
 	t.Run("it provides view", func(t *testing.T) {
 		c := &Controller{}
 		view := c.View("none")

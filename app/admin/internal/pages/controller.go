@@ -14,12 +14,11 @@ import (
 
 type Controller struct {
 	shared.Controller
-	pages repository.Repository[Page, int64]
+	Pages repository.Repository[Page, int64]
 }
 
 func (c *Controller) Boot() {
 	// Repo
-	c.pages = repository.Repo[Page, int64](repository.DRIVER_SQL, "db.sqlite")
 
 	// Routes
 	c.GET("/admin/pages", c.GetList)
@@ -33,14 +32,14 @@ func (c *Controller) Boot() {
 
 func (c Controller) GetList(ctx router.RouteCtx) router.RouteResponse {
 	// Data
-	query := c.pages.Query()
-	rows := c.pages.Find(query)
+	query := c.Pages.Query()
+	rows := c.Pages.Find(query)
 	pagesCtx := c.Ctx()
-	pagesCtx.Set("pages", rows)
+	pagesCtx["pages"] = rows
 
 	// Views
 	content := c.View("admin.pages.list")
-	content.WithCtx(pagesCtx.Basic())
+	content.WithCtx(pagesCtx)
 
 	navigation := c.Navigation(ctx)
 
@@ -67,7 +66,7 @@ func (c Controller) GetList(ctx router.RouteCtx) router.RouteResponse {
 func (c Controller) GetEdit(ctx router.RouteCtx) router.RouteResponse {
 	// Data
 	id := ctx.ParamInt64("id")
-	row, err := c.pages.ByID(id)
+	row, err := c.Pages.ByID(id)
 
 	if err != nil {
 		return c.ResponseString("Page not found").WithStatus(http.StatusNotFound)
@@ -97,7 +96,7 @@ func (c Controller) GetEdit(ctx router.RouteCtx) router.RouteResponse {
 
 func (c Controller) PostEdit(ctx router.RouteCtx) router.RouteResponse {
 	id := ctx.ParamInt64("id")
-	row, err := c.pages.ByID(id)
+	row, err := c.Pages.ByID(id)
 
 	if err != nil {
 		return c.ResponseString("Page not found").WithStatus(http.StatusNotFound)
@@ -110,7 +109,7 @@ func (c Controller) PostEdit(ctx router.RouteCtx) router.RouteResponse {
 		row.Title = values.Get("title")
 		row.Content = values.Get("content")
 
-		err := c.pages.Update(row)
+		err := c.Pages.Update(row)
 
 		if err != nil {
 			f.WithError(err.Error())
@@ -149,7 +148,7 @@ func (c Controller) PostPage(ctx router.RouteCtx) router.RouteResponse {
 	f := c._PageForm("/admin/pages", values)
 
 	if f.Validate() {
-		id, err := c.pages.Create(Page{
+		id, err := c.Pages.Create(Page{
 			Title:   values.Get("title"),
 			Content: values.Get("content"),
 		})
@@ -169,14 +168,14 @@ func (c Controller) PostPage(ctx router.RouteCtx) router.RouteResponse {
 
 func (c Controller) DeletePage(ctx router.RouteCtx) router.RouteResponse {
 	id := ctx.ParamInt64("id")
-	err := c.pages.Delete(id)
+	err := c.Pages.Delete(id)
 
-	query := c.pages.Query()
-	rows := c.pages.Find(query)
+	query := c.Pages.Query()
+	rows := c.Pages.Find(query)
 	contentCtx := c.Ctx()
-	contentCtx.Set("pages", rows)
+	contentCtx["pages"] = rows
 	content := c.View("admin.pages.list")
-	content.WithCtx(contentCtx.Basic())
+	content.WithCtx(contentCtx)
 
 	if err != nil {
 		stack := c.Stack(content, c.ToastHtmx("danger", "Error: %s", err))

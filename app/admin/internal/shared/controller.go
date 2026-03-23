@@ -19,6 +19,6 @@ func (c Controller) Navigation(rctx router.RouteCtx) render.View {
 	}
 
 	ctx := c.Ctx()
-	ctx.Set("admin.navigation", nav.WithActive(rctx.Request().Path()))
-	return c.View("admin.navigation").WithCtx(ctx.Basic())
+	ctx["admin.navigation"] = nav.WithActive(rctx.Request().Path())
+	return c.View("admin.navigation").WithCtx(ctx)
 }

@@ -104,3 +104,19 @@ func newFakeRenderable(str string) *fakeRenderable {
 		String: str,
 	}
 }
+
+type fakeModule struct {
+	Booted bool
+}
+
+func (m fakeModule) Id() string {
+	return "fake-module"
+}
+
+func (m *fakeModule) Boot() {
+	m.Booted = true
+}
+
+func NewFakeModule() *fakeModule {
+	return &fakeModule{}
+}

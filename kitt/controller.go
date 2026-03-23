@@ -13,23 +13,20 @@ func (Controller) Boot() {}
 
 // Routing
 func (Controller) GET(pattern string, handler router.RouteHandler) router.Route {
-	router := K().Router()
-	route := K().Route(pattern).GET(handler)
-	router.To(route)
+	route := router.NewRoute(pattern).GET(handler)
+	K().Router().To(route)
 	return route
 }
 
 func (Controller) POST(pattern string, handler router.RouteHandler) router.Route {
-	router := K().Router()
-	route := K().Route(pattern).POST(handler)
-	router.To(route)
+	route := router.NewRoute(pattern).POST(handler)
+	K().Router().To(route)
 	return route
 }
 
 func (Controller) DELETE(pattern string, handler router.RouteHandler) router.Route {
-	router := K().Router()
-	route := K().Route(pattern).DELETE(handler)
-	router.To(route)
+	route := router.NewRoute(pattern).DELETE(handler)
+	K().Router().To(route)
 	return route
 }
 
@@ -46,8 +43,8 @@ func (Controller) ResponseString(body string) router.RouteResponse {
 }
 
 // Ctx
-func (Controller) Ctx() KittContext {
-	return K().Ctx()
+func (Controller) Ctx() render.AnyCtx {
+	return make(render.AnyCtx)
 }
 
 // Views
@@ -77,9 +74,9 @@ func (c Controller) ToastHtmx(t string, message string, args ...any) htmx.HTMXEl
 	}
 
 	toastCtx := c.Ctx()
-	toastCtx.Set("type", t)
-	toastCtx.Set("message", message)
-	toast := c.View("admin.toast").WithCtx(toastCtx.Basic())
+	toastCtx["type"] = t
+	toastCtx["message"] = message
+	toast := c.View("admin.toast").WithCtx(toastCtx)
 	toastHtmx := c.Htmx(toast).WithId("toast-container").WithSwap(htmx.HTMX_SWAP_AFTER_BEGIN)
 
 	return toastHtmx
