@@ -34,6 +34,7 @@ type Form interface {
 	RenderActions() string
 	RenderAttributes() string
 
+	Attr(key string) string
 	Action() string
 	Method() string
 	Id() string
@@ -47,10 +48,7 @@ type form struct {
 	e           render.Engine
 	attributes  map[string]string
 	fields      []FormField
-	method      string
-	action      string
 	actions     FormActions
-	id          string
 	formError   FormError
 	formSuccess FormSuccess
 }
@@ -116,12 +114,12 @@ func (f *form) WithField(field FormField) Form {
 }
 
 func (f *form) WithMethod(method string) Form {
-	f.method = method
+	f.WithAttribute("method", method)
 	return f
 }
 
 func (f *form) WithAction(action string) Form {
-	f.action = action
+	f.WithAttribute("action", action)
 	return f
 }
 
@@ -131,7 +129,7 @@ func (f *form) WithActions(actions FormActions) Form {
 }
 
 func (f *form) WithId(id string) Form {
-	f.id = id
+	f.WithAttribute("id", id)
 	return f
 }
 
@@ -212,27 +210,38 @@ func (f form) Field(id string) FormField {
 	return nil
 }
 
+func (f form) Attr(key string) string {
+	if attr, ok := f.attributes[key]; ok {
+		return attr
+	}
+
+	return ""
+}
+
 func (f form) Action() string {
-	return f.action
+	return f.Attr("action")
 }
 
 func (f form) Method() string {
-	return f.method
+	return f.Attr("method")
 }
 
 func (f form) Id() string {
-	return f.id
+	return f.Attr("id")
 }
 
 func NewForm(id string, e render.Engine) Form {
-	template := `<form class="form" action="{{ .Action }}" method="{{ .Method }}" id="{{ .Id }}"{{ .Attributes }}>{{ .Success }}{{ .Error }}{{ .Fields }}{{ .Actions }}</form>`
+	template := `<form class="form"{{ .Attributes }}>{{ .Success }}{{ .Error }}{{ .Fields }}{{ .Actions }}</form>`
 	e.WithTemplate("form", template)
 
-	return &form{
+	form := &form{
 		e:          e,
-		id:         id,
-		method:     http.MethodPost,
-		action:     "/",
 		attributes: make(map[string]string),
 	}
+
+	form.WithId(id)
+	form.WithAction("/")
+	form.WithMethod(http.MethodPost)
+
+	return form
 }

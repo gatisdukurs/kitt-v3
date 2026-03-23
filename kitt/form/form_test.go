@@ -20,7 +20,7 @@ func Test_Form(t *testing.T) {
 		field.WithControl(control)
 		f.WithField(field)
 
-		assertEqual(t, f.Render(), `<form class="form" action="/pages" method="GET" id="pages"><div class="field" id="title"><label class="label">Title</label><input class="control" name="title" id="title" type="text" value=""/></div></form>`)
+		assertEqual(t, f.Render(), `<form class="form" action="/pages" id="pages" method="GET"><div class="field" id="title"><label class="label">Title</label><input class="control" name="title" id="title" type="text" value=""/></div></form>`)
 	})
 
 	t.Run("it validates fields", func(t *testing.T) {
@@ -56,7 +56,7 @@ func Test_Form(t *testing.T) {
 		f.WithField(field)
 		f.Validate()
 
-		assertEqual(t, f.Render(), `<form class="form" action="/" method="POST" id="pages"><div class="field" id="title"><label class="label">Title</label><input class="control" name="title" id="title" type="text" value=""/><ul class="errors"><li>This field is required</li><li>Must be at least 3 characters</li></ul></div></form>`)
+		assertEqual(t, f.Render(), `<form class="form" action="/" id="pages" method="POST"><div class="field" id="title"><label class="label">Title</label><input class="control" name="title" id="title" type="text" value=""/><ul class="errors"><li>This field is required</li><li>Must be at least 3 characters</li></ul></div></form>`)
 	})
 
 	t.Run("it returns control", func(t *testing.T) {
@@ -79,7 +79,7 @@ func Test_Form(t *testing.T) {
 		assertEqual(t, f.RenderError(), "")
 
 		f.WithError("Error.")
-		assertEqual(t, f.Render(), `<form class="form" action="/" method="POST" id="pages"><div class="alert alert--danger">Error.</div></form>`)
+		assertEqual(t, f.Render(), `<form class="form" action="/" id="pages" method="POST"><div class="alert alert--danger">Error.</div></form>`)
 	})
 
 	t.Run("it renders success", func(t *testing.T) {
@@ -90,7 +90,7 @@ func Test_Form(t *testing.T) {
 
 		f.WithSuccess("Success.")
 
-		assertEqual(t, f.Render(), `<form class="form" action="/" method="POST" id="pages"><div class="alert alert--success flash">Success.</div></form>`)
+		assertEqual(t, f.Render(), `<form class="form" action="/" id="pages" method="POST"><div class="alert alert--success flash">Success.</div></form>`)
 	})
 
 	t.Run("it sets values and resets", func(t *testing.T) {
@@ -182,7 +182,7 @@ func Test_Form(t *testing.T) {
 
 		f.WithActions(actions)
 
-		assertEqual(t, f.Render(), `<form class="form" action="/" method="POST" id="pages"><div class="actions" id="actions"><button class="btn" id="save" name="save" value="">Save</button></div></form>`)
+		assertEqual(t, f.Render(), `<form class="form" action="/" id="pages" method="POST"><div class="actions" id="actions"><button class="btn" id="save" name="save" value="">Save</button></div></form>`)
 	})
 
 	t.Run("it renders attributes", func(t *testing.T) {
@@ -192,6 +192,6 @@ func Test_Form(t *testing.T) {
 		f.WithAttribute("data-custom", "1")
 		f.WithAttribute("data-required", "")
 
-		assertEqual(t, f.Render(), `<form class="form" action="/" method="POST" id="pages" data-custom="1" data-required></form>`)
+		assertEqual(t, f.Render(), `<form class="form" action="/" data-custom="1" data-required id="pages" method="POST"></form>`)
 	})
 }
