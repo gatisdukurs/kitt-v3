@@ -11,11 +11,11 @@ type Controller struct {
 	shared.Controller
 }
 
-func (c Controller) Boot() {
+func (c *Controller) Boot() {
 	c.GET("/admin", c.GetDashboard)
 }
 
-func (c Controller) GetDashboard(ctx router.RouteCtx) router.RouteResponse {
+func (c *Controller) GetDashboard(ctx router.RouteCtx) router.RouteResponse {
 	// View
 	content := c.View("admin.dashboard")
 	navigation := c.Navigation(ctx)

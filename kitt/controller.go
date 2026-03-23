@@ -68,7 +68,6 @@ func (Controller) Htmx(view render.Renderable) htmx.HTMXElement {
 }
 
 func (c Controller) ToastHtmx(t string, message string, args ...any) htmx.HTMXElement {
-
 	if len(args) > 0 {
 		message = fmt.Sprintf(message, args...)
 	}

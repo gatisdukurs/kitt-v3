@@ -117,6 +117,10 @@ func (m *fakeModule) Boot() {
 	m.Booted = true
 }
 
+func (m *fakeModule) Runnables() []Runnable {
+	return []Runnable{}
+}
+
 func NewFakeModule() *fakeModule {
 	return &fakeModule{}
 }

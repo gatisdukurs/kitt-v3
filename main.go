@@ -34,14 +34,11 @@ func main() {
 	// Modules
 	k.WithModule(&admin.Module{})
 
-	// Boot
-	k.Boot()
-
 	// Start server
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
-	err := k.ServeHttp(ctx, ":3000")
+	err := k.Run(ctx, ":3000")
 
 	if err != nil {
 		fmt.Println(err)

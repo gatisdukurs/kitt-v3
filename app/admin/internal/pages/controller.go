@@ -2,9 +2,11 @@ package pages
 
 import (
 	"fmt"
+	"kitt/app/admin/internal/pages/jobs"
 	"kitt/app/admin/internal/shared"
 	"kitt/kitt/form"
 	"kitt/kitt/htmx"
+	"kitt/kitt/queue"
 	"kitt/kitt/render"
 	"kitt/kitt/repository"
 	"kitt/kitt/router"
@@ -15,12 +17,10 @@ import (
 type Controller struct {
 	shared.Controller
 	Pages repository.Repository[Page, int64]
+	Queue queue.Queue
 }
 
 func (c *Controller) Boot() {
-	// Repo
-
-	// Routes
 	c.GET("/admin/pages", c.GetList)
 	c.GET("/admin/pages/create", c.GetCreate)
 	c.POST("/admin/pages", c.PostPage)
@@ -30,7 +30,10 @@ func (c *Controller) Boot() {
 	c.POST("/admin/pages/:id/edit", c.PostEdit)
 }
 
-func (c Controller) GetList(ctx router.RouteCtx) router.RouteResponse {
+func (c *Controller) GetList(ctx router.RouteCtx) router.RouteResponse {
+	c.Queue.Dispatch(ctx.Request().HttpRequest().Context(), jobs.Ajob{
+		SomeVar: "Getting List and other cool things now.",
+	})
 	// Data
 	query := c.Pages.Query()
 	rows := c.Pages.Find(query)
@@ -63,7 +66,7 @@ func (c Controller) GetList(ctx router.RouteCtx) router.RouteResponse {
 	}
 }
 
-func (c Controller) GetEdit(ctx router.RouteCtx) router.RouteResponse {
+func (c *Controller) GetEdit(ctx router.RouteCtx) router.RouteResponse {
 	// Data
 	id := ctx.ParamInt64("id")
 	row, err := c.Pages.ByID(id)
@@ -94,7 +97,7 @@ func (c Controller) GetEdit(ctx router.RouteCtx) router.RouteResponse {
 	}
 }
 
-func (c Controller) PostEdit(ctx router.RouteCtx) router.RouteResponse {
+func (c *Controller) PostEdit(ctx router.RouteCtx) router.RouteResponse {
 	id := ctx.ParamInt64("id")
 	row, err := c.Pages.ByID(id)
 
@@ -124,7 +127,7 @@ func (c Controller) PostEdit(ctx router.RouteCtx) router.RouteResponse {
 	return c.Response(f)
 }
 
-func (c Controller) GetCreate(ctx router.RouteCtx) router.RouteResponse {
+func (c *Controller) GetCreate(ctx router.RouteCtx) router.RouteResponse {
 	// View
 	content := c.View("admin.pages.create")
 	content.WithPartial("form", c._PageForm("/admin/pages", url.Values{}))
@@ -143,7 +146,7 @@ func (c Controller) GetCreate(ctx router.RouteCtx) router.RouteResponse {
 	}
 }
 
-func (c Controller) PostPage(ctx router.RouteCtx) router.RouteResponse {
+func (c *Controller) PostPage(ctx router.RouteCtx) router.RouteResponse {
 	values := ctx.Request().FormValues()
 	f := c._PageForm("/admin/pages", values)
 
@@ -166,7 +169,7 @@ func (c Controller) PostPage(ctx router.RouteCtx) router.RouteResponse {
 	return c.Response(f)
 }
 
-func (c Controller) DeletePage(ctx router.RouteCtx) router.RouteResponse {
+func (c *Controller) DeletePage(ctx router.RouteCtx) router.RouteResponse {
 	id := ctx.ParamInt64("id")
 	err := c.Pages.Delete(id)
 
@@ -185,7 +188,7 @@ func (c Controller) DeletePage(ctx router.RouteCtx) router.RouteResponse {
 	return c.Response(content)
 }
 
-func (c Controller) _PageForm(action string, values url.Values) form.Form {
+func (c *Controller) _PageForm(action string, values url.Values) form.Form {
 	e := render.NewEngine()
 	f := form.NewForm("form-page", e)
 	f.WithMethod(http.MethodPost)
