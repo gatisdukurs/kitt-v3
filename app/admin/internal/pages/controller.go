@@ -223,6 +223,8 @@ func (c Controller) _PageForm(action string, values url.Values) form.Form {
 	f.WithField(content)
 	f.WithActions(actions)
 	f.WithValues(values)
+	// HTMX support
+	f = htmx.HTMXForm(f)
 
 	return f
 }
