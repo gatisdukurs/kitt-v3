@@ -1,7 +1,8 @@
 package dashboard
 
 import (
-	"kitt/app/admin/internal/shared"
+	"kitt/apps/admin/internal/shared"
+	"kitt/kitt"
 	"kitt/kitt/htmx"
 	"kitt/kitt/render"
 	"kitt/kitt/router"
@@ -11,7 +12,8 @@ type Controller struct {
 	shared.Controller
 }
 
-func (c *Controller) Boot() {
+func (c *Controller) Boot(app kitt.App) {
+	c.Controller.Boot(app)
 	c.GET("/admin", c.GetDashboard)
 }
 

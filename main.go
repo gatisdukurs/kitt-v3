@@ -3,10 +3,12 @@ package main
 import (
 	"context"
 	"fmt"
-	"kitt/app/admin"
-	"kitt/kitt"
+	"kitt/apps/admin"
+	"kitt/kitt/config"
+	"kitt/kitt/kernel"
 	"kitt/kitt/render"
 	"kitt/kitt/router"
+	"kitt/kitt/services"
 	"os"
 	"os/signal"
 	"syscall"
@@ -14,31 +16,44 @@ import (
 )
 
 func main() {
-	k := kitt.K()
+	// Context
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
 
-	// Some globals
-	k.WithTemplateFuncs(render.Funcs{
+	// Config
+	config.LoadEnv("./")
+	conf := config.NewConfigFromEnv()
+
+	// Render
+	renderService := render.NewEngine()
+	renderService.WithFuncs(render.Funcs{
 		"asset": func(path string) string {
 			return fmt.Sprintf("%s?v=%d", path, time.Now().Unix())
 		},
 	})
-	k.WithTemplates(kitt.TemplatePatterns{
-		"app/admin/internal/*/*.html",
-	})
-	k.Router().With404(func(ctx router.RouteCtx) router.RouteResponse {
+
+	// Router
+	routerService := router.NewRouter()
+	routerService.With404(func(ctx router.RouteCtx) router.RouteResponse {
 		ctx.Response().Send("Custom 404 here")
 		return nil
 	})
-	k.Router().To(router.NewStaticRoute("/css", "./public/css"))
+	routerService.To(router.NewStaticRoute("/css", "./public/css"))
 
-	// Modules
-	k.WithModule(&admin.Module{})
+	// Services
+	container := services.NewServices()
+	container.Set(renderService)
+	container.Set(routerService)
+	container.Set(conf)
+
+	// Kernel
+	k := kernel.NewKernel()
+	k.WithServices(container)
+	k.WithApp(&admin.App{})
+	k.Boot()
 
 	// Start server
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
-	defer stop()
-
-	err := k.Run(ctx, ":3000")
+	err := k.Run(ctx)
 
 	if err != nil {
 		fmt.Println(err)

@@ -1,6 +1,9 @@
 == TODO
 
-NOW: Services concept.
+NOW: Create web server runnable.
+
+NEXT: Tests for Kernel
+NEXT: Get db settings from config
 
 NEXT: Create music catalog module.
 

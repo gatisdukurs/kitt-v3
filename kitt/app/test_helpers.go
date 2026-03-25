@@ -1,9 +1,10 @@
-package kitt
+package app
 
 import (
 	"bytes"
 	"context"
 	"fmt"
+	"kitt/kitt/kernel"
 	"kitt/kitt/router"
 	"os"
 	"strings"
@@ -113,12 +114,12 @@ func (m fakeModule) Id() string {
 	return "fake-module"
 }
 
-func (m *fakeModule) Boot() {
+func (m *fakeModule) Boot(k kernel.Kernel) {
 	m.Booted = true
 }
 
-func (m *fakeModule) Runnables() []Runnable {
-	return []Runnable{}
+func (m *fakeModule) Runnables() []kernel.Runnable {
+	return []kernel.Runnable{}
 }
 
 func NewFakeModule() *fakeModule {

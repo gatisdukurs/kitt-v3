@@ -1,4 +1,4 @@
-package kitt
+package kernel
 
 import "context"
 

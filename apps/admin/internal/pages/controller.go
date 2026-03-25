@@ -2,8 +2,9 @@ package pages
 
 import (
 	"fmt"
-	"kitt/app/admin/internal/pages/jobs"
-	"kitt/app/admin/internal/shared"
+	"kitt/apps/admin/internal/pages/jobs"
+	"kitt/apps/admin/internal/shared"
+	"kitt/kitt"
 	"kitt/kitt/form"
 	"kitt/kitt/htmx"
 	"kitt/kitt/queue"
@@ -20,7 +21,9 @@ type Controller struct {
 	Queue queue.Queue
 }
 
-func (c *Controller) Boot() {
+func (c *Controller) Boot(app kitt.App) {
+	c.Controller.Boot(app)
+
 	c.GET("/admin/pages", c.GetList)
 	c.GET("/admin/pages/create", c.GetCreate)
 	c.POST("/admin/pages", c.PostPage)

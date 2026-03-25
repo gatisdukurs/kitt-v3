@@ -2,12 +2,17 @@ package shared
 
 import (
 	"kitt/kitt"
+	"kitt/kitt/app"
 	"kitt/kitt/render"
 	"kitt/kitt/router"
 )
 
 type Controller struct {
-	kitt.Controller
+	app.Controller
+}
+
+func (c *Controller) Boot(app kitt.App) {
+	c.Controller.Boot(app)
 }
 
 func (c Controller) Navigation(rctx router.RouteCtx) render.View {
