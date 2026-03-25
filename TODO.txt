@@ -1,8 +1,11 @@
 == TODO
 
-NEXT: Make kitt config, like db etc. 
+NOW: Make kitt config, like db etc.
 
 NEXT: Services concept.
+
+NEXT: Create music catalog module.
+
 NEXT: Add loading for HTMX?
 NEXT: Create frontend for displaying added pages.
 
