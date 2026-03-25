@@ -8,6 +8,7 @@ import (
 	"kitt/kitt/kernel"
 	"kitt/kitt/render"
 	"kitt/kitt/router"
+	"kitt/kitt/runnables"
 	"kitt/kitt/services"
 	"os"
 	"os/signal"
@@ -49,6 +50,7 @@ func main() {
 	// Kernel
 	k := kernel.NewKernel()
 	k.WithServices(container)
+	k.WithRunnable(runnables.NewWebServer(":3000", routerService))
 	k.WithApp(&admin.App{})
 	k.Boot()
 

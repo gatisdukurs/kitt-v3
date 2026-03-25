@@ -1,6 +1,6 @@
 == TODO
 
-NOW: Create web server runnable.
+NOW: Add webserver runnable test.
 
 NEXT: Tests for Kernel
 NEXT: Get db settings from config
