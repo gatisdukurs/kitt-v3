@@ -16,8 +16,13 @@ type services struct {
 	container map[string]any
 }
 
+func (s *services) cleanKey(key string) string {
+
+	return strings.TrimPrefix(strings.ToLower(key), "*")
+}
+
 func (s *services) Set(service any) Services {
-	key := strings.ToLower(reflect.TypeOf(service).String())
+	key := s.cleanKey(reflect.TypeOf(service).String())
 
 	fmt.Println("SET SERVICE", key)
 
@@ -32,7 +37,7 @@ func (s *services) SetWithKey(key string, service any) Services {
 }
 
 func (s *services) Get(key string) any {
-	service, ok := s.container[key]
+	service, ok := s.container[s.cleanKey(key)]
 
 	if !ok {
 		var zero any
@@ -51,6 +56,7 @@ func NewContainer() Services {
 func GetService[T any](s Services) T {
 	key := strings.ToLower(reflect.TypeOf((*T)(nil)).String())
 	raw := s.Get(key)
+
 	service, ok := raw.(T)
 	if !ok {
 		fmt.Println(s)

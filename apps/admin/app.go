@@ -5,6 +5,7 @@ import (
 	"kitt/apps/admin/internal/pages"
 	"kitt/apps/admin/internal/pages/jobs"
 	"kitt/kitt"
+	"kitt/kitt/config"
 	"kitt/kitt/queue"
 	"kitt/kitt/repository"
 )
@@ -30,6 +31,8 @@ func (a *App) Boot(kernel kitt.Kernel) {
 	// Kernel setup
 	a.kernel = kernel
 
+	conf := kitt.Service[kitt.Config](a.kernel.Services())
+
 	// Setup templates
 	rndr := kitt.Service[kitt.Renderer](a.kernel.Services())
 	rndr.WithTemplates("./apps/admin/internal/*/*.html")
@@ -42,7 +45,7 @@ func (a *App) Boot(kernel kitt.Kernel) {
 
 	a.worker = queue.NewQueueWorker("admin.worker", q, d)
 	// Pages
-	a.pagesRepo = repository.Repo[pages.Page, int64](repository.DRIVER_SQL, "db.sqlite")
+	a.pagesRepo = repository.Repo[pages.Page, int64](repository.DRIVER_SQL, conf.Get(config.CONF_DB_SQLITE))
 	a.pagesCtrl = &pages.Controller{
 		Pages: a.pagesRepo,
 		Queue: q,

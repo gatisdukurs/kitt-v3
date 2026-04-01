@@ -6,9 +6,10 @@ import (
 )
 
 const (
-	CONF_APP_ENV  = "app.env"
-	CONF_APP_NAME = "app.name"
-	CONF_APP_HOST = "app.host"
+	CONF_APP_ENV   = "app.env"
+	CONF_APP_NAME  = "app.name"
+	CONF_APP_HOST  = "app.host"
+	CONF_DB_SQLITE = "db.sqlite"
 )
 
 type Config map[string]string

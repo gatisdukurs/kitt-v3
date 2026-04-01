@@ -1,8 +1,6 @@
 == TODO
 
-NOW: Get db settings from config.
-
-NEXT: Create music catalog module.
+NOW: Create music catalog module.
 
 NEXT: Add loading for HTMX?
 NEXT: Create frontend for displaying added pages.

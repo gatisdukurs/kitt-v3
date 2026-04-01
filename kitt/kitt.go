@@ -1,6 +1,7 @@
 package kitt
 
 import (
+	"kitt/kitt/config"
 	"kitt/kitt/kernel"
 	"kitt/kitt/render"
 	"kitt/kitt/router"
@@ -24,6 +25,7 @@ type Renderable = render.Renderable
 type View = render.View
 type ViewStack = render.ViewStack
 type Context = render.AnyCtx
+type Config = config.Config
 
 // Methods
 func Service[T any](s services.Services) T {
