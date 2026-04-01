@@ -12,7 +12,7 @@ import (
 func Test_Contoller(t *testing.T) {
 	rtr := router.NewRouter()
 	rndr := render.NewEngine()
-	container := services.NewServices()
+	container := services.NewContainer()
 	container.Set(rtr)
 	container.Set(rndr)
 

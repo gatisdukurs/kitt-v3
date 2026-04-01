@@ -1,9 +1,6 @@
 == TODO
 
-NOW: Add webserver runnable test.
-
-NEXT: Tests for Kernel
-NEXT: Get db settings from config
+NOW: Get db settings from config.
 
 NEXT: Create music catalog module.
 
@@ -11,8 +8,6 @@ NEXT: Add loading for HTMX?
 NEXT: Create frontend for displaying added pages.
 
 NEXT: Write some tests for controllers and see how it goes.
-
-
 
 Think about url herlper functions for templates - NAMED ROUTES that I can then use in templates
 

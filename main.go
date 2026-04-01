@@ -42,7 +42,7 @@ func main() {
 	routerService.To(router.NewStaticRoute("/css", "./public/css"))
 
 	// Services
-	container := services.NewServices()
+	container := services.NewContainer()
 	container.Set(renderService)
 	container.Set(routerService)
 	container.Set(conf)
@@ -50,11 +50,16 @@ func main() {
 	// Kernel
 	k := kernel.NewKernel()
 	k.WithServices(container)
+
+	// Add Runnable
 	k.WithRunnable(runnables.NewWebServer(":3000", routerService))
+
+	// Add Apps
 	k.WithApp(&admin.App{})
+	// Boot Apps
 	k.Boot()
 
-	// Start server
+	// Run it all.
 	err := k.Run(ctx)
 
 	if err != nil {

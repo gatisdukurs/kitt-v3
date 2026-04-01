@@ -134,3 +134,18 @@ func (m *fakeModule) Kernel() Kernel {
 func NewFakeApp() *fakeModule {
 	return &fakeModule{}
 }
+
+type fakeRunnable struct {
+	DidRun bool
+}
+
+func (r fakeRunnable) Id() string {
+	return "fake-runnable"
+}
+
+func (r *fakeRunnable) Run(ctx context.Context) error {
+	<-ctx.Done()
+	r.DidRun = true
+
+	return nil
+}

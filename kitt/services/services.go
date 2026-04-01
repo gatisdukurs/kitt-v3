@@ -42,7 +42,7 @@ func (s *services) Get(key string) any {
 	return service
 }
 
-func NewServices() Services {
+func NewContainer() Services {
 	return &services{
 		container: make(map[string]any),
 	}

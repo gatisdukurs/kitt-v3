@@ -10,7 +10,7 @@ import (
 )
 
 type Kernel interface {
-	WithServices(s services.Services) Kernel
+	WithServices(container services.Services) Kernel
 	WithApp(module App) Kernel
 	WithRunnable(runnable Runnable) Kernel
 	Services() services.Services
@@ -23,11 +23,11 @@ type k struct {
 	httpServer router.HttpServer
 	apps       map[string]App
 	runnables  []Runnable
-	services   services.Services
+	container  services.Services
 }
 
-func (k *k) WithServices(services services.Services) Kernel {
-	k.services = services
+func (k *k) WithServices(container services.Services) Kernel {
+	k.container = container
 	return k
 }
 
@@ -56,7 +56,7 @@ func (k *k) Run(ctx context.Context) error {
 }
 
 func (k *k) Services() services.Services {
-	return k.services
+	return k.container
 }
 
 func (k *k) Boot() {

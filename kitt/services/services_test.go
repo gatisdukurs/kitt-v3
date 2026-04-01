@@ -10,7 +10,7 @@ import (
 func Test_Services(t *testing.T) {
 	t.Run("it sets and gets services", func(t *testing.T) {
 		have := router.NewRouter()
-		container := NewServices()
+		container := NewContainer()
 		container.Set(have)
 		rtr := strings.ToLower(reflect.TypeOf(have).String())
 
@@ -29,7 +29,7 @@ func Test_Services(t *testing.T) {
 
 	t.Run("it sets with key too", func(t *testing.T) {
 		want := router.NewRouter()
-		container := NewServices()
+		container := NewContainer()
 		container.SetWithKey("router", want)
 
 		have := GetServiceWithKey[router.Router]("router", container)
